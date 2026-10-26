@@ -1,0 +1,26 @@
+Q: Chọn option 1
+A: Server trả lời
+---
+Q: Chọn option 1
+Q: Chọn option 2
+A: Server trả lời
+---
+Q: Chọn option 3
+Q: Chọn option 4
+A: Server trả lời
+---
+Q: Chọn option 5
+Q: Chọn option 6
+A: Server trả lời
+---
+Q: Chọn option 7
+Q: Chọn option 8
+A: Server trả lời
+---
+Q: Chọn option 9
+Q: Chọn option 10
+A: Server trả lời
+---
+Q: Chọn option 11
+Q: Chọn option 12
+A: Server trả lời

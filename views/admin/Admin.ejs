@@ -1,0 +1,1361 @@
+<%- include('../partials/header') %>
+
+<div class="main-container" style="max-width: 1050px; margin: 25px auto 40px auto; padding: 0 15px; position: relative; z-index: 5;">
+
+    <!-- Tiêu đề trang quản trị -->
+    <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 18px 24px; border-radius: 18px; border: 2px solid #fbcfe8; box-shadow: 0 4px 16px rgba(244, 114, 182, 0.12); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 32px; line-height: 1;">⚙️</span>
+            <div>
+                <h1 style="font-size: 22px; margin: 0; color: #1e293b; font-weight: 800;">Quản lý Nhân vật & Kịch bản</h1>
+                <p style="font-size: 13px; margin: 0; color: #64748b;">Thêm mới nhân vật, kịch bản hội thoại (.txt), ảnh đại diện và âm thanh tương tác.</p>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="background: #ffffff; border: 1.5px solid #fbcfe8; padding: 6px 14px; border-radius: 20px; font-size: 13px; color: #334155; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                <span>👤</span>
+                <span style="font-weight: 700; color: #1e293b;"><%= (typeof currentAdmin !== 'undefined' && currentAdmin) ? currentAdmin : 'Admin' %></span>
+                <% if (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) { %>
+                    <span style="background: #fef08a; border: 1px solid #facc15; color: #854d0e; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 800;">⭐ Super Admin</span>
+                <% } else { %>
+                    <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;">Admin</span>
+                <% } %>
+            </div>
+            <div style="background: #fdf2f8; padding: 6px 14px; border-radius: 20px; border: 1px solid #fbcfe8; font-size: 13px; font-weight: 700; color: #db2777;">
+                Tổng số: <%= (typeof characters !== 'undefined' && characters) ? characters.length : 0 %> nhân vật
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI 1: FORM THÊM NHÂN VẬT & KỊCH BẢN MỚI -->
+    <div class="admin-card" id="section-character-add" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('character-form-body', 'character-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #db2777; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>✨</span> Thêm nhân vật, File kịch bản (.txt) & Media đính kèm
+            </h2>
+            <button type="button" id="character-toggle-btn"
+                style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="character-form-body" style="margin-top: 18px; border-top: 2px dashed #fbcfe8; padding-top: 18px;">
+        <form action="/admin/character/add-full" method="POST" enctype="multipart/form-data">
+            
+            <!-- Phần 1: Tên & Mô tả nhân vật -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 20px;">
+                
+                <!-- Tên nhân vật -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Tên nhân vật (*):
+                    </label>
+                    <input type="text" name="name" class="form-control" placeholder="VD: Bác sĩ tư vấn, Super Mario..." required
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+
+                <!-- Mô tả ngắn -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Mô tả ngắn:
+                    </label>
+                    <input type="text" name="description" class="form-control" placeholder="VD: Hỗ trợ giải đáp sức khỏe, tư vấn khách hàng..."
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+
+            </div>
+
+            <!-- Phần 2: Icon Custom & KHU VỰC AVATAR STUDIO -->
+            <div style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; background: #fdfbf7; padding: 20px; border-radius: 16px; border: 1px solid #fbcfe8; margin-bottom: 22px;">
+                
+                <!-- CỘT 1: TÙY CHỌN ICON ĐẠI DIỆN TIN NHẮN (CUSTOM) -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
+                        🎨 Icon đại diện tin nhắn (Custom Emoji):
+                    </label>
+                    
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <!-- Khung hiển thị to của Icon được chọn -->
+                        <div id="icon-display-large" style="width: 54px; height: 54px; border-radius: 14px; background: #ffffff; border: 2px solid #f472b6; box-shadow: 0 3px 0 #db2777; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                            🎮
+                        </div>
+
+                        <!-- Ô nhập trực tiếp icon tùy biến -->
+                        <div style="flex: 1;">
+                            <input type="text" id="iconInput" name="icon" value="🎮" placeholder="Gõ emoji bất kỳ..."
+                                style="width: 100%; padding: 8px 12px; font-size: 18px; border: 2px solid #fbcfe8; border-radius: 8px; outline: none; background: #fff;"
+                                onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
+                            <span style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">* Gõ hoặc dán emoji tùy ý</span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Icon Gợi ý Nhanh -->
+                    <div class="common-icon-picker" style="display: flex; gap: 6px; background: #ffffff; padding: 10px; border: 1px dashed #f59e0b; border-radius: 10px; flex-wrap: wrap;">
+                        <% const commonIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥']; %>
+                        <% commonIcons.forEach(function(iconEmoji) { %>
+                            <button type="button" onclick="selectCommonIcon('<%= iconEmoji %>')" 
+                                    style="font-size: 18px; cursor: pointer; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease;"
+                                    onmouseover="this.style.transform='scale(1.2)';"
+                                    onmouseout="this.style.transform='scale(1)';">
+                                <%= iconEmoji %>
+                            </button>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <!-- CỘT 2: AVATAR STUDIO CHUYÊN NGHIỆP -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
+                        🖼️ Ảnh đại diện (Avatar Studio - Xem trước & Tải ảnh):
+                    </label>
+
+                    <div style="background: #ffffff; padding: 16px; border-radius: 14px; border: 2px solid #fbcfe8; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            
+                            <!-- VÒNG TRÒN PREVIEW AVATAR LỚN (CLICK-TO-UPLOAD & DRAG-DROP) -->
+                            <div id="avatar-circle-preview" title="Bấm vào đây để chọn ảnh hoặc kéo thả ảnh vào" 
+                                style="width: 88px; height: 88px; border-radius: 50%; border: 3px solid #f472b6; box-shadow: 0 4px 14px rgba(244, 114, 182, 0.25); background: #fdf2f8; position: relative; overflow: hidden; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                                
+                                <!-- Ảnh preview khi có chọn file -->
+                                <img id="avatar-preview-img" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                                
+                                <!-- Icon placeholder khi chưa có ảnh -->
+                                <div id="avatar-placeholder-icon" style="font-size: 38px; user-select: none;">
+                                    🎮
+                                </div>
+
+                                <!-- Overlay camera khi rê chuột -->
+                                <div class="avatar-hover-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.45); color: #fff; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;"
+                                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                    <span style="font-size: 18px;">📷</span>
+                                    <span>Chọn ảnh</span>
+                                </div>
+                            </div>
+
+                            <!-- CÁC THAO TÁC AVATAR -->
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                                    <button type="button" onclick="document.getElementById('avatar-input').click()" 
+                                        style="background: #fdf2f8; color: #db2777; border: 1.5px solid #fbcfe8; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 0 #f472b6;">
+                                        <span>📁</span> Chọn ảnh từ máy tính
+                                    </button>
+                                    
+                                    <button type="button" id="btn-remove-avatar" style="display: none; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
+                                        ✕ Gỡ ảnh
+                                    </button>
+                                </div>
+
+                                <!-- Thẻ input file ẩn (kích hoạt bằng click) -->
+                                <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display: none;">
+                                <input type="hidden" id="avatar-url-input" name="avatarUrl" value="">
+
+                                <!-- Trạng thái ảnh -->
+                                <div id="avatar-info-text" style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                                    Bấm vào vòng tròn hoặc kéo thả file ảnh vào
+                                </div>
+
+                                <!-- Ô dán URL ảnh trực tuyến -->
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <input type="text" id="avatar-url-field" placeholder="Hoặc dán link ảnh online (https://...)" 
+                                        style="width: 100%; padding: 6px 10px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #f8fafc;"
+                                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- BỘ AVATAR MẪU CÓ SẴN (PRESET AVATARS 1 CHẠM) -->
+                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #fbcfe8;">
+                            <div style="font-size: 11px; font-weight: 700; color: #db2777; margin-bottom: 6px;">
+                                ⭐ Hoặc chọn nhanh Avatar mẫu chất lượng cao:
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png', 'Pokeball Retro')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" style="width: 20px; height: 20px;"> Pokeball
+                                </button>
+
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png', 'Bình năng lượng')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png" style="width: 20px; height: 20px;"> Bình thuốc
+                                </button>
+
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png', 'Masterball')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" style="width: 20px; height: 20px;"> Master Ball
+                                </button>
+
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png', 'Kẹo may mắn')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" style="width: 20px; height: 20px;"> Kẹo sao
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Phần 3: File Kịch bản .txt (CÓ XEM TRƯỚC TRỰC QUAN & HƯỚNG DẪN MẪU) -->
+            <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #fbcfe8; margin-bottom: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <label style="font-size: 14px; font-weight: 700; color: #db2777; display: flex; align-items: center; gap: 6px;">
+                        <span>📜</span> Tải lên file kịch bản hội thoại (.txt) (*):
+                    </label>
+                    <button type="button" onclick="var el = document.getElementById('script-guide-box'); el.style.display = (el.style.display==='none'?'block':'none');"
+                        style="background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        💡 Xem hướng dẫn & Tải file mẫu .txt
+                    </button>
+                </div>
+
+                <!-- HỘP HƯỚNG DẪN CHI TIẾT CÁCH VIẾT KỊCH BẢN .TXT -->
+                <div id="script-guide-box" style="display: none; background: #fdfbf7; border: 1.5px dashed #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #b45309; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span>📖</span> Quy tắc viết file kịch bản .txt chuẩn:
+                    </div>
+                    <ul style="font-size: 12px; color: #475569; margin: 0 0 10px 18px; line-height: 1.6;">
+                        <li><b>Dòng bắt đầu bằng <code>Q: </code>:</b> Là các nút câu hỏi / lựa chọn của người dùng (có thể có nhiều <code>Q:</code> trong 1 khối).</li>
+                        <li><b>Dòng bắt đầu bằng <code>A: </code>:</b> Là câu bot sẽ trả lời khi người dùng bấm vào các câu hỏi <code>Q:</code> đó.</li>
+                        <li><b>Dấu <code>---</code>:</b> Ngăn cách giữa các bước (khối hội thoại). Khi bot trả lời khối 1, các <code>Q:</code> của khối 2 sẽ xuất hiện tiếp theo!</li>
+                    </ul>
+
+                    <!-- Mẫu kịch bản có thể sao chép nhanh -->
+                    <div style="background: #1e293b; color: #f8fafc; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 11px; line-height: 1.5; margin-bottom: 10px; position: relative;">
+                        Q: Xin chào, bạn là ai?<br>
+                        Q: Giới thiệu về bạn đi!<br>
+                        A: Chào bạn! Mình là trợ lý ảo sẵn sàng đồng hành cùng bạn!<br>
+                        ---<br>
+                        Q: Bạn có thể giúp gì cho tôi?<br>
+                        Q: Bắt đầu cuộc trò chuyện như thế nào?<br>
+                        A: Bạn có thể chọn bất kỳ câu hỏi nào để chúng ta cùng khám phá nhé!
+                    </div>
+
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <a href="/uploads/seeds/mau_kich_ban_chuan.txt" download="mau_kich_ban_chuan.txt" 
+                            style="background: #fef08a; border: 1px solid #facc15; color: #854d0e; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            📥 Tải file kịch bản mẫu (.txt)
+                        </a>
+                        <a href="/uploads/seeds/mau_kich_ban_mario.txt" download="mau_kich_ban_mario.txt" 
+                            style="background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            📥 Tải kịch bản Super Mario (.txt)
+                        </a>
+                    </div>
+                </div>
+
+                <input type="file" id="script-input" name="scriptFile" accept=".txt" required
+                    style="width: 100%; padding: 10px 14px; border: 2px dashed #f472b6; border-radius: 10px; background: #fdf2f8; cursor: pointer; font-size: 13px;">
+
+                <!-- KHUNG XEM TRƯỚC KỊCH BẢN (SCRIPT PREVIEW) -->
+                <div id="script-preview-wrapper" style="display: none; margin-top: 15px; border-top: 1px dashed #fbcfe8; padding-top: 14px;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                        <div id="script-preview-stats" style="font-size: 13px; color: #1e293b; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        </div>
+                        <button type="button" id="btn-toggle-raw-script" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                            📝 Xem mã text gốc
+                        </button>
+                    </div>
+
+                    <div id="script-preview-content" style="max-height: 250px; overflow-y: auto; background: #fdfbf7; border: 1px solid #fbcfe8; border-radius: 10px; padding: 14px;">
+                    </div>
+
+                    <textarea id="script-raw-content" readonly style="display: none; width: 100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #334155; resize: vertical;"></textarea>
+                </div>
+            </div>
+
+            <!-- Phần 4: Đính kèm Media & Âm thanh -->
+            <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #e2e8f0; margin-bottom: 22px;">
+                <h3 style="font-size: 15px; margin: 0 0 14px 0; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span>🎵</span> Đính kèm Media & Âm thanh mở đầu
+                </h3>
+
+                <div id="dialogue-container">
+                    <div class="node-box" id="node-0" style="background: #fdfbf7; border: 1px solid #fbcfe8; padding: 14px; border-radius: 12px; margin-bottom: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
+                            Âm thanh chào mừng (Bước 1):
+                        </div>
+                        
+                        <input type="file" id="audio-input" name="nodeAudio_0" accept="audio/*"
+                            style="width: 100%; padding: 8px 12px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px;">
+
+                        <div id="audio-preview-wrapper" style="display: none; margin-top: 10px; background: #ffffff; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 12px; font-weight: 700; color: #15803d; display: flex; align-items: center; gap: 4px;">
+                                    <span>▶️</span> Nghe thử file âm thanh đã chọn:
+                                </span>
+                                <span id="audio-file-name" style="font-size: 12px; color: #64748b;"></span>
+                                <button type="button" id="btn-remove-audio" style="background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer; font-weight: 600;">
+                                    ✕ Gỡ âm thanh
+                                </button>
+                            </div>
+                            <audio id="audio-preview-player" controls style="width: 100%; height: 36px;"></audio>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="btn-add-node" style="background: #f1f5f9; border: 2px dashed #cbd5e1; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
+                    ➕ Đính kèm thêm hình ảnh / âm thanh cho các bước tiếp theo
+                </button>
+            </div>
+
+            <!-- Nút submit lưu nhân vật -->
+            <button type="submit" style="width: 100%; padding: 14px; background: #22c55e; color: #ffffff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: background 0.15s ease;"
+                onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                💾 Lưu nhân vật, Kịch bản & Media
+            </button>
+        </form>
+        </div>
+    </div>
+
+    <!-- KHỐI 2: QUẢN LÝ NHẠC NỀN -->
+    <div id="music-management" class="admin-card" style="scroll-margin-top: 85px; background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fdba74; box-shadow: 0 8px 24px rgba(251,146,60,0.1); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('music-management-body', 'music-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #c2410c; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>🎵</span> Quản lý Nhạc nền toàn hệ thống
+            </h2>
+            <button type="button" id="music-toggle-btn"
+                style="background: #fff7ed; border: 1.5px solid #fdba74; color: #c2410c; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="music-management-body" style="margin-top: 18px; border-top: 2px dashed #fdba74; padding-top: 18px;">
+        <!-- Phiên bản đang phát hiện tại -->
+        <div id="music-current-status" style="background: #fff7ed; border: 1.5px solid #fdba74; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 22px;">🔊</span>
+            <div>
+                <div style="font-size: 13px; font-weight: 800; color: #c2410c;">Đang phát cho toàn hệ thống:</div>
+                <div id="music-now-playing-label" style="font-size: 13px; color: #1e293b; font-weight: 600;">Đang tải...</div>
+            </div>
+            <div style="margin-left: auto;">
+                <span id="music-now-speed-label" style="background: #fef3c7; border: 1px solid #fcd34d; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #92400e;"></span>
+            </div>
+        </div>
+
+        <!-- Danh sách các phiên bản nhạc -->
+        <h3 style="font-size: 14px; font-weight: 800; color: #1e293b; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+            📋 Danh sách phiên bản nhạc YouTube
+        </h3>
+        <div id="music-versions-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <!-- Render bằng JS -->
+        </div>
+
+        <!-- Form thêm phiên bản YouTube mới -->
+        <div style="background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #15803d; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+                ➕ Thêm phiên bản YouTube mới
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Tiêu đề bài hát:</label>
+                    <input type="text" id="new-music-title" placeholder="VD: Graduation (Lo-Fi Remix)" style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">🔗 Link URL YouTube (*):</label>
+                    <input type="text" id="new-music-url" placeholder="VD: https://www.youtube.com/watch?v=... hoặc https://youtu.be/..." style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Tên nghệ sĩ / Nguồn:</label>
+                    <input type="text" id="new-music-artist" placeholder="VD: Lo-Fi Chill • Không bản quyền" style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Badge nhãn:</label>
+                    <input type="text" id="new-music-badge" placeholder="VD: ⭐ Official hoặc 🎵 Lo-Fi" style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">⚡ Tốc độ phát:</label>
+                    <select id="new-music-speed" style="width: 100%; padding: 8px 10px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; font-weight: 700; color: #166534; background: #fff; outline: none; cursor: pointer;">
+                        <option value="0.85">0.85x (Chill)</option>
+                        <option value="0.9">0.9x (Slowed)</option>
+                        <option value="1.0" selected>1.0x (Chuẩn)</option>
+                        <option value="1.05">1.05x (Pitch-up)</option>
+                        <option value="1.15">1.15x (Nhanh)</option>
+                        <option value="1.25">1.25x (Sôi động)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bảng chọn icon nhanh cho Badge nhãn (Nằm riêng bên dưới, cân đối toàn hàng) -->
+            <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; background: #ffffff; padding: 6px 12px; border: 1px dashed #86efac; border-radius: 8px; margin-bottom: 14px;">
+                <span style="font-size: 11px; font-weight: 700; color: #16a34a; white-space: nowrap; margin-right: 2px;">🎨 Gợi ý icon cho Badge:</span>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '⭐')" class="badge-icon-btn" title="⭐ Ngôi sao / Official">⭐</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🎵')" class="badge-icon-btn" title="🎵 Nốt nhạc / MV">🎵</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🎹')" class="badge-icon-btn" title="🎹 Đàn Piano">🎹</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🎧')" class="badge-icon-btn" title="🎧 Tai nghe / Lo-Fi">🎧</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🎸')" class="badge-icon-btn" title="🎸 Acoustic / Guitar">🎸</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🌸')" class="badge-icon-btn" title="🌸 Hoa đào / Nhẹ nhàng">🌸</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🛡️')" class="badge-icon-btn" title="🛡️ Khiên bảo vệ">🛡️</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '⚡')" class="badge-icon-btn" title="⚡ Tia sét / Remix">⚡</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🔥')" class="badge-icon-btn" title="🔥 Lửa / Bốc lửa">🔥</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '💎')" class="badge-icon-btn" title="💎 Kim cương / VIP">💎</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '✨')" class="badge-icon-btn" title="✨ Lấp lánh / Magic">✨</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '☕')" class="badge-icon-btn" title="☕ Cà phê / Chill">☕</button>
+                <button type="button" onclick="selectBadgeIcon('new-music-badge', '🌌')" class="badge-icon-btn" title="🌌 Vũ trụ / Không gian">🌌</button>
+            </div>
+
+            <button type="button" onclick="addMusicVersion()" style="background: #22c55e; color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25);">
+                ➕ Thêm phiên bản vào danh sách
+            </button>
+        </div>
+
+        <!-- Upload MP3 tùy chỉnh -->
+        <div style="background: #fff7ed; border: 1.5px dashed #fb923c; border-radius: 14px; padding: 16px;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #c2410c; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                📁 Tải lên file MP3 tùy chỉnh (phát thay YouTube)
+            </h3>
+            <p style="font-size: 12px; color: #64748b; margin: 0 0 12px 0;">File MP3 sẽ được lưu lên server và phát cho tất cả người dùng thay thế hoàn toàn YouTube.</p>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <input type="file" id="admin-mp3-upload" accept="audio/*" style="flex: 1; padding: 8px 12px; border: 1.5px dashed #fb923c; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px; min-width: 0;">
+                <button type="button" onclick="uploadAdminMP3()" style="background: #f97316; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                    📤 Tải lên &amp; Phát ngay
+                </button>
+            </div>
+            <div id="mp3-upload-status" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 700; color: #15803d;"></div>
+            <!-- Nút trở về YouTube -->
+            <button type="button" onclick="revertToYoutube()" id="btn-revert-youtube" style="display: none; margin-top: 10px; background: #fff; border: 1px solid #fb923c; color: #c2410c; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                ↩ Trở về phát YouTube (xóa file MP3 tùy chỉnh)
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <!-- KHỐI 3: DANH SÁCH NHÂN VẬT HIỆN CÓ -->
+    <div class="admin-card" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 2px dashed #fbcfe8; padding-bottom: 12px;">
+            <h2 style="font-size: 17px; margin: 0; color: #1e293b; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>📋</span> Danh sách nhân vật
+            </h2>
+            <span style="font-size: 12px; color: #64748b;">
+                Nhân vật mặc định sẽ xuất hiện tại Trang chủ và Phòng Chat
+            </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <% if (typeof characters !== 'undefined' && characters && characters.length > 0) { %>
+                <% characters.forEach(function(c) { %>
+                    <div class="character-item-card" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: all 0.15s ease; flex-wrap: wrap; gap: 12px;"
+                        onmouseover="this.style.borderColor='#fbcfe8'; this.style.boxShadow='0 4px 12px rgba(244,114,182,0.1)';"
+                        onmouseout="this.style.borderColor='#f1f5f9'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)';">
+                        
+                        <!-- Avatar & Tên nhân vật -->
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <div style="position: relative; width: 48px; height: 48px;">
+                                <% if (c.avatarUrl && !c.avatarUrl.includes('NaN')) { %>
+                                    <img src="<%= c.avatarUrl %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #fbcfe8;" alt="<%= c.name %>"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div style="display: none; width: 100%; height: 100%; border-radius: 50%; background: #fdf2f8; border: 2px solid #fbcfe8; align-items: center; justify-content: center; font-size: 22px;">
+                                        <%= c.icon || '🍄' %>
+                                    </div>
+                                <% } else { %>
+                                    <div style="width: 100%; height: 100%; border-radius: 50%; background: #fdf2f8; border: 2px solid #fbcfe8; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                                        <%= c.icon || '🍄' %>
+                                    </div>
+                                <% } %>
+                                <% if (c.icon) { %>
+                                    <span style="position: absolute; bottom: -3px; right: -3px; font-size: 13px; background: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #fbcfe8; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                        <%= c.icon %>
+                                    </span>
+                                <% } %>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <strong style="font-size: 15px; color: #1e293b;"><%= c.name %></strong>
+                                    <% if (c.isDefault) { %>
+                                        <span style="background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid #86efac;">
+                                            ⭐ Mặc định
+                                        </span>
+                                    <% } %>
+                                    <% if (c.audioUrl) { %>
+                                        <button type="button" onclick="playAudioInline('<%= c.audioUrl %>', this)" style="background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                            🎵 Nghe giọng
+                                        </button>
+                                    <% } %>
+                                </div>
+                                <span style="color: #64748b; font-size: 13px;"><%= c.description || 'Không có mô tả' %></span>
+                            </div>
+                        </div>
+
+                        <!-- Các nút thao tác -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <!-- Nút chat thử -->
+                            <a href="/chat/<%= c._id %>" style="padding: 6px 12px; background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+                                💬 Chat thử
+                            </a>
+
+                            <!-- Nút đặt mặc định -->
+                            <form action="/admin/character/update-default/<%= c._id %>" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn-status <%= c.isDefault ? 'is-default' : '' %>" style="padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; border: 1px solid <%= c.isDefault ? '#86efac' : '#cbd5e1' %>; background: <%= c.isDefault ? '#dcfce7' : '#f8fafc' %>; color: <%= c.isDefault ? '#166534' : '#64748b' %>;">
+                                    <%= c.isDefault ? '✓ Mặc định' : 'Đặt mặc định' %>
+                                </button>
+                            </form>
+
+                            <!-- Nút sửa -->
+                            <a href="/admin/character/edit/<%= c._id %>" style="padding: 6px 14px; background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 12px;">
+                                ✏️ Sửa
+                            </a>
+
+                            <!-- Nút xóa -->
+                            <a href="/admin/character/delete/<%= c._id %>" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân vật <%= c.name %>?')" style="padding: 6px 14px; background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 12px;">
+                                🗑️ Xóa
+                            </a>
+                        </div>
+
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; padding: 30px; color: #64748b;">
+                    <div style="font-size: 36px; margin-bottom: 8px;">📭</div>
+                    <p style="margin: 0; font-size: 14px;">Chưa có nhân vật nào trong hệ thống. Hãy tạo nhân vật đầu tiên bằng form phía trên!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- KHỐI 3: QUẢN LÝ TÀI KHOẢN ADMIN (MULTI-ADMIN ACCOUNTS) - CHỈ DÀNH CHO SUPER ADMIN -->
+    <% if (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) { %>
+    <div class="admin-card" id="section-admin-accounts" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('admin-accounts-body', 'admin-accounts-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #db2777; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>🔒</span> Quản lý Tài khoản Quản trị (Multi-Admin System)
+            </h2>
+            <button type="button" id="admin-accounts-toggle-btn"
+                style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="admin-accounts-body" style="display: block; margin-top: 18px; border-top: 2px dashed #fbcfe8; padding-top: 18px;">
+            <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 16px;">
+                Hệ thống xác thực đa quản trị viên lưu trong MongoDB với mật khẩu mã hóa Bcrypt. Bạn có thể thêm tài khoản quản trị mới, đổi mật khẩu hoặc xóa quyền truy cập.
+            </p>
+
+            <div id="admin-accounts-alert" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px;"></div>
+
+            <!-- Nút bấm mở Form Thêm Admin Mới -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <button type="button" onclick="toggleAddAdminForm()" style="background: #db2777; color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 8px rgba(219,39,119,0.25);">
+                    <span>➕</span> Thêm Quản trị viên mới
+                </button>
+                <span style="font-size: 12px; color: #64748b;">
+                    Đang đăng nhập: <b style="color: #db2777;"><%= (typeof currentAdmin !== 'undefined' && currentAdmin) ? currentAdmin : 'Admin' %></b>
+                </span>
+            </div>
+
+            <!-- Form Thêm Admin Mới (Mặc định ẩn) -->
+            <div id="add-admin-form-container" style="display: none; background: #fdfbf7; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 18px; margin-bottom: 20px;">
+                <h3 style="font-size: 14px; margin: 0 0 12px 0; color: #db2777; font-weight: 700;">✨ Tạo tài khoản Quản trị viên mới:</h3>
+                <form id="form-create-admin" onsubmit="handleCreateAdmin(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Tên đăng nhập (*):</label>
+                            <input type="text" id="new-admin-username" placeholder="VD: huymn, boss..." required autocomplete="off"
+                                style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Mật khẩu (*):</label>
+                            <input type="password" id="new-admin-password" placeholder="Tối thiểu 6 ký tự..." required
+                                style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Tên hiển thị:</label>
+                            <input type="text" id="new-admin-fullname" placeholder="VD: Nguyễn Văn Huy"
+                                style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Vai trò:</label>
+                            <select id="new-admin-role" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff;">
+                                <option value="admin">Quản trị viên (Admin)</option>
+                                <option value="superadmin">Quản trị tối cao (Super Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="submit" style="background: #22c55e; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                            Lưu tài khoản
+                        </button>
+                        <button type="button" onclick="toggleAddAdminForm()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng danh sách các tài khoản Admin -->
+            <div style="overflow-x: auto; background: #ffffff; border-radius: 12px; border: 1px solid #fbcfe8;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                    <thead>
+                        <tr style="background: #fdf2f8; border-bottom: 2px solid #fbcfe8; color: #831843;">
+                            <th style="padding: 10px 14px;">Tài khoản</th>
+                            <th style="padding: 10px 14px;">Họ và Tên</th>
+                            <th style="padding: 10px 14px;">Vai trò</th>
+                            <th style="padding: 10px 14px;">Đăng nhập cuối</th>
+                            <th style="padding: 10px 14px; text-align: right;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-accounts-table-body">
+                        <% if (typeof admins !== 'undefined' && admins && admins.length > 0) { %>
+                            <% admins.forEach(function(adm) { %>
+                                <tr style="border-bottom: 1px solid #f1f5f9;" id="admin-row-<%= adm._id %>">
+                                    <td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">
+                                        👤 <%= adm.username %>
+                                    </td>
+                                    <td style="padding: 10px 14px; color: #475569;">
+                                        <%= adm.fullName || 'Quản trị viên' %>
+                                    </td>
+                                    <td style="padding: 10px 14px;">
+                                        <% if (adm.role === 'superadmin') { %>
+                                            <span style="background: #fef08a; border: 1px solid #facc15; color: #854d0e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">⭐ Super Admin</span>
+                                        <% } else { %>
+                                            <span style="background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">Admin</span>
+                                        <% } %>
+                                    </td>
+                                    <td style="padding: 10px 14px; color: #64748b; font-size: 12px;">
+                                        <%= adm.lastLogin ? new Date(adm.lastLogin).toLocaleString('vi-VN') : 'Chưa đăng nhập' %>
+                                    </td>
+                                    <td style="padding: 10px 14px; text-align: right;">
+                                        <div style="display: inline-flex; gap: 6px;">
+                                            <button type="button" onclick="promptChangeAdminPassword('<%= adm._id %>', '<%= adm.username %>')" 
+                                                style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                                                🔑 Đổi mật khẩu
+                                            </button>
+                                            <button type="button" onclick="handleDeleteAdmin('<%= adm._id %>', '<%= adm.username %>')" 
+                                                style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                                                🗑️ Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">
+                                    Đang tải danh sách tài khoản quản trị...
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+</div>
+
+<style>
+.badge-icon-btn {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+.badge-icon-btn:hover {
+    transform: scale(1.2);
+    background: #dcfce7;
+    border-color: #4ade80;
+}
+</style>
+
+<script>
+// ===== QUẢN LÝ NHẠC NỀN TOÀN HỆ THỐNG - TRANG ADMIN =====
+
+// Hàm chọn nhanh icon cho Badge nhãn
+function selectBadgeIcon(inputId, icon) {
+    var el = document.getElementById(inputId);
+    if (!el) return;
+    var val = el.value.trim();
+    // Tách bỏ emoji có sẵn ở đầu chuỗi (kèm theo khoảng trắng nếu có)
+    var textOnly = val.replace(/^[\p{Extended_Pictographic}\u200d\ufe0f\u2600-\u27bf\u{1f300}-\u{1f9ff}]+\s*/u, '').trim();
+    if (textOnly) {
+        el.value = icon + ' ' + textOnly;
+    } else {
+        el.value = icon + ' ';
+    }
+    el.focus();
+}
+
+// Hàm trích xuất ID YouTube chuẩn (hỗ trợ link đầy đủ, link rút gọn, shorts, hoặc ID 11 ký tự)
+function extractYouTubeId(urlOrId) {
+    if (!urlOrId) return '';
+    var str = urlOrId.trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+    var match = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+    return match ? match[1] : '';
+}
+
+// Danh sách phiên bản nhạc NCT DREAM - "Graduation" (Đã kiểm tra 100% hoạt động)
+var DEFAULT_ADMIN_MUSIC_VERSIONS = [
+    { id: "4EteI8yAsv0", title: "Graduation (Relaxing Piano)", artist: "Catiano Cover • Không bản quyền", badge: "🎹 Relaxing Piano", speed: 1.0 },
+    { id: "zuoSn3ObMz4", title: "Graduation (Special Video MV)", artist: "NCT DREAM • SM Entertainment", badge: "🎵 Bản MV", speed: 1.0 },
+    { id: "eF2qrRYiRuM", title: "Graduation (Piano Acoustic)", artist: "Piano Cover • Không bản quyền", badge: "🛡️ Piano Cover", speed: 0.9 },
+    { id: "EznbdoHi0Zs", title: "Graduation (Official Audio)", artist: "NCT DREAM • SM Entertainment", badge: "⭐ Official", speed: 1.0 }
+];
+
+var ADMIN_MUSIC_VERSIONS = DEFAULT_ADMIN_MUSIC_VERSIONS;
+try {
+    var stored = JSON.parse(localStorage.getItem('chatflex_music_versions'));
+    if (Array.isArray(stored) && stored.length > 0 && !stored.some(v => v.id === "R234wY4tTes" || v.id === "wcrkltAbh_g")) {
+        ADMIN_MUSIC_VERSIONS = stored;
+    } else {
+        localStorage.setItem('chatflex_music_versions', JSON.stringify(DEFAULT_ADMIN_MUSIC_VERSIONS));
+    }
+} catch (e) {
+    ADMIN_MUSIC_VERSIONS = DEFAULT_ADMIN_MUSIC_VERSIONS;
+}
+
+var currentMusicSetting = { versionIndex: 0, speed: 1.0, customAudioUrl: null };
+var editingTrackIndex = null; // Quản lý index của bài đang mở chỉnh sửa
+
+// Đồng bộ danh sách bài hát lên máy chủ MongoDB và localStorage
+function syncMusicVersionsToServer(callback) {
+    localStorage.setItem('chatflex_music_versions', JSON.stringify(ADMIN_MUSIC_VERSIONS));
+    fetch('/admin/music-versions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versions: ADMIN_MUSIC_VERSIONS })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && typeof callback === 'function') {
+            callback();
+        }
+    })
+    .catch(err => console.error('Lỗi lưu danh sách bài hát lên server:', err));
+}
+
+// Lấy cài đặt hiện tại từ server
+function loadCurrentMusicSetting() {
+    fetch('/api/music-setting')
+        .then(r => r.json())
+        .then(data => {
+            currentMusicSetting = data;
+            if (Array.isArray(data.versions) && data.versions.length > 0) {
+                ADMIN_MUSIC_VERSIONS = data.versions;
+                localStorage.setItem('chatflex_music_versions', JSON.stringify(ADMIN_MUSIC_VERSIONS));
+            }
+            renderMusicVersionsList();
+            updateNowPlayingLabel();
+            if (data.customAudioUrl) {
+                var revertBtn = document.getElementById('btn-revert-youtube');
+                if (revertBtn) revertBtn.style.display = 'inline-flex';
+            }
+        })
+        .catch(() => {});
+}
+
+// Cập nhật nhãn "đang phát"
+function updateNowPlayingLabel() {
+    var label = document.getElementById('music-now-playing-label');
+    var speedLabel = document.getElementById('music-now-speed-label');
+    if (!label) return;
+
+    if (currentMusicSetting.customAudioUrl) {
+        label.textContent = '📁 ' + (currentMusicSetting.customFileName || 'File MP3 tùy chỉnh');
+    } else {
+        var ver = ADMIN_MUSIC_VERSIONS[currentMusicSetting.versionIndex];
+        label.textContent = ver ? (ver.badge + ' ' + ver.title) : 'Không xác định';
+    }
+    if (speedLabel) {
+        speedLabel.textContent = 'Tốc độ: ' + (currentMusicSetting.speed || 1.0) + 'x';
+    }
+}
+
+// Render toàn bộ danh sách phiên bản nhạc (Có chế độ Xem & Sửa)
+function renderMusicVersionsList() {
+    var container = document.getElementById('music-versions-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    ADMIN_MUSIC_VERSIONS.forEach(function(ver, idx) {
+        var isActive = !currentMusicSetting.customAudioUrl && currentMusicSetting.versionIndex === idx;
+        var trackSpeed = (typeof ver.speed === 'number') ? ver.speed : 1.0;
+        var isEditing = (editingTrackIndex === idx);
+
+        var card = document.createElement('div');
+
+        // CHẾ ĐỘ 1: ĐANG CHỈNH SỬA BÀI HÁT NÀY
+        if (isEditing) {
+            card.style.cssText = 'background:#fff7ed; border:2px solid #fb923c; border-radius:14px; padding:16px; box-shadow:0 6px 18px rgba(251,146,60,0.18); margin-bottom:4px;';
+            card.innerHTML = `
+                <div style="font-size:14px; font-weight:800; color:#c2410c; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span>✏️</span> Chỉnh sửa thông tin bài hát #${idx + 1}
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1.1fr 1.3fr; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:4px;">Tên bài hát (*):</label>
+                        <input type="text" id="edit-title-${idx}" value="${ver.title.replace(/"/g, '&quot;')}" style="width:100%; padding:8px 12px; border:1.5px solid #fdba74; border-radius:8px; font-size:13px; font-weight:600; outline:none; background:#fff;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:4px;">🔗 Link URL YouTube (*):</label>
+                        <input type="text" id="edit-url-${idx}" value="https://www.youtube.com/watch?v=${ver.id}" placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..." style="width:100%; padding:8px 12px; border:1.5px solid #fdba74; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap:12px; margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:4px;">Tên nghệ sĩ / Nguồn:</label>
+                        <input type="text" id="edit-artist-${idx}" value="${(ver.artist || '').replace(/"/g, '&quot;')}" style="width:100%; padding:8px 12px; border:1.5px solid #fdba74; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:4px;">Badge nhãn:</label>
+                        <input type="text" id="edit-badge-${idx}" value="${(ver.badge || '').replace(/"/g, '&quot;')}" placeholder="VD: ⭐ Official" style="width:100%; padding:8px 12px; border:1.5px solid #fdba74; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:4px;">⚡ Tốc độ phát:</label>
+                        <select id="edit-speed-${idx}" style="width:100%; padding:8px 10px; border:1.5px solid #fdba74; border-radius:8px; font-size:13px; font-weight:700; color:#c2410c; background:#fff; outline:none; cursor:pointer;">
+                            <option value="0.85" ${trackSpeed === 0.85 ? 'selected' : ''}>0.85x (Chill)</option>
+                            <option value="0.9" ${trackSpeed === 0.9 ? 'selected' : ''}>0.9x (Slowed)</option>
+                            <option value="1.0" ${trackSpeed === 1.0 ? 'selected' : ''}>1.0x (Chuẩn)</option>
+                            <option value="1.05" ${trackSpeed === 1.05 ? 'selected' : ''}>1.05x (Pitch-up)</option>
+                            <option value="1.15" ${trackSpeed === 1.15 ? 'selected' : ''}>1.15x (Nhanh)</option>
+                            <option value="1.25" ${trackSpeed === 1.25 ? 'selected' : ''}>1.25x (Sôi động)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Bảng chọn icon nhanh cho Badge khi sửa (nằm riêng bên dưới, cân đối) -->
+                <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; background: #fff; padding: 5px 10px; border: 1.5px dashed #fdba74; border-radius: 8px; margin-bottom: 14px;">
+                    <span style="font-size: 11px; font-weight: 700; color: #c2410c; white-space: nowrap; margin-right: 2px;">🎨 Gợi ý icon:</span>
+                    ${['⭐', '🎵', '🎹', '🎧', '🎸', '🌸', '🛡️', '⚡', '🔥', '💎', '✨', '☕', '🌌'].map(ic => `
+                        <button type="button" onclick="selectBadgeIcon('edit-badge-${idx}', '${ic}')" style="background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; font-size:13px; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.2)';" onmouseout="this.style.transform='scale(1)';">${ic}</button>
+                    `).join('')}
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="cancelEditTrack()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:7px 16px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">✕ Hủy</button>
+                    <button type="button" onclick="saveEditTrack(${idx})" style="background:#22c55e; color:#fff; border:none; padding:7px 20px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 2px 8px rgba(34,197,94,0.3);">💾 Lưu thay đổi</button>
+                </div>
+            `;
+        } 
+        // CHẾ ĐỘ 2: HIỂN THỊ THÔNG THƯỜNG
+        else {
+            card.style.cssText = 'display:flex; align-items:center; gap:12px; background:' + (isActive ? '#ecfdf5' : '#fff') + '; border:1.5px solid ' + (isActive ? '#86efac' : '#e2e8f0') + '; border-radius:12px; padding:12px 16px; transition:all 0.15s; flex-wrap:wrap;';
+            card.innerHTML = `
+                <div style="flex:1; min-width:220px;">
+                    <div style="font-size:13px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:6px;">
+                        <span>${ver.badge || '🎵'}</span> <span>${ver.title}</span>
+                        ${isActive ? '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid #86efac;">▶ Đang phát</span>' : ''}
+                    </div>
+                    <div style="font-size:11px; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span>👤 ${ver.artist || 'Chưa có tác giả'}</span>
+                        <span>•</span>
+                        <a href="https://www.youtube.com/watch?v=${ver.id}" target="_blank" style="color:#2563eb; text-decoration:none; display:inline-flex; align-items:center; gap:3px;" title="Mở video YouTube trên tab mới">
+                            🔗 youtu.be/${ver.id}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tùy chọn tốc độ riêng của từng bài -->
+                <div style="display:flex; align-items:center; gap:5px; background:${isActive ? '#dcfce7' : '#f8fafc'}; padding:4px 8px; border-radius:8px; border:1px solid ${isActive ? '#86efac' : '#e2e8f0'};" title="Đổi tốc độ phát cho bài này">
+                    <span style="font-size:11px; font-weight:700; color:#475569;">⚡ Tốc độ:</span>
+                    <select onchange="changeTrackSpeed(${idx}, parseFloat(this.value))" style="
+                        padding: 3px 6px;
+                        border: 1px solid #fdba74;
+                        border-radius: 6px;
+                        font-size: 11px;
+                        font-weight: 700;
+                        background: #fff;
+                        color: #c2410c;
+                        cursor: pointer;
+                        outline: none;
+                    ">
+                        <option value="0.85" ${trackSpeed === 0.85 ? 'selected' : ''}>0.85x</option>
+                        <option value="0.9" ${trackSpeed === 0.9 ? 'selected' : ''}>0.9x</option>
+                        <option value="1.0" ${trackSpeed === 1.0 ? 'selected' : ''}>1.0x</option>
+                        <option value="1.05" ${trackSpeed === 1.05 ? 'selected' : ''}>1.05x</option>
+                        <option value="1.15" ${trackSpeed === 1.15 ? 'selected' : ''}>1.15x</option>
+                        <option value="1.25" ${trackSpeed === 1.25 ? 'selected' : ''}>1.25x</option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác: Phát, Sửa, Xóa -->
+                <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                    ${!isActive ? `<button type="button" onclick="switchMusicVersion(${idx})" style="background:#fdf2f8;color:#db2777;border:1px solid #fbcfe8;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">▶ Phát ngay</button>` : ''}
+                    <button type="button" onclick="startEditTrack(${idx})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" title="Chỉnh sửa tên, link URL và tốc độ của bài này">✏️ Sửa</button>
+                    ${ADMIN_MUSIC_VERSIONS.length > 1 && !isActive ? `<button type="button" onclick="deleteMusicVersion(${idx})" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" title="Xóa bài này">🗑️ Xóa</button>` : ''}
+                </div>
+            `;
+        }
+
+        container.appendChild(card);
+    });
+}
+
+// Mở giao diện chỉnh sửa một bài hát
+function startEditTrack(idx) {
+    editingTrackIndex = idx;
+    renderMusicVersionsList();
+}
+
+// Hủy chỉnh sửa
+function cancelEditTrack() {
+    editingTrackIndex = null;
+    renderMusicVersionsList();
+}
+
+// Lưu thông tin sau khi chỉnh sửa bài hát
+function saveEditTrack(idx) {
+    var titleEl = document.getElementById('edit-title-' + idx);
+    var urlEl = document.getElementById('edit-url-' + idx);
+    var artistEl = document.getElementById('edit-artist-' + idx);
+    var badgeEl = document.getElementById('edit-badge-' + idx);
+    var speedEl = document.getElementById('edit-speed-' + idx);
+
+    if (!titleEl || !urlEl) return;
+    var title = titleEl.value.trim();
+    var rawUrl = urlEl.value.trim();
+    var artist = artistEl ? artistEl.value.trim() : '';
+    var badge = badgeEl ? badgeEl.value.trim() : '';
+    var speed = speedEl ? parseFloat(speedEl.value) : 1.0;
+
+    if (!title) {
+        showAdminToast('⚠️ Vui lòng nhập tiêu đề bài hát!', 'warning');
+        return;
+    }
+    var ytid = extractYouTubeId(rawUrl);
+    if (!ytid) {
+        showAdminToast('⚠️ Link URL YouTube không hợp lệ! Vui lòng dán link YouTube đầy đủ hoặc ID 11 ký tự', 'warning');
+        return;
+    }
+
+    ADMIN_MUSIC_VERSIONS[idx] = {
+        id: ytid,
+        title: title,
+        artist: artist || 'Không rõ nguồn',
+        badge: badge || '🎵 Tùy chỉnh',
+        speed: speed || 1.0
+    };
+
+    editingTrackIndex = null;
+    syncMusicVersionsToServer();
+    renderMusicVersionsList();
+
+    // Nếu bài vừa sửa đang phát thì cập nhật ngay lập tức cho toàn web
+    var isActive = !currentMusicSetting.customAudioUrl && currentMusicSetting.versionIndex === idx;
+    if (isActive) {
+        fetch('/admin/music-setting', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ versionIndex: idx, speed: speed })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                currentMusicSetting = data.setting;
+                updateNowPlayingLabel();
+            }
+        });
+    }
+
+    showAdminToast('✓ Đã cập nhật thành công bài hát: ' + title, 'success');
+}
+
+// Thay đổi tốc độ nhanh của từng bài hát
+function changeTrackSpeed(idx, newSpeed) {
+    if (!ADMIN_MUSIC_VERSIONS[idx]) return;
+    ADMIN_MUSIC_VERSIONS[idx].speed = newSpeed;
+    syncMusicVersionsToServer();
+
+    var isActive = !currentMusicSetting.customAudioUrl && currentMusicSetting.versionIndex === idx;
+    if (isActive) {
+        fetch('/admin/music-setting', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ versionIndex: idx, speed: newSpeed })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                currentMusicSetting = data.setting;
+                updateNowPlayingLabel();
+                showAdminToast('✓ Đã cập nhật tốc độ ' + newSpeed + 'x cho toàn web!', 'success');
+            }
+        });
+    } else {
+        showAdminToast('✓ Đã lưu tốc độ ' + newSpeed + 'x cho bài "' + ADMIN_MUSIC_VERSIONS[idx].title + '"', 'info');
+    }
+}
+
+// Chuyển sang phiên bản nhạc
+function switchMusicVersion(idx) {
+    var speed = (ADMIN_MUSIC_VERSIONS[idx] && typeof ADMIN_MUSIC_VERSIONS[idx].speed === 'number') ? ADMIN_MUSIC_VERSIONS[idx].speed : 1.0;
+    fetch('/admin/music-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionIndex: idx, speed: speed })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            currentMusicSetting = data.setting;
+            renderMusicVersionsList();
+            updateNowPlayingLabel();
+            showAdminToast('✓ Đã chuyển sang: ' + ADMIN_MUSIC_VERSIONS[idx].title + ' (' + speed + 'x)', 'success');
+        }
+    });
+}
+
+// Thêm phiên bản YouTube mới bằng Link URL
+function addMusicVersion() {
+    var title = document.getElementById('new-music-title').value.trim();
+    var rawUrl = document.getElementById('new-music-url').value.trim();
+    var artist = document.getElementById('new-music-artist').value.trim();
+    var badge  = document.getElementById('new-music-badge').value.trim();
+    var speedEl = document.getElementById('new-music-speed');
+    var speed = speedEl ? parseFloat(speedEl.value) : 1.0;
+
+    if (!title || !rawUrl) {
+        showAdminToast('⚠️ Vui lòng nhập Tiêu đề và Link URL YouTube!', 'warning');
+        return;
+    }
+
+    var ytid = extractYouTubeId(rawUrl);
+    if (!ytid) {
+        showAdminToast('⚠️ Link URL YouTube không hợp lệ! Vui lòng dán link YouTube đầy đủ (VD: https://www.youtube.com/watch?v=...)', 'warning');
+        return;
+    }
+
+    ADMIN_MUSIC_VERSIONS.push({
+        id: ytid,
+        title: title,
+        artist: artist || 'Không rõ nguồn',
+        badge: badge || '🎵 Tùy chỉnh',
+        speed: speed || 1.0
+    });
+
+    syncMusicVersionsToServer();
+
+    // Xóa form sau khi thêm
+    document.getElementById('new-music-title').value = '';
+    document.getElementById('new-music-url').value = '';
+    document.getElementById('new-music-artist').value = '';
+    document.getElementById('new-music-badge').value = '';
+
+    renderMusicVersionsList();
+    showAdminToast('✓ Đã thêm bài hát mới: ' + title, 'success');
+}
+
+// Xóa bài hát khỏi danh sách
+function deleteMusicVersion(idx) {
+    if (!confirm('Bạn chắc chắn muốn xóa bài "' + ADMIN_MUSIC_VERSIONS[idx].title + '"?')) return;
+    ADMIN_MUSIC_VERSIONS.splice(idx, 1);
+    syncMusicVersionsToServer();
+    if (currentMusicSetting.versionIndex >= ADMIN_MUSIC_VERSIONS.length) {
+        switchMusicVersion(0);
+        return;
+    }
+    renderMusicVersionsList();
+    showAdminToast('🗑️ Đã xóa bài hát khỏi danh sách', 'info');
+}
+
+// Upload MP3
+function uploadAdminMP3() {
+    var fileInput = document.getElementById('admin-mp3-upload');
+    var statusEl = document.getElementById('mp3-upload-status');
+    if (!fileInput.files[0]) {
+        showAdminToast('⚠️ Vui lòng chọn file MP3 trước!', 'warning');
+        return;
+    }
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#64748b';
+    statusEl.textContent = '⏳ Đang tải file lên server...';
+
+    var formData = new FormData();
+    formData.append('musicFile', fileInput.files[0]);
+
+    fetch('/admin/music-upload', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                statusEl.style.color = '#15803d';
+                statusEl.textContent = '✓ Đã tải lên và phát cho toàn website: ' + fileInput.files[0].name;
+                currentMusicSetting = data.setting || currentMusicSetting;
+                currentMusicSetting.customAudioUrl = data.audioUrl;
+                document.getElementById('btn-revert-youtube').style.display = 'inline-flex';
+                updateNowPlayingLabel();
+                renderMusicVersionsList();
+                showAdminToast('✓ Đang phát file MP3 cho toàn website!', 'success');
+            } else {
+                statusEl.style.color = '#dc2626';
+                statusEl.textContent = '✗ Lỗi: ' + (data.error || 'Không thể tải lên');
+            }
+        })
+        .catch(() => {
+            statusEl.style.color = '#dc2626';
+            statusEl.textContent = '✗ Lỗi kết nối, thử lại!';
+        });
+}
+
+// Trở về YouTube
+function revertToYoutube() {
+    fetch('/admin/music-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionIndex: currentMusicSetting.versionIndex || 0, speed: currentMusicSetting.speed || 1.0 })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            currentMusicSetting = data.setting;
+            document.getElementById('btn-revert-youtube').style.display = 'none';
+            document.getElementById('mp3-upload-status').style.display = 'none';
+            document.getElementById('admin-mp3-upload').value = '';
+            updateNowPlayingLabel();
+            renderMusicVersionsList();
+            showAdminToast('↩ Đã trở về phát YouTube!', 'info');
+        }
+    });
+}
+
+// Toast thông báo nhỏ
+function showAdminToast(msg, type) {
+    var colors = { success: '#dcfce7', warning: '#fef9c3', info: '#e0f2fe', error: '#fee2e2' };
+    var textColors = { success: '#166534', warning: '#854d0e', info: '#0369a1', error: '#dc2626' };
+    var toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed; bottom:80px; right:20px; background:' + (colors[type]||'#fff') + '; color:' + (textColors[type]||'#1e293b') + '; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:700; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:9999; animation:fadeIn 0.2s ease;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Cuộn tới section nhạc nếu URL có #music-management
+if (window.location.hash === '#music-management') {
+    setTimeout(() => {
+        var musicBody = document.getElementById('music-management-body');
+        if (musicBody && musicBody.style.display === 'none') {
+            toggleAdminSection('music-management-body', 'music-toggle-btn');
+        }
+        var el = document.getElementById('music-management');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+}
+
+// ===== THU GỌN / MỞ RỘNG CÁC SECTION TRANG ADMIN =====
+function toggleAdminSection(bodyId, btnId) {
+    var body = document.getElementById(bodyId);
+    var btn = document.getElementById(btnId);
+    if (!body || !btn) return;
+
+    var textSpan = btn.querySelector('span');
+    var arrowSpan = btn.querySelector('.arrow-icon');
+    var isExpanded = (body.style.display !== 'none');
+
+    if (isExpanded) {
+        body.style.display = 'none';
+        if (textSpan) textSpan.textContent = 'Mở rộng';
+        if (arrowSpan) arrowSpan.textContent = '▼';
+        btn.style.background = '#f1f5f9';
+        btn.style.borderColor = '#cbd5e1';
+        btn.style.color = '#64748b';
+        localStorage.setItem('admin_section_' + bodyId, 'collapsed');
+    } else {
+        body.style.display = 'block';
+        if (textSpan) textSpan.textContent = 'Thu gọn';
+        if (arrowSpan) arrowSpan.textContent = '▲';
+        if (btnId === 'character-toggle-btn') {
+            btn.style.background = '#fdf2f8';
+            btn.style.borderColor = '#fbcfe8';
+            btn.style.color = '#db2777';
+        } else {
+            btn.style.background = '#fff7ed';
+            btn.style.borderColor = '#fdba74';
+            btn.style.color = '#c2410c';
+        }
+        localStorage.setItem('admin_section_' + bodyId, 'expanded');
+    }
+}
+
+// Khôi phục trạng thái thu gọn đã lưu (nếu có)
+function initCollapsibleSections() {
+    var isMusicHash = (window.location.hash === '#music-management');
+    var sections = [
+        { bodyId: 'character-form-body', btnId: 'character-toggle-btn' },
+        { bodyId: 'music-management-body', btnId: 'music-toggle-btn' }
+    ];
+
+    sections.forEach(function(s) {
+        var savedState = localStorage.getItem('admin_section_' + s.bodyId);
+        // Nếu người dùng vào thẳng link #music-management, luôn giữ khối nhạc MỞ RỘNG
+        if (s.bodyId === 'music-management-body' && isMusicHash) {
+            var body = document.getElementById(s.bodyId);
+            var btn = document.getElementById(s.btnId);
+            if (body) body.style.display = 'block';
+            if (btn) {
+                var textSpan = btn.querySelector('span');
+                var arrowSpan = btn.querySelector('.arrow-icon');
+                if (textSpan) textSpan.textContent = 'Thu gọn';
+                if (arrowSpan) arrowSpan.textContent = '▲';
+                btn.style.background = '#fff7ed';
+                btn.style.borderColor = '#fdba74';
+                btn.style.color = '#c2410c';
+            }
+            return;
+        }
+
+        if (savedState === 'collapsed') {
+            toggleAdminSection(s.bodyId, s.btnId);
+        }
+    });
+
+    if (isMusicHash) {
+        setTimeout(function() {
+            var target = document.getElementById('music-management');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 150);
+    }
+}
+
+// Bắt sự kiện chuyển hash khi click từ widget
+window.addEventListener('hashchange', function() {
+    if (window.location.hash === '#music-management') {
+        var body = document.getElementById('music-management-body');
+        if (body && body.style.display === 'none') {
+            toggleAdminSection('music-management-body', 'music-toggle-btn');
+        }
+        var target = document.getElementById('music-management');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+});
+
+// ===== QUẢN LÝ TÀI KHOẢN ADMIN TRÊN TRANG QUẢN TRỊ (CHỈ DÀNH CHO SUPER ADMIN) =====
+<% if (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) { %>
+function showAdminAccountsAlert(msg, isSuccess) {
+    var el = document.getElementById('admin-accounts-alert');
+    if (!el) return;
+    el.innerText = msg;
+    el.style.display = 'block';
+    if (isSuccess) {
+        el.style.background = '#dcfce7';
+        el.style.border = '1px solid #86efac';
+        el.style.color = '#166534';
+    } else {
+        el.style.background = '#fef2f2';
+        el.style.border = '1px solid #fca5a5';
+        el.style.color = '#dc2626';
+    }
+    setTimeout(function() { el.style.display = 'none'; }, 5000);
+}
+
+function toggleAddAdminForm() {
+    var form = document.getElementById('add-admin-form-container');
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') {
+        var userInp = document.getElementById('new-admin-username');
+        if (userInp) userInp.focus();
+    }
+}
+
+function handleCreateAdmin(e) {
+    e.preventDefault();
+    var username = document.getElementById('new-admin-username').value.trim();
+    var password = document.getElementById('new-admin-password').value.trim();
+    var fullName = document.getElementById('new-admin-fullname').value.trim();
+    var role = document.getElementById('new-admin-role').value;
+
+    fetch('/admin/api/accounts/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password, fullName: fullName, role: role })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showAdminAccountsAlert(data.message, true);
+            document.getElementById('form-create-admin').reset();
+            toggleAddAdminForm();
+            setTimeout(function() { window.location.reload(); }, 1200);
+        } else {
+            showAdminAccountsAlert(data.error || 'Lỗi tạo tài khoản admin!', false);
+        }
+    })
+    .catch(function(err) {
+        showAdminAccountsAlert('Lỗi kết nối máy chủ!', false);
+    });
+}
+
+function promptChangeAdminPassword(adminId, username) {
+    var newPass = prompt('Nhập mật khẩu mới cho tài khoản "' + username + '" (tối thiểu 6 ký tự):');
+    if (!newPass) return;
+    if (newPass.trim().length < 6) {
+        alert('Mật khẩu phải có từ 6 ký tự trở lên!');
+        return;
+    }
+
+    fetch('/admin/api/accounts/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: adminId, newPassword: newPass.trim() })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showAdminAccountsAlert(data.message, true);
+        } else {
+            showAdminAccountsAlert(data.error || 'Lỗi đổi mật khẩu!', false);
+        }
+    })
+    .catch(function(err) {
+        showAdminAccountsAlert('Lỗi kết nối máy chủ!', false);
+    });
+}
+
+function handleDeleteAdmin(adminId, username) {
+    if (!confirm('Bạn có chắc chắn muốn xóa tài khoản quản trị "' + username + '" không?')) {
+        return;
+    }
+
+    fetch('/admin/api/accounts/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: adminId })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showAdminAccountsAlert(data.message, true);
+            var row = document.getElementById('admin-row-' + adminId);
+            if (row) row.remove();
+        } else {
+            showAdminAccountsAlert(data.error || 'Lỗi xóa tài khoản!', false);
+        }
+    })
+    .catch(function(err) {
+        showAdminAccountsAlert('Lỗi kết nối máy chủ!', false);
+    });
+}
+<% } %>
+
+// Khởi động: Render ngay lập tức trên DOM, sau đó tải dữ liệu mới nhất
+renderMusicVersionsList();
+updateNowPlayingLabel();
+loadCurrentMusicSetting();
+initCollapsibleSections();
+</script>
+
+<script src="/javascripts/admin.js"></script>
+<%- include('../partials/footer') %>

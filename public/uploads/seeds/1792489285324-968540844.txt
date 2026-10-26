@@ -1,0 +1,16 @@
+Q: Chào bạn, máy tính mình bị chậm bất thường.
+Q: Máy tính của mình bị lỗi màn hình xanh (BSOD).
+Q: Bạn có thể tư vấn nâng cấp phần cứng giúp mình không?
+A: Xin chào! Mình là trợ lý kỹ thuật. Rất vui được hỗ trợ bạn dọn dẹp và khắc phục các sự cố máy tính. Bạn muốn bắt đầu từ đâu?
+---
+Q: Hướng dẫn mình gỡ phần mềm rác và ứng dụng chạy ngầm.
+Q: Cho mình xin cách dọn dẹp ổ đĩa C bị đầy.
+A: Để máy chạy nhanh hơn, bạn có thể mở Task Manager (Ctrl+Shift+Esc) để tắt bớt ứng dụng trong tab Startup, hoặc dùng công cụ Disk Cleanup để xóa bớt file rác nhé!
+---
+Q: Cảm ơn bạn, máy mình đã chạy mượt hơn rồi!
+Q: Nếu vẫn bị chậm thì nên nâng cấp linh kiện gì?
+A: Nếu đã tối ưu phần mềm mà máy vẫn chậm, bạn nên ưu tiên nâng cấp ổ cứng SSD và thêm dung lượng RAM. Đây là 2 linh kiện giúp tăng tốc máy rõ rệt nhất!
+---
+Q: Cảm ơn sự trợ giúp nhiệt tình của bạn!
+Q: Để mình tham khảo thêm giá linh kiện nhé.
+A: Không có gì ạ! Nếu gặp thêm bất kỳ khó khăn nào trong quá trình sử dụng, bạn cứ nhắn lại cho mình nhé. Chúc bạn một ngày làm việc vui vẻ!

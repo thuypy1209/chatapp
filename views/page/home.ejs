@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65vh; text-align: center; padding: 20px;">
+    <h1 style="margin-bottom: 12px; color: #1e293b; font-size: 32px; font-weight: 800; text-shadow: 2px 2px 0px #fbcfe8;">
+        Chào mừng bạn đến với Phổi bạn không phải tôi
+    </h1>
+    <p style="color: #64748b; margin-bottom: 30px; font-size: 18px; max-width: 500px;">
+        Nền tảng trò chuyện thông minh kết hợp giải trí game retro Super Mario độc đáo!
+    </p>
+
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 25px;">
+        <!-- Nút vào chơi Mario & Chat -->
+        <a href="/mario" class="btn" style="background: #f59e0b; color: #fff; padding: 14px 28px; font-size: 18px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #b45309; box-shadow: 4px 4px 0px #78350f; display: flex; align-items: center; gap: 10px; transition: transform 0.15s ease;">
+            <span style="font-size: 24px;">🎮</span> Chơi Super Mario & Chat
+        </a>
+
+        <% if (defaultCharacter) { %>
+            <!-- Nút bấm dẫn thẳng vào phòng chat của nhân vật mặc định -->
+            <a href="/chat/<%= defaultCharacter._id %>" class="btn btn-primary question-btn" style="padding: 14px 28px; font-size: 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; width: auto; max-width: fit-content;">
+                <span>💬</span> Nhắn tin với <%= defaultCharacter.name %>
+            </a>
+        <% } else { %>
+            <a href="/chat" class="btn btn-primary question-btn" style="padding: 14px 28px; font-size: 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; width: auto; max-width: fit-content;">
+                <span>💬</span> Vào phòng Chat
+            </a>
+        <% } %>
+    </div>
+
+    <% if (!defaultCharacter) { %>
+        <p style="color: #64748b; font-size: 14px;">Chưa có nhân vật kịch bản? Bạn có thể vào <a href="/admin" style="color: #db2777; font-weight: bold;">Trang Quản trị</a> để cấu hình thêm!</p>
+    <% } %>
+</div>
+<%- include('../partials/footer') %>

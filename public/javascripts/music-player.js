@@ -1,0 +1,865 @@
+/**
+ * ChatFlex - Retro Music & Money Control Center
+ * Bài hát: "Graduation" - NCT DREAM
+ * Tự động đồng bộ toàn hệ thống: Khi Admin đổi nhạc, tất cả người dùng đang online sẽ đổi nhạc theo thời gian thực!
+ */
+
+(function () {
+    'use strict';
+
+    // Danh sách các phiên bản nhạc NCT DREAM - "Graduation" (Đã kiểm tra 100% hoạt động trên YouTube)
+    const DEFAULT_MUSIC_VERSIONS = [
+        {
+            id: "4EteI8yAsv0",
+            title: "Graduation (Relaxing Piano)",
+            artist: "Catiano Cover • Không bản quyền",
+            badge: "🎹 Relaxing Piano",
+            desc: "Bản Piano acoustic nhẹ nhàng phù hợp làm nhạc nền chơi game và trò chuyện"
+        },
+        {
+            id: "zuoSn3ObMz4",
+            title: "Graduation (Special Video MV)",
+            artist: "NCT DREAM • SM Entertainment",
+            badge: "🎵 Bản MV",
+            desc: "Bản Special Video chính thức của NCT DREAM từ Winter Special Mini Album 'Candy'"
+        },
+        {
+            id: "eF2qrRYiRuM",
+            title: "Graduation (Piano Acoustic)",
+            artist: "Piano Cover • Không bản quyền",
+            badge: "🛡️ Piano Cover",
+            desc: "Bản độc tấu Piano êm dịu, không chứa giọng hát gốc, 100% an toàn không bị gắn cờ bản quyền"
+        },
+        {
+            id: "EznbdoHi0Zs",
+            title: "Graduation (Official Audio)",
+            artist: "NCT DREAM • SM Entertainment",
+            badge: "⭐ Official",
+            desc: "Bản nhạc gốc chuẩn chất lượng cao phát hành bởi SM Entertainment"
+        }
+    ];
+
+    // Tự động dọn dẹp các link cũ hỏng nếu có lưu trong trình duyệt
+    let storedVersions = null;
+    try {
+        storedVersions = JSON.parse(localStorage.getItem('chatflex_music_versions'));
+        if (Array.isArray(storedVersions) && storedVersions.some(v => v.id === "R234wY4tTes" || v.id === "wcrkltAbh_g")) {
+            localStorage.removeItem('chatflex_music_versions');
+            storedVersions = null;
+        }
+    } catch (e) {
+        storedVersions = null;
+    }
+    const MUSIC_VERSIONS = storedVersions || DEFAULT_MUSIC_VERSIONS;
+
+    // Kiểm tra quyền Admin (được truyền từ server qua window.IS_ADMIN)
+    const isAdmin = Boolean(window.IS_ADMIN);
+
+    // Cài đặt ban đầu từ máy chủ (được truyền qua window.SERVER_MUSIC_SETTING)
+    const serverSetting = (window.SERVER_MUSIC_SETTING && typeof window.SERVER_MUSIC_SETTING === 'object') ? window.SERVER_MUSIC_SETTING : {};
+    
+    let currentVersionIndex = (typeof serverSetting.versionIndex === 'number' && MUSIC_VERSIONS[serverSetting.versionIndex]) ? serverSetting.versionIndex : 0;
+    let currentSpeed = serverSetting.speed || 1.0;
+    let activeCustomAudioUrl = serverSetting.customAudioUrl || null;
+    let lastSettingTimestamp = serverSetting.updatedAt || Date.now();
+
+    let ytPlayer = null;
+    let isPlaying = false;
+    let isUserPaused = false;
+    let toggleLock = false;
+    let isMuted = false;
+    let volumeLevel = 75; // 0 - 100
+    let isPlayerReady = false;
+    let hasUserInteracted = false;
+    let localAudio = null;
+
+    // --- 1. Tạo Giao diện Music Player Widget nổi ---
+    function createPlayerUI() {
+        if (document.getElementById('chatflex-music-widget')) return;
+
+        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+        const cardWidth = isAdmin ? '365px' : '350px';
+
+        const widget = document.createElement('div');
+        widget.id = 'chatflex-music-widget';
+        widget.innerHTML = `
+            <!-- Nút đĩa than thu nhỏ khi Widget đóng (Mặc định luôn thu nhỏ gọn gàng) -->
+            <button id="music-min-disc" type="button" title="Mở Trình phát nhạc & Mưa tiền" style="
+                display: flex;
+                width: 52px;
+                height: 52px;
+                border-radius: 50%;
+                background: radial-gradient(circle, #f43f5e 20%, #1e293b 21%, #0f172a 70%, #f472b6 100%);
+                border: 3px solid #fbcfe8;
+                box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
+                cursor: pointer;
+                position: relative;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease;
+            ">
+                <span style="font-size: 22px;">💿</span>
+                <span id="min-disc-note" style="position: absolute; top: -6px; right: -4px; background: #db2777; color: #fff; font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 1.5px solid #fff;">🎵</span>
+            </button>
+
+            <!-- Bảng điều khiển mở rộng (Mặc định ẩn, bấm đĩa than để mở) -->
+            <div id="music-full-card" style="
+                display: none;
+                background: rgba(255, 255, 255, 0.96);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                border: 2px solid #fbcfe8;
+                border-radius: 20px;
+                box-shadow: 0 10px 32px rgba(219, 39, 119, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 10px;
+                width: ${cardWidth};
+                max-width: calc(100vw - 28px);
+                transition: all 0.25s ease;
+            ">
+                <!-- Thông báo chuyển nhạc trực tiếp từ Admin -->
+                <div id="music-sync-toast" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px; text-align: center; animation: fadeIn 0.2s ease;">
+                    ✨ Admin vừa đổi bản nhạc!
+                </div>
+
+                <!-- Hàng 1: Đĩa than + Thông tin bài hát + Nút thu nhỏ -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                        <!-- Đĩa than xoay tròn khi phát nhạc -->
+                        <div id="vinyl-disc" style="
+                            width: 44px;
+                            height: 44px;
+                            border-radius: 50%;
+                            background: radial-gradient(circle, #ec4899 22%, #0f172a 24%, #1e293b 72%, #f472b6 100%);
+                            border: 2px solid #fbcfe8;
+                            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 18px;
+                            flex-shrink: 0;
+                            animation: spinVinyl 3.5s linear infinite paused;
+                        ">
+                            🌸
+                        </div>
+
+                        <!-- Tên bài hát & Nghệ sĩ -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 5px; min-width: 0; margin-bottom: 3px;">
+                                <span id="music-track-title" style="font-size: 13px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0;" title="${activeCustomAudioUrl ? 'Nhạc tùy chỉnh' : currentVer.title}">${activeCustomAudioUrl ? 'Nhạc tùy chỉnh' : currentVer.title}</span>
+                                <span id="equalizer-bars" style="display: none; align-items: flex-end; gap: 2.5px; height: 13px; flex-shrink: 0;">
+                                    <span class="eq-bar" style="width: 2.5px; height: 6px; background: #db2777; border-radius: 1px; animation: eqAnim 0.6s infinite ease-in-out alternate;"></span>
+                                    <span class="eq-bar" style="width: 2.5px; height: 13px; background: #f43f5e; border-radius: 1px; animation: eqAnim 0.4s infinite ease-in-out alternate 0.15s;"></span>
+                                    <span class="eq-bar" style="width: 2.5px; height: 8px; background: #fb7185; border-radius: 1px; animation: eqAnim 0.7s infinite ease-in-out alternate 0.3s;"></span>
+                                </span>
+                            </div>
+                            <div id="music-track-artist" style="font-size: 11px; color: #047857; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                                <span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">${activeCustomAudioUrl ? '📁 File MP3 Admin' : currentVer.badge}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút thu nhỏ -->
+                    <button id="btn-minimize-music" type="button" title="Thu nhỏ" style="
+                        background: #fdf2f8;
+                        border: 1px solid #fbcfe8;
+                        color: #db2777;
+                        width: 26px;
+                        height: 26px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 14px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                        line-height: 1;
+                        padding: 0;
+                        transition: all 0.15s ease;
+                    ">
+                        —
+                    </button>
+                </div>
+
+                <!-- PHẦN DÀNH RIÊNG CHO ADMIN: Chọn phiên bản tránh bản quyền & nạp file nhạc -->
+                ${isAdmin ? `
+                <div id="admin-music-panel" style="background: #fff7ed; border: 1.5px dashed #fb923c; border-radius: 12px; padding: 8px 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 800; color: #c2410c; margin-bottom: 5px;">
+                        <span>⚙️ Quản trị nhạc (Chỉ Admin thấy):</span>
+                        <span id="version-badge-note" style="color: #047857; font-weight: 700;">Đồng bộ toàn web</span>
+                    </div>
+
+                    <!-- Menu chọn phiên bản -->
+                    <select id="music-version-select" style="
+                        width: 100%;
+                        padding: 6px 8px;
+                        border: 1.5px solid #fdba74;
+                        border-radius: 8px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #1e293b;
+                        background: #ffffff;
+                        outline: none;
+                        cursor: pointer;
+                        margin-bottom: 6px;
+                    ">
+                        ${MUSIC_VERSIONS.map((v, i) => `<option value="${i}" ${currentVersionIndex === i ? 'selected' : ''}>${v.badge} ${v.title}</option>`).join('')}
+                    </select>
+
+                    <!-- Liên kết đến trang quản trị nhạc -->
+                    <a href="/admin#music-management" style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 5px;
+                        color: #c2410c;
+                        font-size: 11px;
+                        font-weight: 700;
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        background: #ffedd5;
+                        border: 1px dashed #fb923c;
+                        text-decoration: none;
+                        width: 100%;
+                    " title="Mở trang quản trị để thêm/sửa/xóa phiên bản nhạc">
+                        ⚙️ Quản lý phiên bản nhạc → Trang Admin
+                    </a>
+                </div>
+                ` : ''}
+
+                <!-- Hàng điều khiển Play/Pause + Âm lượng + Tốc độ (Tốc độ chỉ hiển thị nếu là Admin) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #fdf2f8; padding: 6px 12px; border-radius: 12px; border: 1px solid #fce7f3;">
+                    <!-- Nút Play/Pause lớn -->
+                    <button id="btn-play-pause-music" type="button" style="
+                        background: #db2777;
+                        color: #ffffff;
+                        border: none;
+                        padding: 6px 15px;
+                        border-radius: 10px;
+                        font-size: 12px;
+                        font-weight: 800;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+                        transition: transform 0.1s ease, background 0.15s ease;
+                        flex-shrink: 0;
+                    ">
+                        <span id="play-pause-icon" style="font-size: 11px; letter-spacing: -0.5px;">▶</span> <span id="play-pause-text">Phát</span>
+                    </button>
+
+                    <!-- Âm lượng -->
+                    <div style="display: flex; align-items: center; gap: 6px; flex: 1; justify-content: flex-end;">
+                        <button id="btn-toggle-mute" type="button" style="background: none; border: none; font-size: 14px; cursor: pointer; color: #64748b; padding: 1px;">
+                            🔊
+                        </button>
+                        <input type="range" id="music-volume-slider" min="0" max="100" value="75" style="
+                            width: 65px;
+                            accent-color: #db2777;
+                            cursor: pointer;
+                        ">
+                    </div>
+
+                    ${isAdmin ? `
+                    <!-- Tùy chỉnh tốc độ (Chỉ Admin thấy) -->
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                        <button type="button" class="btn-speed-pill ${currentSpeed === 0.9 ? 'active' : ''}" data-speed="0.9" title="Tốc độ 0.9x (Slowed chill)" style="background: ${currentSpeed === 0.9 ? '#db2777' : '#fff'}; color: ${currentSpeed === 0.9 ? '#fff' : '#1e293b'}; border: 1px solid ${currentSpeed === 0.9 ? '#db2777' : '#fbcfe8'}; font-size: 10px; font-weight: 700; padding: 3px 5px; border-radius: 5px; cursor: pointer;">0.9x</button>
+                        <button type="button" class="btn-speed-pill ${currentSpeed === 1.0 ? 'active' : ''}" data-speed="1.0" title="Tốc độ 1.0x (Chuẩn)" style="background: ${currentSpeed === 1.0 ? '#db2777' : '#fff'}; color: ${currentSpeed === 1.0 ? '#fff' : '#1e293b'}; border: 1px solid ${currentSpeed === 1.0 ? '#db2777' : '#fbcfe8'}; font-size: 10px; font-weight: 700; padding: 3px 5px; border-radius: 5px; cursor: pointer;">1.0x</button>
+                        <button type="button" class="btn-speed-pill ${currentSpeed === 1.05 ? 'active' : ''}" data-speed="1.05" title="Tốc độ 1.05x (Pitch-up)" style="background: ${currentSpeed === 1.05 ? '#db2777' : '#fff'}; color: ${currentSpeed === 1.05 ? '#fff' : '#1e293b'}; border: 1px solid ${currentSpeed === 1.05 ? '#db2777' : '#fbcfe8'}; font-size: 10px; font-weight: 700; padding: 3px 5px; border-radius: 5px; cursor: pointer;">1.05x</button>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <!-- Hàng công cụ Mưa tiền xu & tiền giấy -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1.5px dashed #fbcfe8; padding-top: 10px; margin-top: 2px;">
+                    <!-- Bật/Tắt mưa tiền -->
+                    <button id="btn-toggle-money-rain" type="button" style="
+                        background: #ecfdf5;
+                        border: 1px solid #a7f3d0;
+                        color: #047857;
+                        padding: 6px 10px;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        flex: 1;
+                        justify-content: center;
+                        transition: all 0.15s ease;
+                    ">
+                        <span id="money-status-icon">💸</span> <span id="money-status-text">Mưa tiền: Bật</span>
+                    </button>
+
+                    <!-- Nút Bắn tung tiền bùng nổ -->
+                    <button id="btn-burst-money" type="button" style="
+                        background: #fef08a;
+                        border: 1px solid #facc15;
+                        color: #854d0e;
+                        padding: 6px 12px;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 800;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        box-shadow: 0 2px 6px rgba(250, 204, 21, 0.25);
+                        flex-shrink: 0;
+                        transition: transform 0.15s ease;
+                    ">
+                        🎉 Tung tiền!
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khung nhúng YouTube ẩn để phát nhạc -->
+            <div id="yt-hidden-container" style="position: fixed; bottom: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+                <div id="yt-player-element"></div>
+            </div>
+        `;
+
+        // CSS Định vị Widget ở góc dưới bên phải màn hình
+        widget.style.position = 'fixed';
+        widget.style.bottom = '58px';
+        widget.style.right = '18px';
+        widget.style.zIndex = '999';
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spinVinyl {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            @keyframes eqAnim {
+                0% { height: 3px; }
+                100% { height: 13px; }
+            }
+            #music-min-disc:hover {
+                transform: scale(1.08);
+            }
+            #btn-play-pause-music:hover {
+                background: #be185d !important;
+            }
+            #btn-burst-money:hover {
+                transform: translateY(-1px);
+                background: #fde047 !important;
+            }
+            .btn-speed-pill:hover {
+                border-color: #db2777 !important;
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(widget);
+
+        attachEventListeners();
+    }
+
+    // --- 2. Gán sự kiện cho các nút điều khiển ---
+    function attachEventListeners() {
+        const fullCard = document.getElementById('music-full-card');
+        const minDisc = document.getElementById('music-min-disc');
+        const btnMinimize = document.getElementById('btn-minimize-music');
+        const btnPlayPause = document.getElementById('btn-play-pause-music');
+        const btnMute = document.getElementById('btn-toggle-mute');
+        const volSlider = document.getElementById('music-volume-slider');
+        const btnToggleMoney = document.getElementById('btn-toggle-money-rain');
+        const btnBurstMoney = document.getElementById('btn-burst-money');
+
+        // Thu nhỏ / Phóng to Widget
+        btnMinimize.addEventListener('click', () => {
+            fullCard.style.display = 'none';
+            minDisc.style.display = 'flex';
+        });
+
+        minDisc.addEventListener('click', () => {
+            minDisc.style.display = 'none';
+            fullCard.style.display = 'flex';
+        });
+
+        // Bật / Tạm dừng Nhạc
+        btnPlayPause.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMusic();
+        });
+
+        // Thanh chỉnh âm lượng
+        volSlider.addEventListener('input', (e) => {
+            volumeLevel = parseInt(e.target.value, 10);
+            setMusicVolume(volumeLevel);
+            btnMute.innerText = (volumeLevel === 0) ? '🔇' : '🔊';
+        });
+
+        // Nút tắt tiếng (Mute)
+        btnMute.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                btnMute.innerText = '🔇';
+                setMusicVolume(0);
+            } else {
+                btnMute.innerText = '🔊';
+                setMusicVolume(volumeLevel);
+            }
+        });
+
+        // CÁC SỰ KIỆN DÀNH CHO ADMIN
+        if (isAdmin) {
+            const versionSelect = document.getElementById('music-version-select');
+            const speedButtons = document.querySelectorAll('.btn-speed-pill');
+
+            // Đổi phiên bản nhạc tránh bản quyền (Admin) -> Gửi lên Server lưu cho mọi người
+            if (versionSelect) {
+                versionSelect.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.value, 10);
+                    const targetSpeed = (MUSIC_VERSIONS[idx] && typeof MUSIC_VERSIONS[idx].speed === 'number') ? MUSIC_VERSIONS[idx].speed : currentSpeed;
+                    adminSaveMusicVersion(idx, targetSpeed);
+                });
+            }
+
+            // Chỉnh tốc độ (Admin) -> Lưu lên Server
+            speedButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const speed = parseFloat(btn.getAttribute('data-speed'));
+                    currentSpeed = speed;
+                    adminSaveMusicVersion(currentVersionIndex, speed);
+
+                    speedButtons.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.background = '#fff';
+                        b.style.color = '#1e293b';
+                        b.style.borderColor = '#fbcfe8';
+                    });
+                    btn.classList.add('active');
+                    btn.style.background = '#db2777';
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = '#db2777';
+                });
+            });
+        }
+
+        // Bật / Tắt mưa tiền
+        btnToggleMoney.addEventListener('click', () => {
+            if (window.moneyRainInstance) {
+                const active = window.moneyRainInstance.toggle();
+                const icon = document.getElementById('money-status-icon');
+                const text = document.getElementById('money-status-text');
+                if (active) {
+                    icon.innerText = '💸';
+                    text.innerText = 'Mưa tiền: Bật';
+                    btnToggleMoney.style.background = '#ecfdf5';
+                    btnToggleMoney.style.color = '#047857';
+                    btnToggleMoney.style.borderColor = '#a7f3d0';
+                } else {
+                    icon.innerText = '⏹️';
+                    text.innerText = 'Mưa tiền: Tắt';
+                    btnToggleMoney.style.background = '#fef2f2';
+                    btnToggleMoney.style.color = '#dc2626';
+                    btnToggleMoney.style.borderColor = '#fca5a5';
+                }
+            }
+        });
+
+        // Bắn tung tiền bùng nổ (Có giới hạn số lần bấm & chống lag khi spam click)
+        let isBurstCoolingDown = false;
+        let burstSpamClickCount = 0;
+        let burstResetTimer = null;
+
+        btnBurstMoney.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!window.moneyRainInstance) return;
+
+            // Nếu đang trong thời gian hồi chiêu
+            if (isBurstCoolingDown) {
+                btnBurstMoney.style.transform = 'scale(0.95)';
+                setTimeout(() => { btnBurstMoney.style.transform = 'none'; }, 100);
+                return;
+            }
+
+            // Tăng đếm số lần bấm liên tiếp
+            burstSpamClickCount++;
+            clearTimeout(burstResetTimer);
+            burstResetTimer = setTimeout(() => {
+                burstSpamClickCount = 0;
+            }, 2500);
+
+            // Bắn tung hạt tiền
+            const rect = btnBurstMoney.getBoundingClientRect();
+            window.moneyRainInstance.burstAt(rect.left + rect.width / 2, rect.top, 20);
+
+            // Cơ chế giới hạn:
+            // - Bấm 1-2 lần: Cooldown 500ms
+            // - Bấm từ lần 3 liên tiếp trở lên: Giới hạn hồi chiêu 1.5 giây để tránh giật lag
+            const isSpamming = burstSpamClickCount >= 3;
+            const cooldownTime = isSpamming ? 1500 : 500;
+
+            isBurstCoolingDown = true;
+            btnBurstMoney.style.pointerEvents = 'none';
+            btnBurstMoney.style.opacity = '0.65';
+            btnBurstMoney.style.transform = 'scale(0.95)';
+            const originalText = '🎉 Tung tiền!';
+
+            if (isSpamming) {
+                btnBurstMoney.innerText = '⏳ Chờ tí...';
+            }
+
+            setTimeout(() => {
+                isBurstCoolingDown = false;
+                btnBurstMoney.style.pointerEvents = 'auto';
+                btnBurstMoney.style.opacity = '1';
+                btnBurstMoney.style.transform = 'none';
+                btnBurstMoney.innerText = originalText;
+            }, cooldownTime);
+        });
+
+        // Tự động phát khi người dùng nhấp chuột lần đầu vào trang web
+        const handleFirstInteraction = (e) => {
+            // Nếu người dùng nhấp vào widget nhạc thì không tự ý bật nhạc đè lên thao tác của họ
+            if (e && e.target && e.target.closest && e.target.closest('#chatflex-music-widget')) {
+                hasUserInteracted = true;
+                return;
+            }
+            if (!hasUserInteracted) {
+                hasUserInteracted = true;
+                if (!isPlaying && !isUserPaused) {
+                    playMusic();
+                }
+            }
+        };
+        document.addEventListener('click', handleFirstInteraction, { once: true });
+        document.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+        // Khởi động chu kỳ đồng bộ thời gian thực cho tất cả người dùng
+        startRealtimeSync();
+    }
+
+    // --- 3. Admin lưu cài đặt nhạc lên Server ---
+    function adminSaveMusicVersion(idx, speed) {
+        currentVersionIndex = idx;
+        currentSpeed = speed;
+        activeCustomAudioUrl = null;
+
+        // Cập nhật giao diện cục bộ trước
+        applyMusicSetting({
+            versionIndex: idx,
+            speed: speed,
+            customAudioUrl: null
+        });
+
+        // Gửi lên server để lưu vào Database và đồng bộ cho tất cả khách
+        fetch('/admin/music-setting', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ versionIndex: idx, speed: speed })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.setting) {
+                lastSettingTimestamp = data.setting.updatedAt || Date.now();
+                console.log('✓ Admin đã lưu cài đặt nhạc mới cho toàn hệ thống:', data.setting);
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi khi Admin lưu cài đặt nhạc:', err);
+        });
+    }
+
+    // --- 4. Áp dụng cài đặt nhạc (áp dụng cho cả Admin lẫn Người dùng bình thường) ---
+    function applyMusicSetting(setting, showToast = false) {
+        if (!setting) return;
+
+        if (typeof setting.versionIndex === 'number' && MUSIC_VERSIONS[setting.versionIndex]) {
+            currentVersionIndex = setting.versionIndex;
+        }
+        if (typeof setting.speed === 'number') {
+            currentSpeed = setting.speed;
+        }
+        activeCustomAudioUrl = setting.customAudioUrl || null;
+
+        const trackTitle = document.getElementById('music-track-title');
+        const trackArtist = document.getElementById('music-track-artist');
+        const versionSelect = document.getElementById('music-version-select');
+        const versionBadgeNote = document.getElementById('version-badge-note');
+
+        // Cập nhật UI Dropdown nếu là Admin
+        if (versionSelect) {
+            versionSelect.value = currentVersionIndex;
+        }
+
+        // Trường hợp 1: Phát file MP3 do Admin tải lên máy chủ
+        if (activeCustomAudioUrl) {
+            if (ytPlayer && isPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
+                ytPlayer.pauseVideo();
+            }
+
+            if (trackTitle) trackTitle.innerText = setting.title || "Graduation (Custom Audio)";
+            if (trackArtist) {
+                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">📁 File MP3 Admin</span>`;
+            }
+
+            if (!localAudio || localAudio.src !== activeCustomAudioUrl) {
+                if (localAudio) localAudio.pause();
+                localAudio = new Audio(activeCustomAudioUrl);
+                localAudio.loop = true;
+                localAudio.volume = volumeLevel / 100;
+                localAudio.playbackRate = currentSpeed;
+            }
+
+            if (isPlaying) {
+                localAudio.play().then(() => updateUIState(true)).catch(() => {});
+            }
+        } 
+        // Trường hợp 2: Phát video YouTube theo phiên bản
+        else {
+            if (localAudio) {
+                localAudio.pause();
+                localAudio = null;
+            }
+
+            const ver = MUSIC_VERSIONS[currentVersionIndex];
+            if (trackTitle) trackTitle.innerText = ver.title;
+            if (trackArtist) {
+                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">${ver.badge}</span>`;
+            }
+            if (versionBadgeNote) {
+                versionBadgeNote.innerText = (currentVersionIndex === 3) ? 'Bản gốc' : 'Không vi phạm Content ID';
+                versionBadgeNote.style.color = (currentVersionIndex === 3) ? '#dc2626' : '#047857';
+            }
+
+            if (ytPlayer && isPlayerReady) {
+                // Nếu Admin vừa đổi bản nhạc mới (showToast = true) hoặc đang ở trạng thái phát:
+                if (showToast || (isPlaying && !isUserPaused)) {
+                    isUserPaused = false;
+                    isPlaying = true;
+                    if (typeof ytPlayer.loadVideoById === 'function') {
+                        ytPlayer.loadVideoById({
+                            videoId: ver.id,
+                            startSeconds: 0
+                        });
+                        ytPlayer.setPlaybackRate(currentSpeed);
+                        ytPlayer.playVideo();
+                        updateUIState(true);
+                    }
+                } else {
+                    if (typeof ytPlayer.cueVideoById === 'function') {
+                        ytPlayer.cueVideoById({
+                            videoId: ver.id,
+                            startSeconds: 0
+                        });
+                        ytPlayer.setPlaybackRate(currentSpeed);
+                    }
+                }
+            }
+        }
+
+        // Hiển thị thông báo nhỏ nếu Admin vừa đổi nhạc
+        if (showToast) {
+            const toast = document.getElementById('music-sync-toast');
+            if (toast) {
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3500);
+            }
+        }
+    }
+
+    // --- 5. Đồng bộ thời gian thực cho tất cả người dùng đang sử dụng (Polling) ---
+    function startRealtimeSync() {
+        // Kiểm tra cài đặt nhạc mới từ server mỗi 3.5 giây
+        setInterval(() => {
+            fetch('/api/music-setting')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data) return;
+
+                    // Đồng bộ danh sách bài hát nếu Admin vừa thêm/sửa/xóa trên trang quản trị
+                    if (Array.isArray(data.versions) && data.versions.length > 0) {
+                        const isListDifferent = (data.versions.length !== MUSIC_VERSIONS.length) ||
+                            data.versions.some((v, idx) => !MUSIC_VERSIONS[idx] || v.id !== MUSIC_VERSIONS[idx].id || v.title !== MUSIC_VERSIONS[idx].title || v.speed !== MUSIC_VERSIONS[idx].speed);
+                        
+                        if (isListDifferent) {
+                            MUSIC_VERSIONS.length = 0;
+                            MUSIC_VERSIONS.push(...data.versions);
+                            localStorage.setItem('chatflex_music_versions', JSON.stringify(MUSIC_VERSIONS));
+                            
+                            const versionSelect = document.getElementById('music-version-select');
+                            if (versionSelect) {
+                                versionSelect.innerHTML = MUSIC_VERSIONS.map((v, i) => `<option value="${i}" ${currentVersionIndex === i ? 'selected' : ''}>${v.badge || '🎵'} ${v.title}</option>`).join('');
+                            }
+                        }
+                    }
+
+                    // Chỉ đồng bộ khi phiên bản nhạc, file MP3 hoặc tốc độ THỰC SỰ THAY ĐỔI
+                    const versionDiff = (typeof data.versionIndex === 'number' && data.versionIndex !== currentVersionIndex);
+                    const customAudioDiff = (data.customAudioUrl !== activeCustomAudioUrl);
+                    const speedDiff = (typeof data.speed === 'number' && Math.abs(data.speed - currentSpeed) > 0.05);
+
+                    if (versionDiff || customAudioDiff || speedDiff) {
+                        console.log('⚡ Nhận diện bản nhạc mới trên server:', data);
+                        lastSettingTimestamp = data.updatedAt || Date.now();
+                        applyMusicSetting(data, true);
+                    } else if (data.updatedAt) {
+                        lastSettingTimestamp = data.updatedAt;
+                    }
+                })
+                .catch(() => {});
+        }, 3500);
+    }
+
+    // --- 6. Tích hợp YouTube IFrame Player API ---
+    function loadYouTubeAPI() {
+        if (window.YT && window.YT.Player) {
+            initYouTubePlayer();
+            return;
+        }
+
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        window.onYouTubeIframeAPIReady = function () {
+            initYouTubePlayer();
+        };
+    }
+
+    function initYouTubePlayer() {
+        try {
+            const defaultVideoId = MUSIC_VERSIONS[currentVersionIndex].id;
+            ytPlayer = new window.YT.Player('yt-player-element', {
+                height: '180',
+                width: '320',
+                videoId: defaultVideoId,
+                playerVars: {
+                    autoplay: 0,
+                    controls: 0,
+                    loop: 1,
+                    playlist: defaultVideoId,
+                    modestbranding: 1,
+                    rel: 0,
+                    origin: window.location.origin
+                },
+                events: {
+                    onReady: (event) => {
+                        isPlayerReady = true;
+                        event.target.setVolume(volumeLevel);
+                        event.target.setPlaybackRate(currentSpeed);
+                        
+                        // Nếu có cài đặt custom audio thì không chạy youtube
+                        if (activeCustomAudioUrl) {
+                            applyMusicSetting({ customAudioUrl: activeCustomAudioUrl });
+                        }
+                    },
+                    onStateChange: (event) => {
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            if (isUserPaused) {
+                                // Người dùng đã chủ động bấm Tạm dừng, không cho YouTube tự phát tiếp
+                                if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                                    ytPlayer.pauseVideo();
+                                }
+                                updateUIState(false);
+                            } else {
+                                updateUIState(true);
+                            }
+                        } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+                            updateUIState(false);
+                        }
+                    },
+                    onError: (err) => {
+                        console.warn('Lỗi YouTube IFrame:', err);
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Lỗi khởi tạo YouTube player:', e);
+        }
+    }
+
+    // --- 7. Các hàm điều khiển Âm nhạc cơ bản ---
+    function playMusic() {
+        isUserPaused = false;
+        if (activeCustomAudioUrl && localAudio) {
+            localAudio.play().then(() => updateUIState(true)).catch(() => {});
+            return;
+        }
+
+        if (ytPlayer && isPlayerReady && typeof ytPlayer.playVideo === 'function') {
+            ytPlayer.playVideo();
+            updateUIState(true);
+        } else {
+            isPlaying = true;
+            updateUIState(true);
+        }
+    }
+
+    function pauseMusic() {
+        isUserPaused = true;
+        if (ytPlayer && isPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
+            ytPlayer.pauseVideo();
+        }
+        if (localAudio) {
+            localAudio.pause();
+        }
+        updateUIState(false);
+    }
+
+    function toggleMusic() {
+        if (toggleLock) return;
+        toggleLock = true;
+        setTimeout(() => { toggleLock = false; }, 300);
+
+        if (isPlaying) {
+            pauseMusic();
+        } else {
+            playMusic();
+        }
+    }
+
+    function setMusicVolume(val) {
+        if (ytPlayer && isPlayerReady && typeof ytPlayer.setVolume === 'function') {
+            ytPlayer.setVolume(val);
+        }
+        if (localAudio) {
+            localAudio.volume = val / 100;
+        }
+    }
+
+    // Cập nhật giao diện khi trạng thái phát/dừng thay đổi
+    function updateUIState(playing) {
+        isPlaying = playing;
+        const disc = document.getElementById('vinyl-disc');
+        const minDisc = document.getElementById('music-min-disc');
+        const eqBars = document.getElementById('equalizer-bars');
+        const playIcon = document.getElementById('play-pause-icon');
+        const playText = document.getElementById('play-pause-text');
+
+        if (playing) {
+            if (disc) disc.style.animationPlayState = 'running';
+            if (minDisc) minDisc.style.animation = 'spinVinyl 3.5s linear infinite';
+            if (eqBars) eqBars.style.display = 'flex';
+            if (playIcon) playIcon.innerText = '❚❚';
+            if (playText) playText.innerText = 'Tạm dừng';
+        } else {
+            if (disc) disc.style.animationPlayState = 'paused';
+            if (minDisc) minDisc.style.animation = 'none';
+            if (eqBars) eqBars.style.display = 'none';
+            if (playIcon) playIcon.innerText = '▶';
+            if (playText) playText.innerText = 'Phát';
+        }
+    }
+
+    // Khởi tạo
+    function init() {
+        createPlayerUI();
+        loadYouTubeAPI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();

@@ -1,0 +1,12 @@
+Q: Chào Mario, bạn đang làm gì đấy?
+Q: Bạn có phải là Super Mario không?
+A: Yahoo! Đúng rồi, tôi là Super Mario từ Vương quốc Nấm đây! Bạn đang muốn tìm hiểu về điều gì nào?
+---
+Q: Làm thế nào để điều khiển bạn trong game?
+Q: Bạn có sợ quái vật Goomba không?
+Q: Làm sao để giải cứu công chúa Peach?
+A: Dễ lắm nha! Dùng phím A/D hoặc Mũi tên để chạy, phím Space hoặc W để nhảy lên cao! Còn quái Goomba thì chỉ cần giẫm bẹp lên đầu nó là xong!
+---
+Q: Bí quyết để đạt điểm thật cao là gì?
+Q: Hãy kể cho tôi nghe về vương quốc Nấm đi!
+A: Hãy nhảy đập đầu vào các khối hộp màu vàng [?] để nhặt thật nhiều đồng xu vàng và chạm đỉnh cột cờ ở cuối màn chơi nhé! Chúc bạn chơi vui vẻ!

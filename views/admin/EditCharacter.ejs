@@ -1,0 +1,214 @@
+<%- include('../partials/header') %>
+
+<div class="main-container" style="max-width: 950px; margin: 25px auto 40px auto; padding: 0 15px; position: relative; z-index: 5;">
+
+    <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 18px 24px; border-radius: 18px; border: 2px solid #fbcfe8; box-shadow: 0 4px 16px rgba(244, 114, 182, 0.12); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 30px; line-height: 1;">✏️</span>
+            <div>
+                <h1 style="font-size: 20px; margin: 0; color: #1e293b; font-weight: 800;">Chỉnh sửa nhân vật: <%= character.name %></h1>
+                <p style="font-size: 13px; margin: 0; color: #64748b;">Cập nhật thông tin, icon, avatar studio và thay đổi file kịch bản.</p>
+            </div>
+        </div>
+        <a href="/admin" style="padding: 8px 16px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px;">
+            ← Quay lại Admin
+        </a>
+    </div>
+
+    <div class="admin-card" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 24px;">
+        
+        <form action="/admin/character/update/<%= character._id %>" method="POST" enctype="multipart/form-data">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 20px;">
+                <!-- Tên nhân vật -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Tên nhân vật (*):</label>
+                    <input type="text" name="name" value="<%= character.name %>" class="form-control" required
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+
+                <!-- Mô tả ngắn -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Mô tả ngắn:</label>
+                    <input type="text" name="description" value="<%= character.description || '' %>" class="form-control"
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+            </div>
+
+            <!-- Icon & AVATAR STUDIO -->
+            <div style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; background: #fdfbf7; padding: 20px; border-radius: 16px; border: 1px solid #fbcfe8; margin-bottom: 22px;">
+                
+                <!-- Icon Custom -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
+                        🎨 Icon đại diện tin nhắn (Custom Emoji):
+                    </label>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <div id="icon-display-large" style="width: 54px; height: 54px; border-radius: 14px; background: #ffffff; border: 2px solid #f472b6; box-shadow: 0 3px 0 #db2777; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
+                            <%= character.icon || '🍄' %>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="text" id="iconInput" name="icon" value="<%= character.icon || '🍄' %>" placeholder="Gõ emoji bất kỳ..."
+                                style="width: 100%; padding: 8px 12px; font-size: 18px; border: 2px solid #fbcfe8; border-radius: 8px; outline: none; background: #fff;"
+                                onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
+                            <span style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">* Gõ hoặc dán emoji tùy ý</span>
+                        </div>
+                    </div>
+
+                    <div class="common-icon-picker" style="display: flex; gap: 6px; background: #ffffff; padding: 10px; border: 1px dashed #f59e0b; border-radius: 10px; flex-wrap: wrap;">
+                        <% const commonIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥']; %>
+                        <% commonIcons.forEach(function(iconEmoji) { %>
+                            <button type="button" onclick="selectCommonIcon('<%= iconEmoji %>')" 
+                                    style="font-size: 18px; cursor: pointer; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                <%= iconEmoji %>
+                            </button>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <!-- AVATAR STUDIO CHUYÊN NGHIỆP -->
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
+                        🖼️ Ảnh đại diện (Avatar Studio - Xem trước & Thay đổi):
+                    </label>
+
+                    <div style="background: #ffffff; padding: 16px; border-radius: 14px; border: 2px solid #fbcfe8; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            
+                            <!-- VÒNG TRÒN PREVIEW AVATAR LỚN -->
+                            <div id="avatar-circle-preview" title="Bấm vào đây để chọn ảnh hoặc kéo thả ảnh vào" 
+                                style="width: 88px; height: 88px; border-radius: 50%; border: 3px solid #f472b6; box-shadow: 0 4px 14px rgba(244, 114, 182, 0.25); background: #fdf2f8; position: relative; overflow: hidden; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                                
+                                <% if (character.avatarUrl && !character.avatarUrl.includes('NaN')) { %>
+                                    <img id="avatar-preview-img" src="<%= character.avatarUrl %>" alt="Avatar" style="display: block; width: 100%; height: 100%; object-fit: cover;">
+                                    <div id="avatar-placeholder-icon" style="display: none; font-size: 38px; user-select: none;">
+                                        <%= character.icon || '🍄' %>
+                                    </div>
+                                <% } else { %>
+                                    <img id="avatar-preview-img" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                                    <div id="avatar-placeholder-icon" style="display: flex; font-size: 38px; user-select: none;">
+                                        <%= character.icon || '🍄' %>
+                                    </div>
+                                <% } %>
+
+                                <div class="avatar-hover-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.45); color: #fff; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;"
+                                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                    <span style="font-size: 18px;">📷</span>
+                                    <span>Đổi ảnh</span>
+                                </div>
+                            </div>
+
+                            <!-- THAO TÁC -->
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                                    <button type="button" onclick="document.getElementById('avatar-input').click()" 
+                                        style="background: #fdf2f8; color: #db2777; border: 1.5px solid #fbcfe8; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                        <span>📁</span> Tải ảnh mới từ máy
+                                    </button>
+                                    
+                                    <button type="button" id="btn-remove-avatar" style="<%= (character.avatarUrl && !character.avatarUrl.includes('NaN')) ? 'display: inline-block;' : 'display: none;' %> background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
+                                        ✕ Gỡ ảnh
+                                    </button>
+                                </div>
+
+                                <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display: none;">
+                                <input type="hidden" id="avatar-url-input" name="avatarUrl" value="<%= (character.avatarUrl && !character.avatarUrl.includes('NaN')) ? character.avatarUrl : '' %>">
+
+                                <div id="avatar-info-text" style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                                    <%= (character.avatarUrl && !character.avatarUrl.includes('NaN')) ? 'Ảnh đại diện đang được lưu' : 'Bấm vào vòng tròn hoặc kéo thả file ảnh vào' %>
+                                </div>
+
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <input type="text" id="avatar-url-field" placeholder="Hoặc dán link ảnh online (https://...)" 
+                                        value="<%= (character.avatarUrl && character.avatarUrl.startsWith('http')) ? character.avatarUrl : '' %>"
+                                        style="width: 100%; padding: 6px 10px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #f8fafc;">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- BỘ ẢNH MẪU -->
+                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #fbcfe8;">
+                            <div style="font-size: 11px; font-weight: 700; color: #db2777; margin-bottom: 6px;">
+                                ⭐ Chọn nhanh Avatar mẫu:
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png', 'Pokeball Retro')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" style="width: 20px; height: 20px;"> Pokeball
+                                </button>
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png', 'Bình năng lượng')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png" style="width: 20px; height: 20px;"> Bình thuốc
+                                </button>
+                                <button type="button" onclick="selectPresetAvatar('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png', 'Masterball')"
+                                    style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px; background: #fdf2f8; border: 1px solid #fbcfe8; cursor: pointer; font-size: 11px; font-weight: 600; color: #db2777;">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" style="width: 20px; height: 20px;"> Master Ball
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Thay thế file kịch bản mới -->
+            <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #fbcfe8; margin-bottom: 22px;">
+                <label style="font-size: 14px; font-weight: 700; color: #db2777; display: block; margin-bottom: 6px;">
+                    📜 Tải lên file kịch bản (.txt) mới (nếu muốn thay thế kịch bản cũ):
+                </label>
+                <input type="file" id="script-input" name="scriptFile" accept=".txt"
+                    style="width: 100%; padding: 10px 14px; border: 2px dashed #f472b6; border-radius: 10px; background: #fdf2f8; cursor: pointer; font-size: 13px;">
+
+                <div id="script-preview-wrapper" style="display: none; margin-top: 15px; border-top: 1px dashed #fbcfe8; padding-top: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                        <div id="script-preview-stats" style="font-size: 13px; color: #1e293b;"></div>
+                        <button type="button" id="btn-toggle-raw-script" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                            📝 Xem text gốc
+                        </button>
+                    </div>
+                    <div id="script-preview-content" style="max-height: 200px; overflow-y: auto; background: #fdfbf7; border: 1px solid #fbcfe8; border-radius: 10px; padding: 12px;"></div>
+                    <textarea id="script-raw-content" readonly style="display: none; width: 100%; height: 160px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #334155; resize: vertical;"></textarea>
+                </div>
+            </div>
+
+            <!-- Cập nhật Âm thanh / Giọng nói của nhân vật -->
+            <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #e2e8f0; margin-bottom: 22px;">
+                <label style="font-size: 14px; font-weight: 700; color: #db2777; display: block; margin-bottom: 8px;">
+                    🎵 Âm thanh / Giọng nói nhân vật (Voice Intro):
+                </label>
+
+                <% if (character.audioUrl) { %>
+                    <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <span style="font-size: 12px; font-weight: 700; color: #15803d; display: flex; align-items: center; gap: 4px;">
+                            <span>▶️</span> File âm thanh hiện tại:
+                        </span>
+                        <audio controls style="height: 32px; max-width: 280px;" src="<%= character.audioUrl %>"></audio>
+                    </div>
+                <% } %>
+
+                <input type="file" id="audio-input" name="nodeAudio_0" accept="audio/*"
+                    style="width: 100%; padding: 8px 12px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px;">
+
+                <div id="audio-preview-wrapper" style="display: none; margin-top: 10px; background: #fdfbf7; padding: 10px 14px; border-radius: 10px; border: 1px solid #fbcfe8;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 12px; font-weight: 700; color: #15803d;">▶ Nghe thử file âm thanh mới:</span>
+                        <span id="audio-file-name" style="font-size: 12px; color: #64748b;"></span>
+                    </div>
+                    <audio id="audio-preview-player" controls style="width: 100%; height: 36px;"></audio>
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 14px; background: #2563eb; color: #ffffff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                💾 Cập nhật thông tin nhân vật
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script src="/javascripts/admin.js"></script>
+<%- include('../partials/footer') %>

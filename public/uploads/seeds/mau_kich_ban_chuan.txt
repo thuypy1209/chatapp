@@ -1,0 +1,12 @@
+Q: Xin chào, tôi cần tư vấn về dịch vụ
+Q: Cho tôi hỏi về thông tin công ty
+A: Dạ xin chào bạn! Rất vui được hỗ trợ bạn hôm nay. Bạn đang quan tâm đến nội dung nào dưới đây ạ?
+---
+Q: Giá gói dịch vụ bên mình là bao nhiêu?
+Q: Quy trình đăng ký sử dụng như thế nào?
+Q: Có chương trình khuyến mãi nào không?
+A: Dạ, bên mình đang có chương trình trải nghiệm miễn phí 14 ngày kèm ưu đãi giảm 20% cho gói năm. Bạn muốn xem chi tiết báo giá hay hướng dẫn kích hoạt tài khoản?
+---
+Q: Hướng dẫn tôi cách kích hoạt tài khoản
+Q: Cho tôi xin số điện thoại tổng đài hỗ trợ
+A: Bạn chỉ cần đăng ký bằng email tại trang chủ, hệ thống sẽ kích hoạt tự động. Hoặc liên hệ hotline 1900-xxxx để được chuyên viên hỗ trợ 24/7 nhé! Cảm ơn bạn!

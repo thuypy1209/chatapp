@@ -1,0 +1,14 @@
+Q: Bắt đầu trò chuyện
+A: Chào bạn! Máy tính của bạn đang gặp hiện tượng gì?
+---
+Q: Máy bị lỗi màn hình xanh (BSOD).
+Q: Máy bị khởi động lại liên tục.
+A: Rất có thể do xung đột driver hoặc phần cứng. Bạn có nhớ mã lỗi hiển thị không?
+---
+Q: Nó hiện mã CRITICAL_PROCESS_DIED.
+Q: Không hiện mã lỗi gì cả.
+A: Mã CRITICAL_PROCESS_DIED cho biết một tiến trình hệ thống quan trọng đã dừng đột ngột. Bạn muốn thử cách nào?
+---
+Q: Hướng dẫn gỡ driver mới cập nhật.
+Q: Hướng dẫn quét kiểm tra RAM và Ổ cứng.
+A: Bạn hãy khởi động lại máy vào chế độ Safe Mode, sau đó mở Device Manager để Roll Back Driver hoặc gỡ phần mềm vừa cài nhé!

@@ -1,0 +1,17 @@
+Q: Xin chào! Cuối tuần này mình muốn đi du lịch miền Bắc.
+Q: Cho mình xin tư vấn địa điểm du lịch miền Trung nắng vàng biển xanh.
+Q: Mình muốn tìm chuyến đi nghỉ dưỡng ngắm cảnh miền Tây sông nước.
+A: Chào bạn! Rất tuyệt vời khi bạn đang lên kế hoạch cho một chuyến đi. Bạn thích trải nghiệm núi cao mờ sương, bãi biển trong xanh hay vẻ đẹp êm đềm vùng sông nước?
+---
+Q: Tầm này đi Sa Pa hay Mộc Châu thì đẹp hơn bạn nhỉ?
+Q: Mình muốn săn mây và check-in các quán cà phê view đẹp.
+Q: Chi phí cho chuyến đi 2 ngày 1 đêm khoảng bao nhiêu?
+A: Thời điểm này Sa Pa rất thích hợp để săn mây trên đỉnh Fansipan và check-in bản Cát Cát. Còn Mộc Châu lại nổi tiếng với những đồi trà xanh mướt và không khí cực kỳ trong lành!
+---
+Q: Cảm ơn thông tin của bạn, mình sẽ chọn Sa Pa!
+Q: Cho mình hỏi thêm về thời tiết và trang phục cần chuẩn bị?
+A: Thời tiết Sa Pa về đêm và sáng sớm khá lạnh, ban ngày có nắng nhẹ. Bạn nhớ mang theo áo khoác ấm, giày thể thao êm chân và ô/dù nhỏ nhé!
+---
+Q: Cảm ơn bạn rất nhiều, tư vấn rất chi tiết!
+Q: Chúc bạn một ngày tốt lành!
+A: Cảm ơn bạn! Chúc bạn có một chuyến đi thật nhiều trải nghiệm thú vị và chụp được nhiều ảnh đẹp nhé!

@@ -1,0 +1,29 @@
+<%- include('../partials/header') %>
+    <div class="main-container" style="text-align: center;">
+        <h1>Chọn nhân vật bạn muốn trò chuyện</h1>
+        <p style="color: #666; margin-bottom: 25px;">Hihi.....</p>
+        <div class="character-grid">
+            <% if (characters && characters.length > 0) { %>
+                <% characters.forEach(function(c) { %>
+                    <div class="character-item">
+                        <a href="/chat/<%= c._id %>" class="char-card-round">
+                            <img src="<%= c.avatarUrl || '/images/default-avatar.png' %>" 
+                                 alt="<%= c.name %>" 
+                                 class="char-avatar-img"
+                                 onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                            <div class="char-overlay">
+                                <span class="char-title"><%= c.name %></span>
+                            </div>
+                        </a>
+                        <a href="/chat/<%= c._id %>" class="btn-chat-round">Trò chuyện ngay</a>
+
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p style="grid-column: span 2; text-align: center; color: #666; width: 100%;">
+                    Chưa có nhân vật nào được tạo. Vui lòng vào <a href="/admin">Trang Quản trị</a> để thêm nhân vật và kịch bản.
+                </p>
+            <% } %>
+        </div>
+    </div>
+<%- include('../partials/footer') %>
