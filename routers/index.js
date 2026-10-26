@@ -6,22 +6,25 @@ var Question = require('../schemas/Question');
 /* GET home page. */
 router.get('/', async function(req, res, next) {
     try {
+        var allCharacters = await Character.find({});
         var defaultCharacter = await Character.findOne({ isDefault: true });
 
         if (!defaultCharacter) {
-            defaultCharacter = await Character.findOne({});
+            defaultCharacter = allCharacters.length > 0 ? allCharacters[0] : null;
         }
 
         // Render giao diện trang chủ / chào mừng (ví dụ file views/*/*.ejs)
         res.render('page/home', { 
             title: 'Phổi bạn không phải tôi',
-            defaultCharacter: defaultCharacter 
+            defaultCharacter: defaultCharacter,
+            allCharacters: allCharacters
         });
     } catch (err) {
         console.log("Lỗi trang chủ:", err);
-        res.render('user/Home', { 
+        res.render('page/home', { 
             title: 'Trang Chủ',
-            defaultCharacter: null 
+            defaultCharacter: null,
+            allCharacters: []
         });
     }
 });
