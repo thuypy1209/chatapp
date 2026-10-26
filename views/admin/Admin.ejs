@@ -70,7 +70,7 @@
             </div>
 
             <!-- Phần 2: Icon Custom & KHU VỰC AVATAR STUDIO -->
-            <div style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; background: #fdfbf7; padding: 20px; border-radius: 16px; border: 1px solid #fbcfe8; margin-bottom: 22px;">
+            <div class="admin-studio-grid" style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; background: #fdfbf7; padding: 20px; border-radius: 16px; border: 1px solid #fbcfe8; margin-bottom: 22px;">
                 
                 <!-- CỘT 1: TÙY CHỌN ICON ĐẠI DIỆN TIN NHẮN (CUSTOM) -->
                 <div>
@@ -352,7 +352,7 @@
             <h3 style="font-size: 14px; font-weight: 800; color: #15803d; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
                 ➕ Thêm phiên bản YouTube mới
             </h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+            <div class="admin-music-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Tiêu đề bài hát:</label>
                     <input type="text" id="new-music-title" placeholder="VD: Graduation (Lo-Fi Remix)" style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
@@ -362,7 +362,7 @@
                     <input type="text" id="new-music-url" placeholder="VD: https://www.youtube.com/watch?v=... hoặc https://youtu.be/..." style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px; margin-bottom: 10px;">
+            <div class="admin-music-grid-3" style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Tên nghệ sĩ / Nguồn:</label>
                     <input type="text" id="new-music-artist" placeholder="VD: Lo-Fi Chill • Không bản quyền" style="width: 100%; padding: 8px 12px; border: 1.5px solid #86efac; border-radius: 8px; font-size: 13px; outline: none;" onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#86efac'">
@@ -486,7 +486,7 @@
                         </div>
 
                         <!-- Các nút thao tác -->
-                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; white-space: nowrap;">
+                        <div class="character-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; white-space: nowrap;">
                             <!-- Nút chat thử -->
                             <a href="/chat/<%= c._id %>" style="padding: 6px 12px; background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 4px;">
                                 💬 Chat thử

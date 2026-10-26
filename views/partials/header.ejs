@@ -24,7 +24,7 @@
             <!-- Thông tin người dùng / Nút đổi tên -->
             <% if (typeof currentUser !== 'undefined' && currentUser) { %>
                 <li>
-                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <div class="user-badge" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                         <span style="font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 4px;">
                             <%= (typeof isAdmin !== 'undefined' && isAdmin) ? '⭐' : '👤' %> 
                             <span id="nav-username-display"><%= currentUser %></span>
@@ -36,7 +36,7 @@
                 </li>
             <% } else { %>
                 <li>
-                    <button type="button" onclick="openWelcomeNameModal()" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); color: #831843; padding: 7px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <button type="button" class="btn-user-name" onclick="openWelcomeNameModal()" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); color: #831843; padding: 7px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                         👋 Nhập tên bạn
                     </button>
                 </li>

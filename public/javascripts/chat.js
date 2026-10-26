@@ -438,10 +438,16 @@
             sidePanel.style.display = 'block';
             sidePanel.style.alignSelf = 'start'; // Khớp chiều cao thực tế, không bị giãn 82vh
             if (chatLayoutWrapper) {
+                chatLayoutWrapper.classList.add('has-mario-side');
                 chatLayoutWrapper.style.maxWidth = '1300px';
                 chatLayoutWrapper.style.display = 'grid';
-                chatLayoutWrapper.style.gridTemplateColumns = 'minmax(0, 1.25fr) minmax(380px, 1fr)';
-                chatLayoutWrapper.style.gap = '20px';
+                if (window.innerWidth < 900) {
+                    chatLayoutWrapper.style.gridTemplateColumns = '1fr';
+                    chatLayoutWrapper.style.gap = '14px';
+                } else {
+                    chatLayoutWrapper.style.gridTemplateColumns = 'minmax(0, 1.25fr) minmax(380px, 1fr)';
+                    chatLayoutWrapper.style.gap = '20px';
+                }
                 chatLayoutWrapper.style.alignItems = 'start'; // Không kéo giãn khoảng đen bên dưới
             }
             if (btnToggle) {
@@ -482,8 +488,10 @@
         } else {
             sidePanel.style.display = 'none';
             if (chatLayoutWrapper) {
+                chatLayoutWrapper.classList.remove('has-mario-side');
                 chatLayoutWrapper.style.maxWidth = '680px';
                 chatLayoutWrapper.style.display = 'block';
+                chatLayoutWrapper.style.gridTemplateColumns = '';
             }
             if (btnToggle) {
                 btnToggle.innerHTML = '🎮 Bật Mario Game';
