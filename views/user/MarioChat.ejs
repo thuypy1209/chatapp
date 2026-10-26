@@ -63,20 +63,36 @@
 
                 <!-- Canvas Game Mario -->
                 <canvas id="mario-canvas" style="display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #5c94fc; cursor: pointer; outline: none;" tabindex="0"></canvas>
+
+                <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
+                <div class="mario-touch-hud" style="display: none; position: absolute; bottom: 12px; left: 14px; right: 14px; justify-content: space-between; align-items: flex-end; pointer-events: none; z-index: 50;">
+                    <div style="display: flex; gap: 10px; pointer-events: auto;">
+                        <button type="button" id="hud-vkey-left" class="hud-key" style="width: 58px; height: 50px; border-radius: 14px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.45); color: #ffffff; font-size: 22px; font-weight: bold; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">◀</button>
+                        <button type="button" id="hud-vkey-right" class="hud-key" style="width: 58px; height: 50px; border-radius: 14px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.45); color: #ffffff; font-size: 22px; font-weight: bold; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</button>
+                    </div>
+                    <div style="pointer-events: auto;">
+                        <button type="button" id="hud-vkey-jump" class="hud-key" style="min-width: 86px; height: 50px; padding: 0 18px; border-radius: 14px; background: rgba(234, 88, 12, 0.88); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.6); color: #ffffff; font-size: 15px; font-weight: 800; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);">▲ NHẢY</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Bàn phím điều khiển ảo (Hỗ trợ chuột & di động) -->
-            <div class="controls-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 14px 18px; border-radius: 16px; border: 2px solid #fbcfe8; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
-                <div class="controls-guide-text" style="font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px;">
-                    <span style="font-weight: 700; color: #db2777;">🎮 Phím chơi:</span>
-                    <span>Di chuyển: <b>A/D</b> hoặc <b>← →</b> | Nhảy: <b>Phím Cách</b> hoặc <b>W/↑</b> | Chạy nhanh: <b>Shift</b></span>
+            <!-- Bàn phím điều khiển ảo (Gamepad 2 tay cho Di động & Máy tính) -->
+            <div class="controls-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 12px 18px; border-radius: 16px; border: 2px solid #fbcfe8; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+                <!-- Cụm tay trái (D-Pad di chuyển) -->
+                <div class="gamepad-dpad-left" style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="virtual-key" id="vkey-left" title="Chạy sang trái (A / ←)" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 56px; height: 48px; border-radius: 12px; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #94a3b8;">◀</button>
+                    <button type="button" class="virtual-key" id="vkey-right" title="Chạy sang phải (D / →)" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 56px; height: 48px; border-radius: 12px; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #94a3b8;">▶</button>
                 </div>
 
-                <!-- Nút bấm ảo -->
-                <div class="virtual-keys-group" style="display: flex; gap: 8px;">
-                    <button type="button" class="virtual-key" id="vkey-left" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 42px; height: 38px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">◀</button>
-                    <button type="button" class="virtual-key" id="vkey-right" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 42px; height: 38px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">▶</button>
-                    <button type="button" class="virtual-key" id="vkey-jump" style="background: #fed7aa; border: 2px solid #fb923c; color: #c2410c; padding: 0 16px; height: 38px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer;">▲ Nhảy (Space)</button>
+                <!-- Hướng dẫn điều khiển -->
+                <div class="controls-guide-text" style="font-size: 12px; color: #64748b; text-align: center; flex: 1; min-width: 160px; line-height: 1.4;">
+                    <span style="font-weight: 700; color: #db2777;">📱 Chơi trên điện thoại:</span> 
+                    <span>Ngón trái bấm <b>◀ ▶</b> | Ngón phải bấm <b>▲ Nhảy</b> (hoặc chạm trực tiếp lên màn hình game)</span>
+                </div>
+
+                <!-- Cụm tay phải (Nút Nhảy Action) -->
+                <div class="gamepad-action-right" style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" title="Nhảy lên (Space / W)" style="background: #fed7aa; border: 2px solid #fb923c; color: #c2410c; padding: 0 20px; height: 48px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 0 #ea580c;">▲ Nhảy (Space)</button>
                 </div>
             </div>
         </div>
@@ -272,7 +288,7 @@ function initMarioApp() {
         });
     }
 
-    // 5. Bàn phím ảo trên giao diện
+    // 5. Bàn phím ảo trên giao diện & Touch Control cho điện thoại
     function setupVirtualKey(id, keyName, keyCode) {
         var el = document.getElementById(id);
         if (!el || !game) return;
@@ -294,11 +310,77 @@ function initMarioApp() {
         el.addEventListener('mouseleave', triggerUp);
         el.addEventListener('touchstart', triggerDown, { passive: false });
         el.addEventListener('touchend', triggerUp, { passive: false });
+        el.addEventListener('touchcancel', triggerUp, { passive: false });
     }
 
+    // Gán phím D-pad thanh điều khiển
     setupVirtualKey('vkey-left', 'ArrowLeft', 'ArrowLeft');
     setupVirtualKey('vkey-right', 'ArrowRight', 'ArrowRight');
     setupVirtualKey('vkey-jump', ' ', 'Space');
+
+    // Gán phím ảo nổi khi chơi Fullscreen
+    setupVirtualKey('hud-vkey-left', 'ArrowLeft', 'ArrowLeft');
+    setupVirtualKey('hud-vkey-right', 'ArrowRight', 'ArrowRight');
+    setupVirtualKey('hud-vkey-jump', ' ', 'Space');
+
+    // Hỗ trợ chạm trực tiếp lên màn hình Game (Touch on Canvas)
+    var mCanvas = document.getElementById('mario-canvas');
+    if (mCanvas) {
+        var handleCanvasTouch = function(e) {
+            if (!game) return;
+            e.preventDefault();
+            if (window.MarioAudio) window.MarioAudio.init();
+            if (game.gameState === 'READY') game.gameState = 'PLAYING';
+
+            var rect = mCanvas.getBoundingClientRect();
+            var moveLeft = false;
+            var moveRight = false;
+            var shouldJump = false;
+
+            for (var i = 0; i < e.touches.length; i++) {
+                var touch = e.touches[i];
+                var touchX = (touch.clientX - rect.left) / rect.width;
+                var touchY = (touch.clientY - rect.top) / rect.height;
+
+                if (touchY < 0.35) {
+                    // Chạm nửa trên màn hình = Nhảy
+                    shouldJump = true;
+                } else if (touchX < 0.45) {
+                    // Chạm nửa trái màn hình = Chạy sang trái
+                    moveLeft = true;
+                } else if (touchX > 0.55) {
+                    // Chạm nửa phải màn hình = Chạy sang phải
+                    moveRight = true;
+                } else {
+                    // Chạm giữa = Nhảy
+                    shouldJump = true;
+                }
+            }
+
+            game.keys['ArrowLeft'] = moveLeft;
+            game.keys['ArrowRight'] = moveRight;
+            game.keys[' '] = shouldJump;
+            game.keys['Space'] = shouldJump;
+        };
+
+        var handleCanvasTouchEnd = function(e) {
+            if (!game) return;
+            e.preventDefault();
+            if (e.touches.length === 0) {
+                game.keys['ArrowLeft'] = false;
+                game.keys['ArrowRight'] = false;
+                game.keys[' '] = false;
+                game.keys['Space'] = false;
+            } else {
+                handleCanvasTouch(e);
+            }
+        };
+
+        mCanvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
+        mCanvas.addEventListener('touchmove', handleCanvasTouch, { passive: false });
+        mCanvas.addEventListener('touchend', handleCanvasTouchEnd, { passive: false });
+        mCanvas.addEventListener('touchcancel', handleCanvasTouchEnd, { passive: false });
+    }
 
     // 6. Cầu nối Game sang Khung Chat (Event Reaction)
     window.marioChatBridge = function(type, message) {

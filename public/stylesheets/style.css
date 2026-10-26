@@ -1180,3 +1180,37 @@ h1 {
         margin-bottom: 20px !important;
     }
 }
+
+/* HUD phím ảo cảm ứng nổi trong chế độ Fullscreen */
+#mario-game-container:fullscreen .mario-touch-hud,
+#mario-game-container:-webkit-full-screen .mario-touch-hud,
+.is-mario-fullscreen .mario-touch-hud {
+    display: flex !important;
+}
+
+.hud-key:active {
+    transform: scale(0.92);
+    filter: brightness(1.25);
+}
+
+@media (max-width: 640px) {
+    .controls-card {
+        padding: 10px 12px !important;
+        gap: 8px !important;
+    }
+    .controls-guide-text {
+        order: -1;
+        width: 100% !important;
+        margin-bottom: 2px !important;
+    }
+    .gamepad-dpad-left button {
+        width: 58px !important;
+        height: 50px !important;
+        font-size: 22px !important;
+    }
+    .gamepad-action-right button {
+        height: 50px !important;
+        font-size: 15px !important;
+        padding: 0 20px !important;
+    }
+}
