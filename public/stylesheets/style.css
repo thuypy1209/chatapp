@@ -1166,3 +1166,17 @@ h1 {
         padding: 0 14px !important;
     }
 }
+
+/* Card nhân vật mặc định do Admin chọn trên Trang Chủ */
+.hero-character-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 36px rgba(244, 114, 182, 0.24) !important;
+}
+
+@media (max-width: 640px) {
+    .hero-character-card {
+        padding: 22px 16px !important;
+        border-radius: 20px !important;
+        margin-bottom: 20px !important;
+    }
+}

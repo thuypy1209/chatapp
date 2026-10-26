@@ -5,19 +5,21 @@
 
 <div class="chat-outer-wrapper" style="max-width: 1200px; margin: 20px auto 40px auto; padding: 0 15px; position: relative; z-index: 5;">
 
-    <!-- THANH CHỌN NHÂN VẬT ĐỂ TRÒ CHUYỆN (CHARACTER SWITCHER) -->
-    <div class="char-switcher-bar" style="max-width: 680px; margin: 0 auto 12px auto; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
-        <span style="font-size: 12px; font-weight: 700; color: #831843; white-space: nowrap; margin-right: 2px;">👥 Chọn nhân vật:</span>
-        <% if (typeof allCharacters !== 'undefined' && allCharacters && allCharacters.length > 0) { %>
-            <% allCharacters.forEach(function(charItem) { %>
-                <% var isCurrent = character && character._id.toString() === charItem._id.toString(); %>
-                <a href="/chat/<%= charItem._id %>" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: all 0.15s ease; border: 1.5px solid <%= isCurrent ? '#db2777' : 'rgba(251, 207, 232, 0.8)' %>; background: <%= isCurrent ? '#db2777' : 'rgba(255, 255, 255, 0.9)' %>; color: <%= isCurrent ? '#ffffff' : '#334155' %>; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                    <span style="font-size: 15px;"><%= charItem.icon || '🍄' %></span>
-                    <span><%= charItem.name %></span>
-                </a>
-            <% }); %>
-        <% } %>
-    </div>
+    <!-- THANH CHỌN NHÂN VẬT (CHỈ HIỂN THỊ KHI ADMIN ĐĂNG NHẬP ĐỂ TEST NHÂN VẬT) -->
+    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+        <div class="char-switcher-bar" style="max-width: 680px; margin: 0 auto 12px auto; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+            <span style="font-size: 12px; font-weight: 700; color: #831843; white-space: nowrap; margin-right: 2px;">⚙️ Admin test:</span>
+            <% if (typeof allCharacters !== 'undefined' && allCharacters && allCharacters.length > 0) { %>
+                <% allCharacters.forEach(function(charItem) { %>
+                    <% var isCurrent = character && character._id.toString() === charItem._id.toString(); %>
+                    <a href="/chat/<%= charItem._id %>" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: all 0.15s ease; border: 1.5px solid <%= isCurrent ? '#db2777' : 'rgba(251, 207, 232, 0.8)' %>; background: <%= isCurrent ? '#db2777' : 'rgba(255, 255, 255, 0.9)' %>; color: <%= isCurrent ? '#ffffff' : '#334155' %>; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <span style="font-size: 15px;"><%= charItem.icon || '🍄' %></span>
+                        <span><%= charItem.name %></span>
+                    </a>
+                <% }); %>
+            <% } %>
+        </div>
+    <% } %>
 
     <!-- VÙNG CHỨA BỐ CỤC CHAT (Có thể mở rộng khi bật Mario Game) -->
     <div id="chat-layout-wrapper" style="max-width: 680px; margin: 0 auto; transition: all 0.3s ease;">

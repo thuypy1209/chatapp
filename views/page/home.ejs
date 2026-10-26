@@ -1,54 +1,120 @@
 <%- include('../partials/header') %>
 
-<div class="container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65vh; text-align: center; padding: 20px 15px;">
-    <h1 style="margin-bottom: 12px; color: #1e293b; font-size: 32px; font-weight: 800; text-shadow: 2px 2px 0px #fbcfe8;">
+<div class="container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65vh; text-align: center; padding: 25px 15px; position: relative; z-index: 5;">
+    
+    <h1 style="margin-bottom: 10px; color: #1e293b; font-size: 32px; font-weight: 800; text-shadow: 2px 2px 0px #fbcfe8;">
         Chào mừng bạn đến với Phổi bạn không phải tôi
     </h1>
-    <p style="color: #64748b; margin-bottom: 25px; font-size: 16px; max-width: 550px;">
+    <p style="color: #64748b; margin-bottom: 26px; font-size: 16px; max-width: 550px; line-height: 1.5;">
         Nền tảng trò chuyện thông minh kết hợp giải trí game retro Super Mario độc đáo!
     </p>
 
-    <!-- Nút chơi Mario & Chat nhanh -->
-    <div style="margin-bottom: 28px;">
-        <a href="/mario" class="btn" style="background: #f59e0b; color: #fff; padding: 12px 28px; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #b45309; box-shadow: 3px 3px 0px #78350f; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s ease;">
-            <span style="font-size: 20px;">🎮</span> Chơi Super Mario & Chat (120 FPS)
-        </a>
-    </div>
+    <% if (defaultCharacter) { %>
+        <!-- THẺ NHÂN VẬT MẶC ĐỊNH ĐƯỢC ADMIN CHỌN -->
+        <div class="hero-character-card" style="width: 100%; max-width: 480px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; border: 3px solid #fbcfe8; padding: 30px 24px; box-shadow: 0 10px 30px rgba(244, 114, 182, 0.18); text-align: center; margin-bottom: 24px; transition: transform 0.2s ease;">
+            
+            <!-- Huy hiệu nhân vật đại diện do Admin chọn -->
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+                ⭐ Nhân vật đại diện
+            </div>
 
-    <!-- DANH SÁCH CÁC NHÂN VẬT ĐỂ BẮT ĐẦU TRÒ CHUYỆN -->
-    <div style="width: 100%; max-width: 780px; text-align: left; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; padding: 22px; box-shadow: 0 4px 16px rgba(244, 114, 182, 0.12);">
-        <h2 style="font-size: 16px; font-weight: 800; color: #db2777; margin: 0 0 14px 0; display: flex; align-items: center; gap: 6px;">
-            <span>👥</span> Chọn nhân vật để bắt đầu cuộc trò chuyện:
-        </h2>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
-            <% if (typeof allCharacters !== 'undefined' && allCharacters && allCharacters.length > 0) { %>
-                <% allCharacters.forEach(function(c) { %>
-                    <a href="/chat/<%= c._id %>" style="display: flex; flex-direction: column; text-decoration: none; background: #ffffff; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 14px; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.03);"
-                        onmouseover="this.style.borderColor='#db2777'; this.style.transform='translateY(-2px)';"
-                        onmouseout="this.style.borderColor='#fbcfe8'; this.style.transform='translateY(0)';"
-                    >
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                            <span style="font-size: 28px; line-height: 1;"><%= c.icon || '🍄' %></span>
-                            <div>
-                                <div style="font-size: 14px; font-weight: 700; color: #1e293b;"><%= c.name %></div>
-                                <% if (c.isDefault) { %>
-                                    <span style="font-size: 10px; background: #dcfce7; color: #166534; font-weight: 700; padding: 1px 6px; border-radius: 6px;">Mặc định</span>
-                                <% } %>
-                            </div>
-                        </div>
-                        <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0; line-height: 1.4; flex: 1;">
-                            <%= c.description || 'Nhân vật kịch bản tương tác đa tầng.' %>
-                        </p>
-                        <span style="font-size: 12px; font-weight: 700; color: #db2777; display: flex; align-items: center; gap: 4px;">
-                            Trò chuyện ngay ➜
-                        </span>
-                    </a>
-                <% }); %>
-            <% } else { %>
-                <p style="color: #64748b; font-size: 13px; margin: 0;">Chưa có nhân vật nào. Hãy vào <a href="/admin" style="color: #db2777; font-weight: bold;">Trang Quản trị</a> để thêm nhân vật!</p>
+            <!-- Avatar lớn của nhân vật mặc định -->
+            <div style="position: relative; width: 92px; height: 92px; margin: 0 auto 14px auto;">
+                <% if (defaultCharacter.avatarUrl && !defaultCharacter.avatarUrl.includes('NaN')) { %>
+                    <img src="<%= defaultCharacter.avatarUrl %>" alt="<%= defaultCharacter.name %>" 
+                        style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f472b6; box-shadow: 0 6px 18px rgba(244, 114, 182, 0.25);"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display: none; width: 100%; height: 100%; border-radius: 50%; background: #fdf2f8; border: 3px solid #f472b6; align-items: center; justify-content: center; font-size: 40px;">
+                        <%= defaultCharacter.icon || '🍄' %>
+                    </div>
+                <% } else { %>
+                    <div style="width: 100%; height: 100%; border-radius: 50%; background: #fdf2f8; border: 3px solid #f472b6; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 6px 18px rgba(244, 114, 182, 0.25);">
+                        <%= defaultCharacter.icon || '🍄' %>
+                    </div>
+                <% } %>
+                
+                <% if (defaultCharacter.icon) { %>
+                    <span style="position: absolute; bottom: -2px; right: -2px; font-size: 18px; background: #ffffff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #fbcfe8; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+                        <%= defaultCharacter.icon %>
+                    </span>
+                <% } %>
+            </div>
+
+            <!-- Tên & Mô tả nhân vật -->
+            <h2 style="font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">
+                <%= defaultCharacter.name %>
+            </h2>
+            <p style="font-size: 13px; color: #64748b; margin: 0 auto 18px auto; line-height: 1.5; max-width: 380px;">
+                <%= defaultCharacter.description || 'Nhân vật kịch bản trò chuyện thông minh đa tầng.' %>
+            </p>
+
+            <!-- Nút nghe giọng chào nếu có -->
+            <% if (defaultCharacter.audioUrl) { %>
+                <div style="margin-bottom: 18px;">
+                    <button type="button" onclick="playHeroAudio('<%= defaultCharacter.audioUrl %>', this)" 
+                        style="background: #fdf2f8; color: #db2777; border: 1.5px solid #fbcfe8; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(219,39,119,0.12); transition: all 0.15s ease;">
+                        <span class="audio-btn-icon">🎵</span> <span class="audio-btn-text">Nghe giọng chào</span>
+                    </button>
+                </div>
             <% } %>
+
+            <!-- Nút bấm trò chuyện ngay với nhân vật mặc định -->
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <a href="/chat/<%= defaultCharacter._id %>" class="btn btn-primary" 
+                    style="width: 100%; max-width: 360px; padding: 13px 22px; font-size: 16px; font-weight: 800; text-decoration: none; border-radius: 12px; background: #db2777; color: #ffffff; border: 2px solid #be185d; box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s ease;">
+                    <span style="font-size: 20px;">💬</span> Trò chuyện ngay với <%= defaultCharacter.name %>
+                </a>
+
+                <!-- Nút Vừa chơi Mario vừa Chat -->
+                <a href="/mario" class="btn" 
+                    style="width: 100%; max-width: 360px; background: #f59e0b; color: #fff; padding: 12px 22px; font-size: 15px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #b45309; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s ease;">
+                    <span style="font-size: 18px;">🎮</span> Chơi Super Mario & Chat (120 FPS)
+                </a>
+            </div>
+
         </div>
-    </div>
+    <% } else { %>
+        <!-- Nếu chưa có nhân vật nào trong hệ thống -->
+        <div style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; border: 2px dashed #fbcfe8; padding: 30px; max-width: 480px; margin-bottom: 24px;">
+            <div style="font-size: 38px; margin-bottom: 10px;">🍄</div>
+            <h2 style="font-size: 18px; color: #1e293b; margin: 0 0 8px 0; font-weight: 800;">Chưa cấu hình nhân vật mặc định</h2>
+            <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">Vui lòng truy cập trang Quản trị để thêm nhân vật và bấm "Đặt mặc định".</p>
+            <a href="/admin" style="background: #db2777; color: #fff; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 13px; display: inline-block;">
+                ⚙️ Đến trang Quản trị
+            </a>
+        </div>
+    <% } %>
+
 </div>
+
+<script>
+var currentHeroAudio = null;
+function playHeroAudio(url, btn) {
+    if (currentHeroAudio && !currentHeroAudio.paused) {
+        currentHeroAudio.pause();
+        currentHeroAudio.currentTime = 0;
+        var iconEl = btn.querySelector('.audio-btn-icon');
+        var textEl = btn.querySelector('.audio-btn-text');
+        if (iconEl) iconEl.innerText = '🎵';
+        if (textEl) textEl.innerText = 'Nghe giọng chào';
+        return;
+    }
+    if (!currentHeroAudio || currentHeroAudio.src !== url) {
+        currentHeroAudio = new Audio(url);
+    }
+    currentHeroAudio.play().then(function() {
+        var iconEl = btn.querySelector('.audio-btn-icon');
+        var textEl = btn.querySelector('.audio-btn-text');
+        if (iconEl) iconEl.innerText = '⏸';
+        if (textEl) textEl.innerText = 'Đang phát...';
+        currentHeroAudio.onended = function() {
+            if (iconEl) iconEl.innerText = '🎵';
+            if (textEl) textEl.innerText = 'Nghe giọng chào';
+        };
+    }).catch(function(e) {
+        console.log('Không thể phát âm thanh:', e);
+    });
+}
+</script>
+
 <%- include('../partials/footer') %>
