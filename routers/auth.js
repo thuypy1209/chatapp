@@ -1,13 +1,26 @@
 var express = require('express');
 var router = express.Router();
+var rateLimit = require('express-rate-limit');
 var User = require('../schemas/User');
 var authUtils = require('../utils/auth');
 
-// POST /auth/login: Xử lý nhập tên / đăng nhập
-router.post('/login', async function(req, res) {
+// Bảo mật chống Brute-Force: Giới hạn tối đa 20 lần thử đăng nhập trong 5 phút từ một địa chỉ IP
+var loginLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 phút
+    max: 20, // Tối đa 20 yêu cầu
+    message: {
+        success: false,
+        error: 'Phát hiện quá nhiều yêu cầu đăng nhập từ IP của bạn! Vui lòng đợi 5 phút trước khi thử lại để đảm bảo an toàn.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// POST /auth/login: Xử lý nhập tên / đăng nhập (Bảo vệ bởi loginLimiter)
+router.post('/login', loginLimiter, async function(req, res) {
     try {
-        var username = (req.body.username || '').trim();
-        var password = (req.body.password || '').trim();
+        var username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
+        var password = typeof req.body.password === 'string' ? req.body.password.trim() : '';
 
         if (!username) {
             return res.json({ success: false, error: 'Vui lòng nhập tên của bạn!' });

@@ -31,32 +31,48 @@ async function seedSuperAdmin() {
 }
 
 /**
- * Tạo token phiên quản trị có chữ ký số HMAC SHA-256 (tự chứa username)
+ * Tạo token phiên quản trị có chữ ký số HMAC SHA-256 kèm thời hạn hết hạn
+ * Payload: JSON { u: username, exp: timestamp }
+ * Mặc định hết hạn sau 7 ngày
  */
-function generateAdminToken(username) {
+function generateAdminToken(username, expiresInMs) {
     var cleanUser = (username || 'admin').trim().toLowerCase();
-    var b64User = Buffer.from(cleanUser).toString('base64');
-    var sig = crypto.createHmac('sha256', getSecret()).update(b64User).digest('hex');
-    return b64User + '.' + sig;
+    var exp = Date.now() + (expiresInMs || 7 * 24 * 60 * 60 * 1000);
+    var payload = JSON.stringify({ u: cleanUser, exp: exp });
+    var b64Payload = Buffer.from(payload).toString('base64');
+    var sig = crypto.createHmac('sha256', getSecret()).update(b64Payload).digest('hex');
+    return b64Payload + '.' + sig;
 }
 
 /**
- * Xác thực token phiên quản trị (Chống timing attack)
- * Trả về username nếu hợp lệ, ngược lại trả về false
+ * Xác thực token phiên quản trị:
+ * 1. Chống timing attack với crypto.timingSafeEqual
+ * 2. Tự động kiểm tra thời hạn hết hạn (exp)
+ * 3. Tương thích ngược với định dạng cũ nếu có
  */
 function verifyAdminToken(token) {
     if (!token || typeof token !== 'string' || !token.includes('.')) return false;
     var parts = token.split('.');
     if (parts.length !== 2) return false;
-    var b64User = parts[0];
+    var b64Payload = parts[0];
     var sig = parts[1];
-    var expectedSig = crypto.createHmac('sha256', getSecret()).update(b64User).digest('hex');
+    var expectedSig = crypto.createHmac('sha256', getSecret()).update(b64Payload).digest('hex');
     if (sig.length !== expectedSig.length) return false;
     try {
         var match = crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig));
         if (!match) return false;
-        var username = Buffer.from(b64User, 'base64').toString('utf8');
-        return username;
+        var decoded = Buffer.from(b64Payload, 'base64').toString('utf8');
+        // Kiểm tra nếu là payload JSON mới có exp
+        if (decoded.startsWith('{') && decoded.endsWith('}')) {
+            var data = JSON.parse(decoded);
+            if (data.exp && Date.now() > data.exp) {
+                // Token đã hết hạn!
+                return false;
+            }
+            return data.u || false;
+        }
+        // Tương thích ngược: Chuỗi b64User cũ
+        return decoded;
     } catch (e) {
         return false;
     }

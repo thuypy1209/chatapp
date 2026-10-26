@@ -15,8 +15,18 @@ var marioRouter = require('./routers/mario');
 var authRouter = require('./routers/auth');
 var authUtils = require('./utils/auth');
 var settingsUtils = require('./utils/settings');
+var helmet = require('helmet');
 
 var app = express();
+
+// Bật trust proxy để Express và express-rate-limit nhận diện đúng IP client khi chạy sau Render/Nginx
+app.set('trust proxy', 1);
+
+// Cấu hình HTTP Security Headers với Helmet (Chống Clickjacking, MIME-sniffing, XSS)
+app.use(helmet({
+    contentSecurityPolicy: false, // Để iframe YouTube, audio và script Mario chạy mượt mà
+    crossOriginEmbedderPolicy: false
+}));
 
 // Kết nối MongoDB qua biến môi trường MONGODB_URI (Bảo mật tuyệt đối, không lộ credentials)
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ChatApp';
