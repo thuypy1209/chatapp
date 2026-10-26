@@ -442,13 +442,13 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <% if (typeof characters !== 'undefined' && characters && characters.length > 0) { %>
                 <% characters.forEach(function(c) { %>
-                    <div class="character-item-card" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: all 0.15s ease; flex-wrap: wrap; gap: 12px;"
+                    <div class="character-item-card" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: all 0.15s ease; gap: 16px;"
                         onmouseover="this.style.borderColor='#fbcfe8'; this.style.boxShadow='0 4px 12px rgba(244,114,182,0.1)';"
                         onmouseout="this.style.borderColor='#f1f5f9'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.02)';">
                         
                         <!-- Avatar & Tên nhân vật -->
-                        <div style="display: flex; align-items: center; gap: 14px;">
-                            <div style="position: relative; width: 48px; height: 48px;">
+                        <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
+                            <div style="position: relative; width: 48px; height: 48px; flex-shrink: 0;">
                                 <% if (c.avatarUrl && !c.avatarUrl.includes('NaN')) { %>
                                     <img src="<%= c.avatarUrl %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #fbcfe8;" alt="<%= c.name %>"
                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -467,8 +467,8 @@
                                 <% } %>
                             </div>
 
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                     <strong style="font-size: 15px; color: #1e293b;"><%= c.name %></strong>
                                     <% if (c.isDefault) { %>
                                         <span style="background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid #86efac;">
@@ -481,12 +481,12 @@
                                         </button>
                                     <% } %>
                                 </div>
-                                <span style="color: #64748b; font-size: 13px;"><%= c.description || 'Không có mô tả' %></span>
+                                <p style="color: #64748b; font-size: 13px; margin: 3px 0 0 0; line-height: 1.4;"><%= c.description || 'Không có mô tả' %></p>
                             </div>
                         </div>
 
                         <!-- Các nút thao tác -->
-                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; white-space: nowrap;">
                             <!-- Nút chat thử -->
                             <a href="/chat/<%= c._id %>" style="padding: 6px 12px; background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 4px;">
                                 💬 Chat thử
