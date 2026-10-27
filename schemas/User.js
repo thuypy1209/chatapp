@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     },
     lastActive: {
         type: Date,
-        default: Date.now
+        default: null
     },
     lastPage: {
         type: String,

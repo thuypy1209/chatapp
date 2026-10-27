@@ -79,6 +79,24 @@ function requireSuperAdmin(req, res, next) {
     next();
 }
 
+function formatDateVN(date) {
+    if (!date) return '';
+    try {
+        return new Date(date).toLocaleString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour12: false
+        });
+    } catch(e) {
+        return '';
+    }
+}
+
 // 1. Hiển thị trang quản lý Admin (Bao gồm danh sách nhân vật và form thêm)
 router.get('/', async function(req, res) {
     try {
@@ -94,13 +112,14 @@ router.get('/', async function(req, res) {
             characters: characters,
             admins: admins,
             chatUsers: chatUsers,
+            formatDateVN: formatDateVN,
             currentAdmin: req.adminUser,
             currentAdminRole: req.adminObj ? req.adminObj.role : 'admin',
             isSuperAdmin: isSuperAdmin
         });
     } catch (err) {
         console.log("Lỗi lấy danh sách nhân vật cho admin:", err);
-        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], isSuperAdmin: false, currentAdmin: req.adminUser });
+        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser });
     }
 });
 

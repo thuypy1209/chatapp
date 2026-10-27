@@ -622,7 +622,7 @@
                                         <% } %>
                                     </td>
                                     <td style="padding: 10px 14px; color: #64748b; font-size: 12px;">
-                                        <%= adm.lastLogin ? new Date(adm.lastLogin).toLocaleString('vi-VN') : 'Chưa đăng nhập' %>
+                                        <%= (typeof formatDateVN === 'function' && adm.lastLogin) ? formatDateVN(adm.lastLogin) : 'Chưa đăng nhập' %>
                                     </td>
                                     <td style="padding: 10px 14px; text-align: right;">
                                         <% var isProtectedRoot = (adm.username && adm.username.toLowerCase() === 'admin') || (adm.fullName === 'Super Administrator'); %>
@@ -794,10 +794,10 @@
                                         </div>
                                     </td>
                                     <td style="padding: 10px 14px; color: #475569; font-size: 12px;">
-                                        <%= u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Không rõ' %>
+                                        <%= (typeof formatDateVN === 'function' && u.createdAt) ? formatDateVN(u.createdAt) : 'Không rõ' %>
                                     </td>
                                     <td style="padding: 10px 14px; color: #059669; font-weight: 600; font-size: 12px;">
-                                        <%= u.lastActive ? new Date(u.lastActive).toLocaleString('vi-VN') : (u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Mới tham gia') %>
+                                        <%= (typeof formatDateVN === 'function') ? (u.lastActive ? formatDateVN(u.lastActive) : (u.createdAt ? formatDateVN(u.createdAt) : 'Mới tham gia')) : 'Mới tham gia' %>
                                     </td>
                                     <td style="padding: 10px 14px;">
                                         <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
@@ -1681,8 +1681,19 @@ function refreshChatUsersList() {
                 }
                 var html = '';
                 data.users.forEach(function(u, idx) {
-                    var created = u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Không rõ';
-                    var active = u.lastActive ? new Date(u.lastActive).toLocaleString('vi-VN') : (u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Mới tham gia');
+                    var formatVN = function(d) {
+                        if (!d) return '';
+                        try {
+                            return new Date(d).toLocaleString('vi-VN', {
+                                timeZone: 'Asia/Ho_Chi_Minh',
+                                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour12: false
+                            });
+                        } catch(e) { return ''; }
+                    };
+                    var created = u.createdAt ? formatVN(u.createdAt) : 'Không rõ';
+                    var active = u.lastActive ? formatVN(u.lastActive) : (u.createdAt ? formatVN(u.createdAt) : 'Mới tham gia');
                     var page = u.lastPage || 'Phòng Chat';
                     var visits = u.visitCount || 1;
                     var cleanName = (u.username || '').replace(/'/g, "\\'");
