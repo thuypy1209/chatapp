@@ -632,11 +632,11 @@
                                             </span>
                                         <% } else { %>
                                             <div style="display: inline-flex; gap: 6px;">
-                                                <button type="button" onclick="promptChangeAdminPassword('<%= adm._id %>', '<%= adm.username %>')" 
+                                                <button type="button" onclick="openChangeAdminPasswordModal('<%= adm._id %>', '<%= adm.username %>')" 
                                                     style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
                                                     🔑 Đổi mật khẩu
                                                 </button>
-                                                <button type="button" onclick="handleDeleteAdmin('<%= adm._id %>', '<%= adm.username %>')" 
+                                                <button type="button" onclick="openDeleteAdminModal('<%= adm._id %>', '<%= adm.username %>')" 
                                                     style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">
                                                     🗑️ Xóa
                                                 </button>
@@ -654,6 +654,72 @@
                         <% } %>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ĐỔI MẬT KHẨU TÀI KHOẢN ADMIN -->
+    <div id="modal-change-password" class="admin-modal-overlay" onclick="if(event.target===this) closeChangeAdminPasswordModal()">
+        <div class="admin-modal-box">
+            <button type="button" class="admin-modal-close" onclick="closeChangeAdminPasswordModal()" title="Đóng (ESC)">✕</button>
+            <div class="admin-modal-icon">
+                🔑
+            </div>
+            <h3 class="admin-modal-title">Đổi mật khẩu tài khoản</h3>
+            <p class="admin-modal-desc">
+                Nhập mật khẩu mới cho tài khoản <b id="modal-cp-username" style="color: #db2777;"></b>:
+            </p>
+
+            <div id="modal-cp-error" class="welcome-error-alert"></div>
+
+            <form id="form-modal-change-password" onsubmit="submitChangeAdminPassword(event)">
+                <input type="hidden" id="modal-cp-admin-id">
+                <div class="admin-modal-group">
+                    <label class="admin-modal-label">Mật khẩu mới (*):</label>
+                    <div class="admin-modal-input-wrapper">
+                        <input type="password" id="modal-cp-password" class="admin-modal-input" placeholder="Tối thiểu 6 ký tự..." required minlength="6" autocomplete="new-password">
+                        <button type="button" class="admin-modal-eye-btn" onclick="toggleShowPassword('modal-cp-password', 'modal-cp-eye-icon')" title="Ẩn/Hiện mật khẩu">
+                            <span id="modal-cp-eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-modal-actions">
+                    <button type="button" class="admin-modal-btn-cancel" onclick="closeChangeAdminPasswordModal()">
+                        Hủy
+                    </button>
+                    <button type="submit" id="btn-modal-cp-submit" class="admin-modal-btn-submit">
+                        💾 Lưu mật khẩu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL XÁC NHẬN XÓA TÀI KHOẢN ADMIN -->
+    <div id="modal-delete-admin" class="admin-modal-overlay" onclick="if(event.target===this) closeDeleteAdminModal()">
+        <div class="admin-modal-box">
+            <button type="button" class="admin-modal-close" onclick="closeDeleteAdminModal()" title="Đóng (ESC)">✕</button>
+            <div class="admin-modal-icon danger">
+                🗑️
+            </div>
+            <h3 class="admin-modal-title" style="color: #dc2626;">Xác nhận xóa tài khoản</h3>
+            <p class="admin-modal-desc">
+                Bạn có chắc chắn muốn xóa tài khoản <b id="modal-del-username" style="color: #dc2626;"></b> không?<br>
+                <span style="font-size: 12px; color: #94a3b8;">* Hành động này sẽ xóa vĩnh viễn và không thể khôi phục.</span>
+            </p>
+
+            <div id="modal-del-error" class="welcome-error-alert"></div>
+
+            <input type="hidden" id="modal-del-admin-id">
+
+            <div class="admin-modal-actions">
+                <button type="button" class="admin-modal-btn-cancel" onclick="closeDeleteAdminModal()">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="btn-modal-del-submit" class="admin-modal-btn-danger" onclick="confirmDeleteAdmin()">
+                    🗑️ Xóa vĩnh viễn
+                </button>
             </div>
         </div>
     </div>
@@ -1305,43 +1371,120 @@ function handleCreateAdmin(e) {
     });
 }
 
-function promptChangeAdminPassword(adminId, username) {
+// ===== MODAL ĐỔI MẬT KHẨU TÀI KHOẢN ADMIN =====
+function openChangeAdminPasswordModal(adminId, username) {
     if ((username || '').toLowerCase() === 'admin') {
-        alert('Tài khoản gốc "admin" (Super Administrator) được hệ thống bảo vệ cố định, không được phép đổi mật khẩu!');
+        alert('Tài khoản gốc "admin" (Super Administrator) được hệ thống bảo vệ cố định, không được phép đổi mật khẩu hay xóa!');
         return;
     }
-    var newPass = prompt('Nhập mật khẩu mới cho tài khoản "' + username + '" (tối thiểu 6 ký tự):');
-    if (!newPass) return;
-    if (newPass.trim().length < 6) {
-        alert('Mật khẩu phải có từ 6 ký tự trở lên!');
+    var modal = document.getElementById('modal-change-password');
+    if (!modal) return;
+    document.getElementById('modal-cp-admin-id').value = adminId;
+    document.getElementById('modal-cp-username').innerText = '"' + username + '"';
+    var passInp = document.getElementById('modal-cp-password');
+    passInp.value = '';
+    passInp.type = 'password';
+    var eyeIcon = document.getElementById('modal-cp-eye-icon');
+    if (eyeIcon) eyeIcon.innerText = '👁️';
+    var errEl = document.getElementById('modal-cp-error');
+    if (errEl) errEl.style.display = 'none';
+    modal.style.display = 'flex';
+    setTimeout(function() { passInp.focus(); }, 120);
+}
+
+function closeChangeAdminPasswordModal() {
+    var modal = document.getElementById('modal-change-password');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleShowPassword(inputId, iconId) {
+    var inp = document.getElementById(inputId);
+    var icon = document.getElementById(iconId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        if (icon) icon.innerText = '🙈';
+    } else {
+        inp.type = 'password';
+        if (icon) icon.innerText = '👁️';
+    }
+}
+
+function submitChangeAdminPassword(e) {
+    e.preventDefault();
+    var adminId = document.getElementById('modal-cp-admin-id').value;
+    var newPassword = document.getElementById('modal-cp-password').value.trim();
+    var errEl = document.getElementById('modal-cp-error');
+
+    if (!newPassword || newPassword.length < 6) {
+        errEl.innerText = 'Mật khẩu mới phải có từ 6 ký tự trở lên!';
+        errEl.style.display = 'block';
         return;
+    }
+
+    var submitBtn = document.getElementById('btn-modal-cp-submit');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Đang lưu...';
     }
 
     fetch('/admin/api/accounts/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId: adminId, newPassword: newPass.trim() })
+        body: JSON.stringify({ adminId: adminId, newPassword: newPassword })
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '💾 Lưu mật khẩu';
+        }
         if (data.success) {
+            closeChangeAdminPasswordModal();
             showAdminAccountsAlert(data.message, true);
         } else {
-            showAdminAccountsAlert(data.error || 'Lỗi đổi mật khẩu!', false);
+            errEl.innerText = data.error || 'Lỗi đổi mật khẩu!';
+            errEl.style.display = 'block';
         }
     })
     .catch(function(err) {
-        showAdminAccountsAlert('Lỗi kết nối máy chủ!', false);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '💾 Lưu mật khẩu';
+        }
+        errEl.innerText = 'Lỗi kết nối máy chủ!';
+        errEl.style.display = 'block';
     });
 }
 
-function handleDeleteAdmin(adminId, username) {
+// ===== MODAL XÁC NHẬN XÓA TÀI KHOẢN ADMIN =====
+function openDeleteAdminModal(adminId, username) {
     if ((username || '').toLowerCase() === 'admin') {
-        alert('Tài khoản gốc "admin" (Super Administrator) được hệ thống bảo vệ cố định, không được phép xóa!');
+        alert('Tài khoản gốc "admin" (Super Administrator) được hệ thống bảo vệ cố định, không được phép xóa hay đổi mật khẩu!');
         return;
     }
-    if (!confirm('Bạn có chắc chắn muốn xóa tài khoản quản trị "' + username + '" không?')) {
-        return;
+    var modal = document.getElementById('modal-delete-admin');
+    if (!modal) return;
+    document.getElementById('modal-del-admin-id').value = adminId;
+    document.getElementById('modal-del-username').innerText = '"' + username + '"';
+    var errEl = document.getElementById('modal-del-error');
+    if (errEl) errEl.style.display = 'none';
+    modal.style.display = 'flex';
+}
+
+function closeDeleteAdminModal() {
+    var modal = document.getElementById('modal-delete-admin');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmDeleteAdmin() {
+    var adminId = document.getElementById('modal-del-admin-id').value;
+    var errEl = document.getElementById('modal-del-error');
+    var submitBtn = document.getElementById('btn-modal-del-submit');
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Đang xóa...';
     }
 
     fetch('/admin/api/accounts/delete', {
@@ -1351,18 +1494,41 @@ function handleDeleteAdmin(adminId, username) {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🗑️ Xóa vĩnh viễn';
+        }
         if (data.success) {
+            closeDeleteAdminModal();
             showAdminAccountsAlert(data.message, true);
             var row = document.getElementById('admin-row-' + adminId);
             if (row) row.remove();
         } else {
-            showAdminAccountsAlert(data.error || 'Lỗi xóa tài khoản!', false);
+            errEl.innerText = data.error || 'Lỗi xóa tài khoản!';
+            errEl.style.display = 'block';
         }
     })
     .catch(function(err) {
-        showAdminAccountsAlert('Lỗi kết nối máy chủ!', false);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🗑️ Xóa vĩnh viễn';
+        }
+        errEl.innerText = 'Lỗi kết nối máy chủ!';
+        errEl.style.display = 'block';
     });
 }
+
+// Giữ lại tên hàm cũ để tương thích
+function promptChangeAdminPassword(adminId, username) { openChangeAdminPasswordModal(adminId, username); }
+function handleDeleteAdmin(adminId, username) { openDeleteAdminModal(adminId, username); }
+
+// Lắng nghe phím ESC để đóng modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeChangeAdminPasswordModal();
+        closeDeleteAdminModal();
+    }
+});
 <% } %>
 
 // Khởi động: Render ngay lập tức trên DOM, sau đó tải dữ liệu mới nhất
