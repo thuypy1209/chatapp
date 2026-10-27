@@ -2274,6 +2274,19 @@ h1 {
     user-select: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+.admin-badge-viewonly {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
 
 /* Custom Admin Modal Dialogs (Change Password, Delete Admin) */
 .admin-modal-overlay {

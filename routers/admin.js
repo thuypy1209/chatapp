@@ -73,7 +73,7 @@ function requireSuperAdmin(req, res, next) {
     if (!req.isSuperAdmin) {
         return res.status(403).json({
             success: false,
-            error: 'Bạn không có quyền thực hiện thao tác này! Chỉ Super Admin mới có quyền quản lý tài khoản quản trị.'
+            error: 'Bạn không có quyền thực hiện thao tác này! Chỉ Super Admin mới có quyền quản lý tài khoản và xóa người dùng.'
         });
     }
     next();
@@ -685,8 +685,8 @@ router.get('/api/chat-users', async function(req, res) {
     }
 });
 
-// 2. Xóa người dùng (giải phóng tên hoặc dọn dẹp)
-router.post('/api/chat-users/delete', async function(req, res) {
+// 2. Xóa người dùng (giải phóng tên hoặc dọn dẹp - Chỉ Super Admin)
+router.post('/api/chat-users/delete', requireSuperAdmin, async function(req, res) {
     try {
         var User = require('../schemas/User');
         var userId = req.body.userId;

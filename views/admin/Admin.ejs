@@ -808,11 +808,17 @@
                                         <%= u.visitCount || 1 %>
                                     </td>
                                     <td style="padding: 10px 14px; text-align: right;">
-                                        <button type="button" onclick="handleDeleteChatUser('<%= u._id %>', '<%= u.username.replace(/'/g, "\\'") %>')" 
-                                            style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;"
-                                            title="Xóa người dùng này để giải phóng tên">
-                                            🗑️ Xóa
-                                        </button>
+                                        <% if (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) { %>
+                                            <button type="button" onclick="openDeleteChatUserModal('<%= u._id %>', '<%= (u.username || '').replace(/'/g, "\\'") %>')" 
+                                                style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;"
+                                                title="Xóa người dùng này để giải phóng tên">
+                                                🗑️ Xóa
+                                            </button>
+                                        <% } else { %>
+                                            <span class="admin-badge-viewonly" title="Chỉ Super Admin mới có quyền xóa người dùng">
+                                                👁️ Chỉ xem
+                                            </span>
+                                        <% } %>
                                     </td>
                                 </tr>
                             <% }); %>
@@ -827,6 +833,35 @@
                 </table>
             </div>
         </div>
+
+    <!-- MODAL XÁC NHẬN XÓA CHAT USER (CHỈ DÀNH CHO SUPER ADMIN) -->
+    <div id="modal-delete-chat-user" class="admin-modal-overlay" onclick="if(event.target===this) closeDeleteChatUserModal()">
+        <div class="admin-modal-box">
+            <button type="button" class="admin-modal-close" onclick="closeDeleteChatUserModal()" title="Đóng (ESC)">✕</button>
+            <div class="admin-modal-icon danger">
+                🗑️
+            </div>
+            <h3 class="admin-modal-title" style="color: #dc2626;">Xác nhận xóa người dùng</h3>
+            <p class="admin-modal-desc">
+                Bạn có chắc chắn muốn xóa người dùng <b id="modal-del-chat-username" style="color: #dc2626;"></b> khỏi hệ thống không?<br>
+                <span style="font-size: 12px; color: #94a3b8;">* Tên này sẽ được giải phóng để người khác có thể sử dụng lại.</span>
+            </p>
+
+            <div id="modal-del-chat-error" class="welcome-error-alert"></div>
+
+            <input type="hidden" id="modal-del-chat-userid">
+
+            <div class="admin-modal-actions">
+                <button type="button" class="admin-modal-btn-cancel" onclick="closeDeleteChatUserModal()">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="btn-modal-del-chat-submit" class="admin-modal-btn-danger" onclick="confirmDeleteChatUser()">
+                    🗑️ Xóa vĩnh viễn
+                </button>
+            </div>
+        </div>
+    </div>
+
     </div>
 
 
@@ -1710,7 +1745,10 @@ function refreshChatUsersList() {
                         '<td style="padding: 10px 14px;"><span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">' + page + '</span></td>' +
                         '<td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">' + visits + '</td>' +
                         '<td style="padding: 10px 14px; text-align: right;">' +
-                            '<button type="button" onclick="handleDeleteChatUser(\'' + u._id + '\', \'' + cleanName + '\')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' +
+                            (currentIsSuperAdmin ? 
+                                '<button type="button" onclick="openDeleteChatUserModal(\'' + u._id + '\', \'' + cleanName + '\')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' :
+                                '<span class="admin-badge-viewonly" title="Chỉ Super Admin mới có quyền xóa người dùng">👁️ Chỉ xem</span>'
+                            ) +
                         '</td>' +
                     '</tr>';
                 });
@@ -1722,9 +1760,37 @@ function refreshChatUsersList() {
         });
 }
 
-function handleDeleteChatUser(userId, username) {
-    if (!confirm('Bạn có chắc chắn muốn xóa người dùng "' + username + '" khỏi hệ thống không?\nThao tác này sẽ giải phóng tên để người khác có thể sử dụng.')) {
+var currentIsSuperAdmin = <%= (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) ? 'true' : 'false' %>;
+
+function openDeleteChatUserModal(userId, username) {
+    if (!currentIsSuperAdmin) {
+        alert('Chỉ Super Admin mới có quyền xóa người dùng khỏi hệ thống!');
         return;
+    }
+    var modal = document.getElementById('modal-delete-chat-user');
+    if (!modal) return;
+    document.getElementById('modal-del-chat-userid').value = userId;
+    document.getElementById('modal-del-chat-username').innerText = '"' + username + '"';
+    var errEl = document.getElementById('modal-del-chat-error');
+    if (errEl) errEl.style.display = 'none';
+    modal.style.display = 'flex';
+}
+
+function closeDeleteChatUserModal() {
+    var modal = document.getElementById('modal-delete-chat-user');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmDeleteChatUser() {
+    var userId = document.getElementById('modal-del-chat-userid').value;
+    var errEl = document.getElementById('modal-del-chat-error');
+    var submitBtn = document.getElementById('btn-modal-del-chat-submit');
+
+    if (!userId) return;
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Đang xóa...';
     }
 
     fetch('/admin/api/chat-users/delete', {
@@ -1734,7 +1800,12 @@ function handleDeleteChatUser(userId, username) {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🗑️ Xóa vĩnh viễn';
+        }
         if (data.success) {
+            closeDeleteChatUserModal();
             var row = document.getElementById('chat-user-row-' + userId);
             if (row) row.remove();
             var alertEl = document.getElementById('chat-users-alert');
@@ -1749,13 +1820,37 @@ function handleDeleteChatUser(userId, username) {
             var countEl = document.getElementById('chat-users-badge-count');
             var remaining = document.querySelectorAll('.chat-user-row').length;
             if (countEl) countEl.innerText = remaining + ' người dùng';
+            if (remaining === 0) {
+                var tbody = document.getElementById('chat-users-table-body');
+                if (tbody) {
+                    tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Chưa có người dùng nào nhập tên vào trò chuyện.</td></tr>';
+                }
+            }
         } else {
-            alert(data.error || 'Lỗi xóa người dùng!');
+            if (errEl) {
+                errEl.innerText = data.error || 'Lỗi xóa người dùng!';
+                errEl.style.display = 'block';
+            } else {
+                alert(data.error || 'Lỗi xóa người dùng!');
+            }
         }
     })
     .catch(function(err) {
-        alert('Lỗi kết nối máy chủ!');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🗑️ Xóa vĩnh viễn';
+        }
+        if (errEl) {
+            errEl.innerText = 'Lỗi kết nối máy chủ!';
+            errEl.style.display = 'block';
+        } else {
+            alert('Lỗi kết nối máy chủ!');
+        }
     });
+}
+
+function handleDeleteChatUser(userId, username) {
+    openDeleteChatUserModal(userId, username);
 }
 
 </script>
