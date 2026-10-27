@@ -588,6 +588,15 @@ router.post('/api/accounts/change-password', requireSuperAdmin, async function(r
             return res.json({ success: false, error: 'Không tìm thấy tài khoản quản trị cần đổi mật khẩu!' });
         }
 
+        // Không cho phép đổi mật khẩu tài khoản gốc "admin" (Super Administrator)
+        var usernameLower = (admin.username || '').toLowerCase();
+        if (usernameLower === 'admin' || admin.fullName === 'Super Administrator') {
+            return res.json({
+                success: false,
+                error: 'Tài khoản gốc "admin" (Super Administrator) được bảo vệ cố định bởi hệ thống, không được phép đổi mật khẩu hay xóa!'
+            });
+        }
+
         admin.passwordHash = await Admin.hashPassword(newPassword);
         await admin.save();
 
@@ -607,6 +616,15 @@ router.post('/api/accounts/delete', requireSuperAdmin, async function(req, res) 
         var targetAdmin = await Admin.findById(adminId);
         if (!targetAdmin) {
             return res.json({ success: false, error: 'Không tìm thấy tài khoản để xóa!' });
+        }
+
+        // Không cho phép xóa tài khoản gốc "admin" (Super Administrator)
+        var usernameLower = (targetAdmin.username || '').toLowerCase();
+        if (usernameLower === 'admin' || targetAdmin.fullName === 'Super Administrator') {
+            return res.json({
+                success: false,
+                error: 'Tài khoản gốc "admin" (Super Administrator) được bảo vệ cố định bởi hệ thống, không được phép xóa hay đổi mật khẩu!'
+            });
         }
 
         // Cấm tự xóa tài khoản đang đăng nhập
