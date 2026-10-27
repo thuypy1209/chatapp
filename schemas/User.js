@@ -11,6 +11,18 @@ const userSchema = new mongoose.Schema({
         type: Boolean, 
         default: false 
     },
+    lastActive: {
+        type: Date,
+        default: Date.now
+    },
+    lastPage: {
+        type: String,
+        default: 'Phòng Chat'
+    },
+    visitCount: {
+        type: Number,
+        default: 1
+    },
     createdAt: { 
         type: Date, 
         default: Date.now 

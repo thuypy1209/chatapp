@@ -85,6 +85,10 @@ router.post('/login', loginLimiter, async function(req, res) {
         var confirmRelogin = req.body.allowRelogin === true;
 
         if (existingUser && (isOwnUser || confirmRelogin)) {
+            existingUser.lastActive = new Date();
+            existingUser.visitCount = (existingUser.visitCount || 1) + 1;
+            await existingUser.save().catch(function() {});
+
             res.cookie('chat_user', existingUser.username, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
             res.cookie('chat_role', 'user', { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
             return res.json({ 
@@ -108,7 +112,10 @@ router.post('/login', loginLimiter, async function(req, res) {
         // Tạo User mới trong MongoDB để giữ tên không bị trùng
         var newUser = await User.create({
             username: username,
-            isAdmin: false
+            isAdmin: false,
+            lastActive: new Date(),
+            lastPage: 'Phòng Chat',
+            visitCount: 1
         });
 
         res.cookie('chat_user', newUser.username, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });

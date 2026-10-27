@@ -5,10 +5,25 @@ var Answer = require('../schemas/Answer');
 var Image = require('../schemas/Image');
 var Audio = require('../schemas/Audio');
 var Character = require('../schemas/Character');
+var User = require('../schemas/User');
+
+function trackUserActivity(req, pageName) {
+    try {
+        var username = req.cookies.chat_user;
+        if (username) {
+            var escaped = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            User.updateOne(
+                { username: { $regex: new RegExp('^' + escaped + '$', 'i') } },
+                { $set: { lastActive: new Date(), lastPage: pageName || 'Phòng Chat' }, $inc: { visitCount: 1 } }
+            ).catch(function() {});
+        }
+    } catch(e) {}
+}
 
 // Trang chủ: Hiển thị danh sách nhân vật để chọn trước khi chat
 router.get('/', async function(req, res, next) {
     try {
+        trackUserActivity(req, 'Phòng Chat');
         var allCharacters = await Character.find({});
 
         // 1. Tìm nhân vật được đánh dấu là mặc định
@@ -77,6 +92,8 @@ router.get('/:characterId', async function(req, res, next) {
         if (!character) {
             return res.redirect('/chat');
         }
+
+        trackUserActivity(req, 'Chat: ' + character.name);
         
         // 1. Lấy tất cả các câu hỏi ở khối đầu tiên (blockIndex: 0) làm các nút lựa chọn ban đầu
         var rootQuestions = await Question.find({ characterId: charId, blockIndex: 0 })
@@ -103,6 +120,7 @@ router.get('/:characterId', async function(req, res, next) {
 
 // Xử lý khi người dùng bấm vào một câu hỏi (gửi ngầm từ AJAX/Fetch)
 router.post('/ask', async function(req, res, next) {
+    trackUserActivity(req, 'Nhắn tin kịch bản');
     var questionId = req.body.questionId;
 
     try {
@@ -140,6 +158,7 @@ router.post('/ask', async function(req, res, next) {
 
 // Xử lý khi người dùng nhập văn bản tự do trong phòng chat
 router.post('/text-message', async function(req, res) {
+    trackUserActivity(req, 'Nhắn tin tự do');
     try {
         var { message, characterId } = req.body;
         var cleanMsg = (message || '').trim();

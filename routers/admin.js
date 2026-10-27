@@ -83,20 +83,24 @@ function requireSuperAdmin(req, res, next) {
 router.get('/', async function(req, res) {
     try {
         var Admin = require('../schemas/Admin');
+        var User = require('../schemas/User');
         var characters = await Character.find({});
         var isSuperAdmin = !!req.isSuperAdmin;
         var admins = isSuperAdmin ? await Admin.find({}).select('-passwordHash').sort({ createdAt: 1 }) : [];
+        var chatUsers = await User.find({}).sort({ lastActive: -1, createdAt: -1 });
+
         res.render('admin/Admin', { 
             title: 'Quản trị Admin',
             characters: characters,
             admins: admins,
+            chatUsers: chatUsers,
             currentAdmin: req.adminUser,
             currentAdminRole: req.adminObj ? req.adminObj.role : 'admin',
             isSuperAdmin: isSuperAdmin
         });
     } catch (err) {
         console.log("Lỗi lấy danh sách nhân vật cho admin:", err);
-        res.render('admin/Admin', { characters: [], admins: [], isSuperAdmin: false, currentAdmin: req.adminUser });
+        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], isSuperAdmin: false, currentAdmin: req.adminUser });
     }
 });
 
@@ -643,6 +647,40 @@ router.post('/api/accounts/delete', requireSuperAdmin, async function(req, res) 
     } catch (err) {
         console.error('Lỗi xóa admin:', err);
         res.status(500).json({ success: false, error: 'Lỗi khi xóa tài khoản admin!' });
+    }
+});
+
+// ========================================================
+// API QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO TRÒ CHUYỆN (CHAT USERS)
+// ========================================================
+
+// 1. Lấy danh sách người dùng đã vào trò chuyện
+router.get('/api/chat-users', async function(req, res) {
+    try {
+        var User = require('../schemas/User');
+        var users = await User.find({}).sort({ lastActive: -1, createdAt: -1 });
+        res.json({ success: true, users: users, total: users.length });
+    } catch (err) {
+        console.error('Lỗi lấy danh sách chat users:', err);
+        res.status(500).json({ success: false, error: 'Không thể lấy danh sách người dùng!' });
+    }
+});
+
+// 2. Xóa người dùng (giải phóng tên hoặc dọn dẹp)
+router.post('/api/chat-users/delete', async function(req, res) {
+    try {
+        var User = require('../schemas/User');
+        var userId = req.body.userId;
+        var targetUser = await User.findById(userId);
+        if (!targetUser) {
+            return res.json({ success: false, error: 'Không tìm thấy người dùng cần xóa!' });
+        }
+
+        await User.findByIdAndDelete(userId);
+        res.json({ success: true, message: `Đã xóa người dùng "${targetUser.username}" khỏi hệ thống thành công!` });
+    } catch (err) {
+        console.error('Lỗi xóa chat user:', err);
+        res.status(500).json({ success: false, error: 'Lỗi khi xóa người dùng!' });
     }
 });
 

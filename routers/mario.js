@@ -2,6 +2,20 @@ var express = require('express');
 var router = express.Router();
 var Character = require('../schemas/Character');
 var Question = require('../schemas/Question');
+var User = require('../schemas/User');
+
+function trackUserActivity(req, pageName) {
+    try {
+        var username = req.cookies.chat_user;
+        if (username) {
+            var escaped = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            User.updateOne(
+                { username: { $regex: new RegExp('^' + escaped + '$', 'i') } },
+                { $set: { lastActive: new Date(), lastPage: pageName || 'Game Mario' }, $inc: { visitCount: 1 } }
+            ).catch(function() {});
+        }
+    } catch(e) {}
+}
 
 // Đảm bảo có nhân vật Mario sẵn trong hệ thống
 async function getOrCreateMarioCharacter() {
@@ -42,6 +56,7 @@ async function getOrCreateMarioCharacter() {
 
 // GET /mario: Giao diện chính Vừa chơi Mario Vừa Chat
 router.get('/', async function(req, res) {
+    trackUserActivity(req, 'Game Mario');
     try {
         var mario = await getOrCreateMarioCharacter();
         var questions = [];
@@ -66,6 +81,7 @@ router.get('/', async function(req, res) {
 
 // POST /mario/message: Xử lý tin nhắn văn bản tự do người dùng gửi cho Mario
 router.post('/message', function(req, res) {
+    trackUserActivity(req, 'Chat Mario');
     var message = (req.body.message || '').trim().toLowerCase();
 
     var reply = '';

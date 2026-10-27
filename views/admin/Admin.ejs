@@ -725,6 +725,111 @@
     </div>
     <% } %>
 
+    <!-- KHỐI 4: DANH SÁCH NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT VISITORS) -->
+    <div class="admin-card" id="section-chat-users" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('chat-users-body', 'chat-users-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #db2777; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>💬</span> Danh sách Người dùng đã vào Nhắn tin Trò chuyện
+                <span id="chat-users-badge-count" style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 800;">
+                    <%= (typeof chatUsers !== 'undefined' && chatUsers) ? chatUsers.length : 0 %> người dùng
+                </span>
+            </h2>
+            <button type="button" id="chat-users-toggle-btn"
+                style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="chat-users-body" style="display: block; margin-top: 18px; border-top: 2px dashed #fbcfe8; padding-top: 18px;">
+            <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 16px;">
+                Theo dõi tất cả những người dùng đã nhập tên tham gia trò chuyện hoặc chơi game. Quản trị viên có thể xem thời gian truy cập, hoạt động gần nhất hoặc xóa người dùng để giải phóng tên.
+            </p>
+
+            <div id="chat-users-alert" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px;"></div>
+
+            <!-- Thanh tìm kiếm & công cụ -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div style="position: relative; flex: 1; max-width: 380px; min-width: 240px;">
+                    <input type="text" id="search-chat-users-input" placeholder="🔍 Tìm kiếm theo tên người dùng..." oninput="handleSearchChatUsers(this.value)"
+                        style="width: 100%; padding: 9px 14px 9px 36px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'">
+                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none;">👤</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" onclick="refreshChatUsersList()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        🔄 Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bảng danh sách người dùng -->
+            <div style="overflow-x: auto; background: #ffffff; border-radius: 12px; border: 1px solid #fbcfe8;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                    <thead>
+                        <tr style="background: #fdf2f8; border-bottom: 2px solid #fbcfe8; color: #831843;">
+                            <th style="padding: 10px 14px;">STT</th>
+                            <th style="padding: 10px 14px;">Tên Người dùng</th>
+                            <th style="padding: 10px 14px;">Lần đầu tham gia</th>
+                            <th style="padding: 10px 14px;">Hoạt động gần nhất</th>
+                            <th style="padding: 10px 14px;">Trang truy cập</th>
+                            <th style="padding: 10px 14px; text-align: center;">Số lần</th>
+                            <th style="padding: 10px 14px; text-align: right;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chat-users-table-body">
+                        <% if (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 0) { %>
+                            <% chatUsers.forEach(function(u, idx) { %>
+                                <tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-<%= u._id %>" class="chat-user-row" data-username="<%= (u.username || '').toLowerCase() %>">
+                                    <td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">
+                                        #<%= idx + 1 %>
+                                    </td>
+                                    <td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="width: 32px; height: 32px; border-radius: 50%; background: #fdf2f8; border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">
+                                                👤
+                                            </span>
+                                            <span style="font-size: 14px;"><%= u.username %></span>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 10px 14px; color: #475569; font-size: 12px;">
+                                        <%= u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Không rõ' %>
+                                    </td>
+                                    <td style="padding: 10px 14px; color: #059669; font-weight: 600; font-size: 12px;">
+                                        <%= u.lastActive ? new Date(u.lastActive).toLocaleString('vi-VN') : (u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Mới tham gia') %>
+                                    </td>
+                                    <td style="padding: 10px 14px;">
+                                        <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                                            <%= u.lastPage || 'Phòng Chat' %>
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">
+                                        <%= u.visitCount || 1 %>
+                                    </td>
+                                    <td style="padding: 10px 14px; text-align: right;">
+                                        <button type="button" onclick="handleDeleteChatUser('<%= u._id %>', '<%= u.username.replace(/'/g, "\\'") %>')" 
+                                            style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;"
+                                            title="Xóa người dùng này để giải phóng tên">
+                                            🗑️ Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr id="chat-users-empty-row">
+                                <td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">
+                                    Chưa có người dùng nào nhập tên vào trò chuyện.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 <style>
@@ -1538,5 +1643,109 @@ loadCurrentMusicSetting();
 initCollapsibleSections();
 </script>
 
-<script src="/javascripts/admin.js"></script>
+<script src="/javascripts/admin.js">
+
+// ===== QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT USERS) =====
+function handleSearchChatUsers(keyword) {
+    var kw = (keyword || '').toLowerCase().trim();
+    var rows = document.querySelectorAll('.chat-user-row');
+    var visibleCount = 0;
+    rows.forEach(function(row) {
+        var user = row.getAttribute('data-username') || '';
+        if (!kw || user.includes(kw)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    var emptyRow = document.getElementById('chat-users-empty-row');
+    if (emptyRow) {
+        emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+    }
+}
+
+function refreshChatUsersList() {
+    var tbody = document.getElementById('chat-users-table-body');
+    var badge = document.getElementById('chat-users-badge-count');
+    if (!tbody) return;
+
+    fetch('/admin/api/chat-users')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success && data.users) {
+                if (badge) badge.innerText = data.users.length + ' người dùng';
+                if (data.users.length === 0) {
+                    tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Chưa có người dùng nào nhập tên vào trò chuyện.</td></tr>';
+                    return;
+                }
+                var html = '';
+                data.users.forEach(function(u, idx) {
+                    var created = u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Không rõ';
+                    var active = u.lastActive ? new Date(u.lastActive).toLocaleString('vi-VN') : (u.createdAt ? new Date(u.createdAt).toLocaleString('vi-VN') : 'Mới tham gia');
+                    var page = u.lastPage || 'Phòng Chat';
+                    var visits = u.visitCount || 1;
+                    var cleanName = (u.username || '').replace(/'/g, "\\'");
+                    html += '<tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-' + u._id + '" class="chat-user-row" data-username="' + (u.username || '').toLowerCase() + '">' +
+                        '<td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">#' + (idx + 1) + '</td>' +
+                        '<td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">' +
+                            '<div style="display: flex; align-items: center; gap: 8px;">' +
+                                '<span style="width: 32px; height: 32px; border-radius: 50%; background: #fdf2f8; border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">👤</span>' +
+                                '<span style="font-size: 14px;">' + u.username + '</span>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td style="padding: 10px 14px; color: #475569; font-size: 12px;">' + created + '</td>' +
+                        '<td style="padding: 10px 14px; color: #059669; font-weight: 600; font-size: 12px;">' + active + '</td>' +
+                        '<td style="padding: 10px 14px;"><span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">' + page + '</span></td>' +
+                        '<td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">' + visits + '</td>' +
+                        '<td style="padding: 10px 14px; text-align: right;">' +
+                            '<button type="button" onclick="handleDeleteChatUser(\'' + u._id + '\', \'' + cleanName + '\')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' +
+                        '</td>' +
+                    '</tr>';
+                });
+                tbody.innerHTML = html;
+            }
+        })
+        .catch(function(err) {
+            console.error('Lỗi refresh chat users:', err);
+        });
+}
+
+function handleDeleteChatUser(userId, username) {
+    if (!confirm('Bạn có chắc chắn muốn xóa người dùng "' + username + '" khỏi hệ thống không?\nThao tác này sẽ giải phóng tên để người khác có thể sử dụng.')) {
+        return;
+    }
+
+    fetch('/admin/api/chat-users/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            var row = document.getElementById('chat-user-row-' + userId);
+            if (row) row.remove();
+            var alertEl = document.getElementById('chat-users-alert');
+            if (alertEl) {
+                alertEl.innerText = data.message;
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#dcfce7';
+                alertEl.style.border = '1px solid #86efac';
+                alertEl.style.color = '#166534';
+                setTimeout(function() { alertEl.style.display = 'none'; }, 4000);
+            }
+            var countEl = document.getElementById('chat-users-badge-count');
+            var remaining = document.querySelectorAll('.chat-user-row').length;
+            if (countEl) countEl.innerText = remaining + ' người dùng';
+        } else {
+            alert(data.error || 'Lỗi xóa người dùng!');
+        }
+    })
+    .catch(function(err) {
+        alert('Lỗi kết nối máy chủ!');
+    });
+}
+
+</script>
 <%- include('../partials/footer') %>
