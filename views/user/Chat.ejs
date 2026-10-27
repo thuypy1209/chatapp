@@ -3,17 +3,17 @@
 <!-- Script Game Mario để hỗ trợ khi bật chế độ chơi song song -->
 <script src="/javascripts/mario.js"></script>
 
-<div class="chat-outer-wrapper" style="max-width: 1200px; margin: 20px auto 40px auto; padding: 0 15px; position: relative; z-index: 5;">
+<div class="chat-outer-wrapper">
 
     <!-- THANH CHỌN NHÂN VẬT (CHỈ HIỂN THỊ KHI ADMIN ĐĂNG NHẬP ĐỂ TEST NHÂN VẬT) -->
     <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-        <div class="char-switcher-bar" style="max-width: 680px; margin: 0 auto 12px auto; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
-            <span style="font-size: 12px; font-weight: 700; color: #831843; white-space: nowrap; margin-right: 2px;">⚙️ Admin test:</span>
+        <div class="char-switcher-bar">
+            <span class="char-switcher-label">⚙️ Admin test:</span>
             <% if (typeof allCharacters !== 'undefined' && allCharacters && allCharacters.length > 0) { %>
                 <% allCharacters.forEach(function(charItem) { %>
                     <% var isCurrent = character && character._id.toString() === charItem._id.toString(); %>
-                    <a href="/chat/<%= charItem._id %>" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: all 0.15s ease; border: 1.5px solid <%= isCurrent ? '#db2777' : 'rgba(251, 207, 232, 0.8)' %>; background: <%= isCurrent ? '#db2777' : 'rgba(255, 255, 255, 0.9)' %>; color: <%= isCurrent ? '#ffffff' : '#334155' %>; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                        <span style="font-size: 15px;"><%= charItem.icon || '🍄' %></span>
+                    <a href="/chat/<%= charItem._id %>" class="char-switcher-link <%= isCurrent ? 'active' : '' %>">
+                        <span class="char-switcher-icon"><%= charItem.icon || '🍄' %></span>
                         <span><%= charItem.name %></span>
                     </a>
                 <% }); %>
@@ -22,100 +22,100 @@
     <% } %>
 
     <!-- VÙNG CHỨA BỐ CỤC CHAT (Có thể mở rộng khi bật Mario Game) -->
-    <div id="chat-layout-wrapper" style="max-width: 680px; margin: 0 auto; transition: all 0.3s ease;">
+    <div id="chat-layout-wrapper" class="chat-layout-wrapper">
         
         <!-- BẢNG GAME MARIO SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
-        <div id="mario-side-panel" style="display: none; background: #0f172a; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border: 4px solid #38bdf8; position: relative; align-self: start;">
+        <div id="mario-side-panel" class="mario-side-panel">
             <!-- Header bar của panel -->
-            <div class="mario-panel-header" style="background: #1e293b; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 13px; font-weight: 700; gap: 6px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 6px;">
+            <div class="mario-panel-header">
+                <div class="mario-panel-title-group">
                     <span>🎮</span>
-                    <span style="color: #f8fafc; font-weight: 700; font-size: 13px;">Super Mario Bros</span>
-                    <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800;">⚡ 120 FPS</span>
+                    <span class="mario-panel-game-title">Super Mario Bros</span>
+                    <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <button type="button" id="side-skin-btn" onclick="toggleSideSkin()" title="Đổi giao diện Minecraft / Mario" style="background: #065f46; border: 1.5px solid #10b981; color: #a7f3d0; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s ease;">
+                <div class="mario-panel-actions">
+                    <button type="button" id="side-skin-btn" onclick="toggleSideSkin()" title="Đổi giao diện Minecraft / Mario" class="side-skin-btn">
                         🟩 Minecraft
                     </button>
-                    <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" style="background: #334155; border: 1.5px solid #64748b; color: #fff; padding: 4px 7px; border-radius: 6px; font-size: 11px; cursor: pointer;">
+                    <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" class="side-audio-btn">
                         🔊
                     </button>
-                    <button type="button" onclick="restartSideMario()" title="Chơi lại từ đầu" style="background: #854d0e; border: 1.5px solid #facc15; color: #fef08a; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                    <button type="button" onclick="restartSideMario()" title="Chơi lại từ đầu" class="side-restart-btn">
                         🔄
                     </button>
-                    <button type="button" id="side-fs-btn" class="btn-mario-fullscreen-toggle" onclick="toggleFullscreenMario('mario-side-panel')" title="Phóng to toàn màn hình để chơi" style="background: #1d4ed8; border: 1.5px solid #60a5fa; color: #eff6ff; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(29,78,216,0.3);">
+                    <button type="button" id="side-fs-btn" class="btn-mario-fullscreen-toggle side-fs-btn" onclick="toggleFullscreenMario('mario-side-panel')" title="Phóng to toàn màn hình để chơi">
                         <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
                     </button>
                 </div>
             </div>
 
             <!-- Canvas Game Mario -->
-            <canvas id="mario-side-canvas" style="display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #5c94fc; cursor: pointer; outline: none;" tabindex="0"></canvas>
+            <canvas id="mario-side-canvas" class="mario-panel-canvas" tabindex="0"></canvas>
 
             <!-- Footer điều khiển & phím ảo cho Side Panel -->
-            <div class="mario-panel-footer" style="background: #1e293b; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 11px; border-top: 1px solid #334155;">
+            <div class="mario-panel-footer">
                 <span>Phím: <b>A/D/← →</b> | Nhảy: <b>Space/W</b></span>
-                <div style="display: flex; gap: 6px;">
-                    <button type="button" onmousedown="triggerSideKey('ArrowLeft', true)" onmouseup="triggerSideKey('ArrowLeft', false)" ontouchstart="triggerSideKey('ArrowLeft', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowLeft', false); event.preventDefault();" style="background: #334155; border: 1px solid #475569; color: #f8fafc; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">◀</button>
-                    <button type="button" onmousedown="triggerSideKey('ArrowRight', true)" onmouseup="triggerSideKey('ArrowRight', false)" ontouchstart="triggerSideKey('ArrowRight', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowRight', false); event.preventDefault();" style="background: #334155; border: 1px solid #475569; color: #f8fafc; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">▶</button>
-                    <button type="button" onmousedown="triggerSideKey(' ', true)" onmouseup="triggerSideKey(' ', false)" ontouchstart="triggerSideKey(' ', true); event.preventDefault();" ontouchend="triggerSideKey(' ', false); event.preventDefault();" style="background: #ea580c; border: 1px solid #fb923c; color: #fff; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">▲ Nhảy (Space)</button>
+                <div class="mario-side-vkeys">
+                    <button type="button" class="side-vkey-btn" onmousedown="triggerSideKey('ArrowLeft', true)" onmouseup="triggerSideKey('ArrowLeft', false)" ontouchstart="triggerSideKey('ArrowLeft', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowLeft', false); event.preventDefault();">◀</button>
+                    <button type="button" class="side-vkey-btn" onmousedown="triggerSideKey('ArrowRight', true)" onmouseup="triggerSideKey('ArrowRight', false)" ontouchstart="triggerSideKey('ArrowRight', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowRight', false); event.preventDefault();">▶</button>
+                    <button type="button" class="side-vkey-jump" onmousedown="triggerSideKey(' ', true)" onmouseup="triggerSideKey(' ', false)" ontouchstart="triggerSideKey(' ', true); event.preventDefault();" ontouchend="triggerSideKey(' ', false); event.preventDefault();">▲ Nhảy (Space)</button>
                 </div>
             </div>
         </div>
 
         <!-- KHUNG CHAT CHÍNH -->
-        <div id="chat-main-card" class="chat-card" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); border: 2px solid #fbcfe8; overflow: hidden; display: flex; flex-direction: column; height: 82vh;">
+        <div id="chat-main-card" class="chat-card">
             
             <!-- Header Phòng Chat -->
-            <div style="background: #fff; padding: 12px 18px; border-bottom: 2px solid #fdf2f8; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="chat-header-bar">
+                <div class="chat-header-info">
                     <% if (character && character.avatarUrl && !character.avatarUrl.includes('NaN')) { %>
-                        <img src="<%= character.avatarUrl %>" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fbcfe8;" alt="<%= character.name %>" onerror="this.style.display='none'">
+                        <img src="<%= character.avatarUrl %>" class="chat-avatar-img" alt="<%= character.name %>" onerror="this.style.display='none'">
                     <% } else { %>
-                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #fdf2f8; border: 2px solid #fbcfe8; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                        <div class="chat-avatar-placeholder">
                             <%= character && character.icon ? character.icon : '🤖' %>
                         </div>
                     <% } %>
                     <div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <h2 style="font-size: 16px; margin: 0; color: #1e293b; font-weight: 700;"><%= character ? character.name : 'Phòng Chat' %></h2>
+                        <div class="chat-title-group">
+                            <h2 class="chat-character-title"><%= character ? character.name : 'Phòng Chat' %></h2>
                             <% if (character && character.audioUrl) { %>
-                                <button type="button" onclick="togglePlayVoice(this, '<%= character.audioUrl %>')" title="Nghe giọng chào của nhân vật" style="background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                                <button type="button" onclick="togglePlayVoice(this, '<%= character.audioUrl %>')" title="Nghe giọng chào của nhân vật" class="chat-voice-btn">
                                     🎵 Giọng nói
                                 </button>
                             <% } %>
                         </div>
-                        <span style="font-size: 11px; color: #22c55e; font-weight: 600;">● Trực tuyến</span>
+                        <span class="chat-online-badge">● Trực tuyến</span>
                     </div>
                 </div>
 
                 <!-- Các công cụ nhanh trên header -->
-                <div style="display: flex; align-items: center; gap: 6px;">
+                <div class="chat-header-tools">
                     <!-- Nút reset cuộc trò chuyện -->
-                    <button type="button" onclick="restartCurrentChat()" title="Làm mới cuộc trò chuyện" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <button type="button" onclick="restartCurrentChat()" title="Làm mới cuộc trò chuyện" class="chat-tool-btn">
                         🔄 Làm mới
                     </button>
 
                     <!-- Nút bật/tắt âm thanh -->
-                    <button type="button" id="btn-toggle-chat-sound" onclick="window.chatAudio.muted = !window.chatAudio.muted; this.innerText = window.chatAudio.muted ? '🔇' : '🔊';" title="Bật/Tắt âm thanh thông báo" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;">
+                    <button type="button" id="btn-toggle-chat-sound" onclick="window.chatAudio.muted = !window.chatAudio.muted; this.innerText = window.chatAudio.muted ? '🔇' : '🔊';" title="Bật/Tắt âm thanh thông báo" class="chat-tool-btn">
                         🔊
                     </button>
 
                     <!-- Nút bật màn hình Mario song song -->
-                    <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" style="background: #fef08a; border: 1.5px solid #facc15; color: #854d0e; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 0 #eab308;">
+                    <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" class="chat-toggle-mario-btn">
                         🎮 Bật Mario Game
                     </button>
                 </div>
             </div>
 
             <!-- Vùng cuộn tin nhắn hội thoại -->
-            <div id="message-box" class="message-box" style="flex: 1; padding: 18px; overflow-y: auto; background: #fdfbf7; display: flex; flex-direction: column; gap: 12px;">
+            <div id="message-box" class="message-box">
                 
                 <% if (typeof initialBotMessage !== 'undefined' && initialBotMessage) { %>
                     <% var botMsgText = initialBotMessage.answerId ? initialBotMessage.answerId.answerText : "Xin chào! Rất vui được gặp bạn!"; %>
-                    <div class="message bot" style="align-self: flex-start; background: #ffffff; border: 1px solid #fbcfe8; border-radius: 16px 16px 16px 4px; padding: 14px 16px; font-size: 14px; color: #1e293b; max-width: 88%; box-shadow: 0 2px 10px rgba(0,0,0,0.04); line-height: 1.5;">  
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <b style="color: #db2777; display: flex; align-items: center; gap: 6px;">
+                    <div class="message bot">  
+                        <div class="message-author-bot">
+                            <b>
                                 <span><%= character && character.icon ? character.icon : '🤖' %></span>
                                 <%= character ? character.name : 'Bot' %>:
                             </b>
@@ -124,27 +124,27 @@
                         <div><%= botMsgText %></div>
                         
                         <% if (initialBotMessage.imageId) { %>
-                            <div class="media-box" style="margin-top: 10px;">
-                                <img src="<%= initialBotMessage.imageId.imageUrl %>" class="chat-media-img" alt="Hình ảnh" style="max-width: 100%; border-radius: 10px; border: 1px solid #fbcfe8;">
+                            <div class="media-box">
+                                <img src="<%= initialBotMessage.imageId.imageUrl %>" class="chat-media-img" alt="Hình ảnh">
                             </div>
                         <% } %>
                         
                         <% var initialAudio = (initialBotMessage.audioId && initialBotMessage.audioId.audioUrl) ? initialBotMessage.audioId.audioUrl : (character && character.audioUrl ? character.audioUrl : null); %>
                         <% if (initialAudio) { %>
-                            <div class="voice-bubble" style="margin-top: 10px; background: #fdf2f8; border: 1.5px solid #fbcfe8; border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; max-width: 280px;">
-                                <button type="button" class="btn-play-voice" onclick="togglePlayVoice(this, '<%= initialAudio %>')" style="width: 34px; height: 34px; border-radius: 50%; background: #db2777; color: #fff; border: none; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(219,39,119,0.3); flex-shrink: 0;">
+                            <div class="voice-bubble">
+                                <button type="button" class="btn-play-voice" onclick="togglePlayVoice(this, '<%= initialAudio %>')">
                                     ▶
                                 </button>
-                                <div style="flex: 1;">
-                                    <div style="font-size: 11px; font-weight: 700; color: #db2777; margin-bottom: 2px;">
+                                <div class="voice-wave-wrapper">
+                                    <div class="voice-bubble-title">
                                         🎵 Tin nhắn thoại (<%= character ? character.name : 'Bot' %>)
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 3px; height: 12px;">
-                                        <span style="width: 3px; height: 5px; background: #f472b6; border-radius: 2px;"></span>
-                                        <span style="width: 3px; height: 11px; background: #db2777; border-radius: 2px;"></span>
-                                        <span style="width: 3px; height: 7px; background: #f472b6; border-radius: 2px;"></span>
-                                        <span style="width: 3px; height: 12px; background: #db2777; border-radius: 2px;"></span>
-                                        <span style="width: 3px; height: 6px; background: #f472b6; border-radius: 2px;"></span>
+                                    <div class="voice-wave-container">
+                                        <span class="voice-bar voice-bar-1"></span>
+                                        <span class="voice-bar active voice-bar-2"></span>
+                                        <span class="voice-bar voice-bar-3"></span>
+                                        <span class="voice-bar active voice-bar-4"></span>
+                                        <span class="voice-bar voice-bar-5"></span>
                                     </div>
                                 </div>
                             </div>
@@ -159,19 +159,18 @@
             <input type="hidden" id="character-name" value="<%= character ? character.name : 'Bot' %>">
 
             <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN -->
-            <div id="options-container" class="options-in-chat" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; background: #ffffff; padding: 10px 16px; border-top: 1px dashed #fbcfe8; max-height: 160px; overflow-y: auto; z-index: 5;">
-                <div style="font-size: 12px; font-weight: 700; color: #db2777; margin-bottom: 2px;">💡 Chọn câu hỏi tiếp theo:</div>
+            <div id="options-container" class="options-in-chat">
+                <div class="options-title">💡 Chọn câu hỏi tiếp theo:</div>
                 <% if (typeof questions !== 'undefined' && questions && questions.length > 0) { %>
                     <% questions.forEach(function(q) { %>
-                        <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')" 
-                            style="width: 100%; text-align: left; background: #fdf2f8; border: 1px solid #fbcfe8; padding: 10px 14px; border-radius: 10px; cursor: pointer; color: #db2777; font-weight: 600; font-size: 13px; margin-bottom: 2px; transition: transform 0.1s ease;">
+                        <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
                             <%= character && character.icon ? character.icon : '💬' %> <%= q.questionText %>
                         </button>
                     <% }); %>
                 <% } else { %>
-                    <div style="text-align: center; padding: 4px;">
-                        <p style="font-size: 13px; color: #64748b; margin: 0 0 6px 0;">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
-                        <button type="button" onclick="restartCurrentChat()" style="background: #22c55e; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">
+                    <div class="chat-finished-box">
+                        <p class="chat-finished-text">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
+                        <button type="button" onclick="restartCurrentChat()" class="btn-chat-restart">
                             🔄 Bắt đầu lại cuộc trò chuyện
                         </button>
                     </div>
@@ -179,13 +178,10 @@
             </div>
 
             <!-- Ô NHẬP TIN NHẮN TỰ DO (FREE-TEXT CHAT INPUT) -->
-            <div style="padding: 12px 16px; background: #ffffff; border-top: 1px solid #f0eae1; flex-shrink: 0;">
-                <form id="chat-free-form" style="display: flex; gap: 8px;" onsubmit="handleSendFreeText(event)">
-                    <input type="text" id="chat-free-input" placeholder="Nhập câu hỏi để trò chuyện cùng <%= character ? character.name : 'Bot' %>..." autocomplete="off"
-                        style="flex: 1; padding: 11px 16px; border: 2px solid #fbcfe8; border-radius: 12px; font-size: 14px; outline: none; transition: border-color 0.2s;"
-                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
-                    <button type="submit" style="background: #db2777; color: #ffffff; border: none; padding: 11px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 3px 0 #be185d; transition: all 0.15s ease;"
-                        onmouseover="this.style.background='#be185d'" onmouseout="this.style.background='#db2777'">
+            <div class="chat-input-bar">
+                <form id="chat-free-form" class="chat-free-form" onsubmit="handleSendFreeText(event)">
+                    <input type="text" id="chat-free-input" class="chat-free-input" placeholder="Nhập câu hỏi để trò chuyện cùng <%= character ? character.name : 'Bot' %>..." autocomplete="off">
+                    <button type="submit" class="chat-send-btn">
                         Gửi 🚀
                     </button>
                 </form>

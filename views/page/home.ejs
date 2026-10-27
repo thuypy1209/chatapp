@@ -1,41 +1,31 @@
 <%- include('../partials/header') %>
 
-<div class="container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65vh; text-align: center; padding: 20px 15px; position: relative; z-index: 5;">
-    
-    <h1 style="margin-bottom: 12px; color: #1e293b; font-size: 32px; font-weight: 800; text-shadow: 2px 2px 0px #fbcfe8;">
+<div class="container home-container">
+    <h1 class="home-title">
         Chào mừng bạn đến với Phổi bạn không phải tôi
     </h1>
-    <p style="color: #64748b; margin-bottom: 30px; font-size: 16px; max-width: 550px; line-height: 1.5;">
+    <p class="home-subtitle">
         Nền tảng trò chuyện thông minh kết hợp giải trí game retro Super Mario độc đáo!
     </p>
 
     <!-- Chỉ hiển thị 2 nút: Trò chuyện & Chơi -->
-    <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; align-items: center;">
-        
+    <div class="home-actions">
         <!-- Nút Trò chuyện với nhân vật mặc định do Admin chọn -->
         <% if (defaultCharacter) { %>
-            <a href="/chat/<%= defaultCharacter._id %>" class="btn" style="background: #db2777; color: #fff; padding: 14px 28px; font-size: 17px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #be185d; box-shadow: 3px 3px 0px #9d174d; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s ease;"
-                onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';"
-            >
-                <span style="font-size: 22px;"><%= defaultCharacter.icon || '💬' %></span> Trò chuyện với <%= defaultCharacter.name %>
+            <a href="/chat/<%= defaultCharacter._id %>" class="btn btn-home-chat">
+                <span class="btn-home-icon"><%= defaultCharacter.icon || '💬' %></span> Trò chuyện với <%= defaultCharacter.name %>
             </a>
         <% } else { %>
-            <a href="/chat" class="btn" style="background: #db2777; color: #fff; padding: 14px 28px; font-size: 17px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #be185d; box-shadow: 3px 3px 0px #9d174d; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s ease;"
-                onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';"
-            >
-                <span style="font-size: 22px;">💬</span> Vào phòng Chat
+            <a href="/chat" class="btn btn-home-chat">
+                <span class="btn-home-icon">💬</span> Vào phòng Chat
             </a>
         <% } %>
 
         <!-- Nút Chơi Super Mario & Chat -->
-        <a href="/mario" class="btn" style="background: #f59e0b; color: #fff; padding: 14px 28px; font-size: 17px; font-weight: 700; text-decoration: none; border-radius: 12px; border: 2px solid #b45309; box-shadow: 3px 3px 0px #78350f; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s ease;"
-            onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';"
-        >
-            <span style="font-size: 22px;">🎮</span> Chơi Super Mario & Chat
+        <a href="/mario" class="btn btn-home-mario">
+            <span class="btn-home-icon">🎮</span> Chơi Super Mario & Chat
         </a>
-
     </div>
-
 </div>
 
 <%- include('../partials/footer') %>

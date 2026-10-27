@@ -1,58 +1,58 @@
 <%- include('../partials/header') %>
 
-<div class="mario-play-chat-wrapper" style="max-width: 1350px; margin: 15px auto 40px auto; padding: 0 15px; position: relative; z-index: 5;">
+<div class="mario-play-chat-wrapper">
 
     <!-- Thanh tiêu đề & Công cụ điều khiển nhanh -->
-    <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 12px 20px; border-radius: 16px; margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border: 2px solid #fbcfe8; box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 28px; line-height: 1;">🍄</span>
+    <div class="mario-header-bar">
+        <div class="mario-header-title-box">
+            <span class="mario-header-icon">🍄</span>
             <div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <h1 style="font-size: 19px; margin: 0; color: #1e293b; font-weight: 800;">Super Mario Bros & Chat Trực Tuyến</h1>
-                    <span style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; color: #059669; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 800;">⚡ 120 FPS</span>
+                <div class="mario-header-title-flex">
+                    <h1 class="mario-header-h1">Super Mario Bros & Chat Trực Tuyến</h1>
+                    <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
-                <p style="font-size: 12px; margin: 0; color: #64748b;">Vừa thưởng thức game Mario 2D retro cổ điển, vừa trò chuyện tương tác trực tiếp!</p>
+                <p class="mario-header-subtitle">Vừa thưởng thức game Mario 2D retro cổ điển, vừa trò chuyện tương tác trực tiếp!</p>
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <button id="btn-toggle-skin" type="button" class="tool-btn" style="background: #ecfdf5; border: 2px solid #10b981; color: #047857; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+        <div class="mario-header-tools">
+            <button id="btn-toggle-skin" type="button" class="tool-btn btn-mario-skin">
                 <span id="skin-icon">🟩</span> <span id="skin-text">Chế độ: Minecraft Edition</span>
             </button>
-            <button id="btn-toggle-sound" type="button" class="tool-btn" style="background: #fdf2f8; border: 2px solid #f472b6; color: #db2777; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button id="btn-toggle-sound" type="button" class="tool-btn btn-mario-sound">
                 <span id="sound-icon">🔊</span> <span id="sound-text">Âm thanh: Bật</span>
             </button>
-            <button id="btn-restart-game" type="button" class="tool-btn" style="background: #fef08a; border: 2px solid #facc15; color: #854d0e; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button id="btn-restart-game" type="button" class="tool-btn btn-mario-restart">
                 🔄 Chơi lại
             </button>
-            <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle" onclick="toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi" style="background: #eff6ff; border: 2px solid #3b82f6; color: #1d4ed8; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle btn-mario-fs" onclick="toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi">
                 <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
             </button>
         </div>
     </div>
 
     <!-- Khung chính 2 cột: Trò chơi Mario (Trái) & Phòng Chat (Phải) -->
-    <div class="mario-grid-container" style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr); gap: 20px; align-items: start;">
+    <div class="mario-grid-container">
 
         <!-- CỘT 1: KHUNG GAME MARIO -->
-        <div class="game-column" style="display: flex; flex-direction: column; gap: 12px;">
-            <div id="mario-game-container" class="game-card" style="background: #0f172a; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border: 4px solid #38bdf8; position: relative;">
+        <div class="game-column">
+            <div id="mario-game-container" class="game-card">
                 <!-- Fullscreen Top Header Bar -->
-                <div class="mario-fs-header" style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 8px; color: #fff;">
-                        <span style="font-size: 16px;">🎮</span>
-                        <span style="font-size: 14px; font-weight: 700;">Super Mario Bros & Minecraft</span>
-                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800;">⚡ 120 FPS</span>
-                        <span style="font-size: 11px; color: #94a3b8; margin-left: 6px;">(Di chuyển: A/D/← → | Nhảy: Space/W)</span>
+                <div class="mario-fs-header">
+                    <div class="mario-fs-title-box">
+                        <span class="mario-fs-icon">🎮</span>
+                        <span class="mario-fs-text-title">Super Mario Bros & Minecraft</span>
+                        <span class="mario-fps-badge mario-fs-fps-badge">⚡ 120 FPS</span>
+                        <span class="mario-fs-guide-text">(Di chuyển: A/D/← → | Nhảy: Space/W)</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button type="button" id="fs-skin-btn" onclick="document.getElementById('btn-toggle-skin').click()" style="background: #065f46; border: 1.5px solid #10b981; color: #a7f3d0; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <div class="mario-fs-actions">
+                        <button type="button" id="fs-skin-btn" class="fs-skin-btn" onclick="document.getElementById('btn-toggle-skin').click()">
                             <span id="fs-skin-icon">🟩</span> <span id="fs-skin-text">Đổi Skin</span>
                         </button>
-                        <button type="button" id="fs-sound-btn" onclick="document.getElementById('btn-toggle-sound').click()" style="background: #334155; border: 1.5px solid #64748b; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                        <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="document.getElementById('btn-toggle-sound').click()">
                             🔊
                         </button>
-                        <button type="button" onclick="document.getElementById('btn-restart-game').click()" style="background: #854d0e; border: 1.5px solid #facc15; color: #fef08a; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                        <button type="button" class="fs-restart-btn" onclick="document.getElementById('btn-restart-game').click()">
                             🔄 Chơi lại
                         </button>
                         <button type="button" class="btn-exit-fullscreen" onclick="exitFullscreenMario()">
@@ -62,67 +62,67 @@
                 </div>
 
                 <!-- Canvas Game Mario -->
-                <canvas id="mario-canvas" style="display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #5c94fc; cursor: pointer; outline: none;" tabindex="0"></canvas>
+                <canvas id="mario-canvas" class="game-canvas" tabindex="0"></canvas>
 
                 <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
-                <div class="mario-touch-hud" style="display: none; position: absolute; bottom: 12px; left: 14px; right: 14px; justify-content: space-between; align-items: flex-end; pointer-events: none; z-index: 50;">
-                    <div style="display: flex; gap: 10px; pointer-events: auto;">
-                        <button type="button" id="hud-vkey-left" class="hud-key" style="width: 58px; height: 50px; border-radius: 14px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.45); color: #ffffff; font-size: 22px; font-weight: bold; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">◀</button>
-                        <button type="button" id="hud-vkey-right" class="hud-key" style="width: 58px; height: 50px; border-radius: 14px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.45); color: #ffffff; font-size: 22px; font-weight: bold; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</button>
+                <div class="mario-touch-hud">
+                    <div class="mario-hud-group">
+                        <button type="button" id="hud-vkey-left" class="hud-key hud-key-nav">◀</button>
+                        <button type="button" id="hud-vkey-right" class="hud-key hud-key-nav">▶</button>
                     </div>
-                    <div style="pointer-events: auto;">
-                        <button type="button" id="hud-vkey-jump" class="hud-key" style="min-width: 86px; height: 50px; padding: 0 18px; border-radius: 14px; background: rgba(234, 88, 12, 0.88); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.6); color: #ffffff; font-size: 15px; font-weight: 800; cursor: pointer; user-select: none; touch-action: manipulation; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);">▲ NHẢY</button>
+                    <div class="mario-hud-group">
+                        <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump">▲ NHẢY</button>
                     </div>
                 </div>
             </div>
 
             <!-- Bàn phím điều khiển ảo (Gamepad 2 tay cho Di động & Máy tính) -->
-            <div class="controls-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 12px 18px; border-radius: 16px; border: 2px solid #fbcfe8; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+            <div class="controls-card">
                 <!-- Cụm tay trái (D-Pad di chuyển) -->
-                <div class="gamepad-dpad-left" style="display: flex; align-items: center; gap: 8px;">
-                    <button type="button" class="virtual-key" id="vkey-left" title="Chạy sang trái (A / ←)" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 56px; height: 48px; border-radius: 12px; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #94a3b8;">◀</button>
-                    <button type="button" class="virtual-key" id="vkey-right" title="Chạy sang phải (D / →)" style="background: #f1f5f9; border: 2px solid #cbd5e1; width: 56px; height: 48px; border-radius: 12px; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #94a3b8;">▶</button>
+                <div class="gamepad-dpad-left">
+                    <button type="button" class="virtual-key" id="vkey-left" title="Chạy sang trái (A / ←)">◀</button>
+                    <button type="button" class="virtual-key" id="vkey-right" title="Chạy sang phải (D / →)">▶</button>
                 </div>
 
                 <!-- Hướng dẫn điều khiển -->
-                <div class="controls-guide-text" style="font-size: 12px; color: #64748b; text-align: center; flex: 1; min-width: 160px; line-height: 1.4;">
-                    <span style="font-weight: 700; color: #db2777;">📱 Chơi trên điện thoại:</span> 
+                <div class="controls-guide-text">
+                    <span class="controls-guide-highlight">📱 Chơi trên điện thoại:</span> 
                     <span>Ngón trái bấm <b>◀ ▶</b> | Ngón phải bấm <b>▲ Nhảy</b> (hoặc chạm trực tiếp lên màn hình game)</span>
                 </div>
 
                 <!-- Cụm tay phải (Nút Nhảy Action) -->
-                <div class="gamepad-action-right" style="display: flex; align-items: center; gap: 8px;">
-                    <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" title="Nhảy lên (Space / W)" style="background: #fed7aa; border: 2px solid #fb923c; color: #c2410c; padding: 0 20px; height: 48px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 0 #ea580c;">▲ Nhảy (Space)</button>
+                <div class="gamepad-action-right">
+                    <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" title="Nhảy lên (Space / W)">▲ Nhảy (Space)</button>
                 </div>
             </div>
         </div>
 
         <!-- CỘT 2: KHUNG CHAT MARIO -->
         <div class="chat-column">
-            <div class="chat-card" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); border: 2px solid #fbcfe8; display: flex; flex-direction: column; height: 580px; overflow: hidden;">
+            <div class="chat-card mario-chat-card">
                 
                 <!-- Chat Header -->
-                <div style="background: #fff; padding: 14px 18px; border-bottom: 2px solid #fdf2f8; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div id="chat-hero-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #dbeafe; border: 2px solid #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <div class="mario-chat-header">
+                    <div class="mario-chat-header-info">
+                        <div id="chat-hero-avatar" class="mario-chat-hero-avatar">
                             ⛏️
                         </div>
                         <div>
-                            <h2 id="chat-hero-name" style="font-size: 15px; margin: 0; color: #1e293b; font-weight: 700;">Steve (Minecraft)</h2>
-                            <span style="font-size: 11px; color: #22c55e; font-weight: 600;">● Đang online trong game</span>
+                            <h2 id="chat-hero-name" class="mario-chat-hero-name">Steve (Minecraft)</h2>
+                            <span class="mario-chat-status">● Đang online trong game</span>
                         </div>
                     </div>
-                    <span style="font-size: 11px; background: #fdf2f8; color: #db2777; font-weight: 700; padding: 4px 10px; border-radius: 12px; border: 1px solid #fbcfe8;">
+                    <span class="mario-chat-tag">
                         Interactive Live Chat
                     </span>
                 </div>
 
                 <!-- Chat Messages Scroll Area -->
-                <div id="mario-message-box" style="flex: 1; padding: 16px; overflow-y: auto; background: #fdfbf7; display: flex; flex-direction: column; gap: 12px;">
+                <div id="mario-message-box" class="mario-message-box">
                     
                     <!-- Lời chào đầu tiên từ Hero -->
-                    <div class="message bot" style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 14px 14px 14px 4px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 14px; color: #1e293b; line-height: 1.5; max-width: 90%;">
-                        <b id="chat-welcome-bot-title" style="color: #0284c7; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                    <div class="message bot mario-welcome-bot-msg">
+                        <b id="chat-welcome-bot-title" class="chat-welcome-bot-title">
                             <span>⛏️</span> Steve (Minecraft Edition):
                         </b>
                         <span id="chat-welcome-bot-msg">Xin chào! Tôi là Steve trong thế giới Mario x Minecraft! Hãy nhấp vào màn hình để điều khiển tôi vung Kiếm Kim Cương 🗡️, vượt qua Cổng Nether và hạ gục Creeper 💥! Bạn có thể vừa chơi vừa chat cùng tôi nhé! ⭐</span>
@@ -131,27 +131,27 @@
                 </div>
 
                 <!-- Gợi ý câu hỏi nhanh -->
-                <div id="mario-quick-questions" style="padding: 10px 14px; background: #ffffff; border-top: 1px dashed #fbcfe8; flex-shrink: 0; max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-                    <div style="font-size: 11px; font-weight: 700; color: #0284c7;">💡 Gợi ý hỏi đáp:</div>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Có những bản Mario x Minecraft nào chơi được và đẹp nhất?')" style="text-align: left; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 6px 10px; border-radius: 8px; font-size: 12px; color: #047857; cursor: pointer;">
+                <div id="mario-quick-questions" class="mario-quick-questions">
+                    <div class="mario-quick-title">💡 Gợi ý hỏi đáp:</div>
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Có những bản Mario x Minecraft nào chơi được và đẹp nhất?')">
                         ⛏️ Có những bản Mario x Minecraft nào chơi được & đẹp nhất?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Steve nhảy và chém Creeper?')" style="text-align: left; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 10px; border-radius: 8px; font-size: 12px; color: #15803d; cursor: pointer;">
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Steve nhảy và chém Creeper?')">
                         💥 Làm thế nào để điều khiển Steve nhảy chém Creeper?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để đào Kim Cương Diamond?')" style="text-align: left; background: #f0f9ff; border: 1px solid #bae6fd; padding: 6px 10px; border-radius: 8px; font-size: 12px; color: #0284c7; cursor: pointer;">
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để đào Kim Cương Diamond?')">
                         💎 Làm thế nào để đào được Kim Cương Diamond?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Mario nhảy cao?')" style="text-align: left; background: #fdf2f8; border: 1px solid #fbcfe8; padding: 6px 10px; border-radius: 8px; font-size: 12px; color: #db2777; cursor: pointer;">
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Mario nhảy cao?')">
                         🍄 Làm thế nào để điều khiển Mario nhảy cao?
                     </button>
                 </div>
 
                 <!-- Input nhắn tin trực tiếp -->
-                <div style="padding: 12px 14px; background: #ffffff; border-top: 1px solid #f0eae1; flex-shrink: 0;">
-                    <form id="mario-chat-form" style="display: flex; gap: 8px;" onsubmit="handleSendChat(event)">
-                        <input type="text" id="mario-chat-input" placeholder="Nhập tin nhắn để chat với Mario..." autocomplete="off" style="flex: 1; padding: 10px 14px; border: 2px solid #fbcfe8; border-radius: 10px; font-size: 13px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'" />
-                        <button type="submit" style="background: #db2777; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='#be185d'" onmouseout="this.style.background='#db2777'">
+                <div class="mario-chat-input-bar">
+                    <form id="mario-chat-form" class="mario-chat-form" onsubmit="handleSendChat(event)">
+                        <input type="text" id="mario-chat-input" class="mario-chat-input" placeholder="Nhập tin nhắn để chat với Mario..." autocomplete="off" />
+                        <button type="submit" class="mario-chat-send-btn">
                             Gửi
                         </button>
                     </form>

@@ -1,43 +1,38 @@
 <%- include('../partials/header') %>
 
-<div class="main-container" style="max-width: 480px; margin: 40px auto; padding: 0 15px; position: relative; z-index: 5;">
+<div class="main-container admin-login-wrapper">
     
-    <div class="admin-card" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 30px rgba(0,0,0,0.08); padding: 32px 28px; text-align: center;">
+    <div class="admin-card admin-login-card">
         
-        <div style="width: 68px; height: 68px; border-radius: 50%; background: #fef2f2; border: 2px solid #fca5a5; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px auto; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);">
+        <div class="admin-login-icon">
             🔒
         </div>
 
-        <h1 style="font-size: 21px; margin: 0 0 8px 0; color: #1e293b; font-weight: 800;">Xác thực Quản trị viên</h1>
-        <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
+        <h1 class="admin-login-title">Xác thực Quản trị viên</h1>
+        <p class="admin-login-desc">
             Trang này chỉ dành cho quản trị viên hệ thống. Vui lòng nhập mật khẩu tài khoản <b>Admin</b> để tiếp tục.
         </p>
 
-        <div id="login-error-alert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 18px; text-align: left;"></div>
+        <div id="login-error-alert" class="welcome-error-alert"></div>
 
         <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
-            <div style="text-align: left; margin-bottom: 16px;">
-                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Tên tài khoản Admin (*):</label>
-                <input type="text" id="admin-username-input" value="<%= typeof adminUsername !== 'undefined' ? adminUsername : 'admin' %>" placeholder="Nhập tên tài khoản (VD: admin, huymn...)" required
-                    style="width: 100%; padding: 11px 14px; border: 2px solid #fbcfe8; border-radius: 10px; font-size: 14px; background: #fff; font-weight: 600; color: #1e293b; outline: none; transition: border-color 0.2s;"
-                    onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
+            <div class="admin-login-group">
+                <label class="admin-login-label">Tên tài khoản Admin (*):</label>
+                <input type="text" id="admin-username-input" class="admin-login-input" value="<%= typeof adminUsername !== 'undefined' ? adminUsername : 'admin' %>" placeholder="Nhập tên tài khoản (VD: admin, huymn...)" required>
             </div>
 
-            <div style="text-align: left; margin-bottom: 22px;">
-                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Mật khẩu Admin (*):</label>
-                <input type="password" id="admin-password-input" placeholder="Nhập mật khẩu quản trị..." required autofocus
-                    style="width: 100%; padding: 11px 14px; border: 2px solid #fbcfe8; border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s;"
-                    onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
+            <div class="admin-login-group admin-login-group-last">
+                <label class="admin-login-label">Mật khẩu Admin (*):</label>
+                <input type="password" id="admin-password-input" class="admin-login-input" placeholder="Nhập mật khẩu quản trị..." required autofocus>
             </div>
 
-            <button type="submit" id="btn-admin-submit" style="width: 100%; padding: 13px; background: #db2777; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(219,39,119,0.25); transition: background 0.15s ease;"
-                onmouseover="this.style.background='#be185d'" onmouseout="this.style.background='#db2777'">
+            <button type="submit" id="btn-admin-submit" class="btn-admin-submit">
                 🔑 Xác nhận & Vào trang Quản trị
             </button>
         </form>
 
-        <div style="margin-top: 20px; font-size: 13px;">
-            <a href="/" style="color: #64748b; text-decoration: none; font-weight: 600;">← Quay về Trang chủ</a>
+        <div class="admin-login-back">
+            <a href="/">← Quay về Trang chủ</a>
         </div>
 
     </div>

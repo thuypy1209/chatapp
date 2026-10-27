@@ -346,20 +346,28 @@ h1 {
 
 .message.user {
     align-self: flex-end;
-    background: #bae6fd !important;
-    border: 3px solid #38bdf8 !important;
-    color: #0369a1 !important;
-    border-radius: 12px 4px 12px 12px !important;
-    box-shadow: -3px 3px 0px #0284c7;
+    background: #db2777;
+    color: #ffffff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 16px;
+    font-size: 14px;
+    max-width: 82%;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);
+    border: none;
+    animation: fadeIn 0.15s ease;
 }
 
 .message.bot {
     align-self: flex-start;
-    background: #fef08a !important;
-    color: #713f12 !important;
-    border: 3px solid #facc15 !important;
-    border-radius: 4px 12px 12px 12px !important;
-    box-shadow: 3px 3px 0px #f59e0b;
+    background: #ffffff;
+    border: 1px solid #fbcfe8;
+    border-radius: 16px 16px 16px 4px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #1e293b;
+    max-width: 88%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    line-height: 1.5;
 }
 
 /* Khung chọn Options nằm nối tiếp bên trong luồng Chat */
@@ -869,6 +877,1388 @@ h1 {
 .btn-exit-fullscreen:hover {
     background: #b91c1c !important;
     transform: scale(1.04) !important;
+}
+
+/* ========================================================================== */
+/* 🎨 EXTRACTED MODULAR COMPONENT STYLES (VIEWS REFACTORING)                   */
+/* ========================================================================== */
+
+/* --- 1. Header & Navigation Components --- */
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    padding: 5px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.user-badge-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.user-badge-logout {
+    background: rgba(254, 226, 226, 0.7);
+    color: #dc2626;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    text-decoration: none;
+    font-weight: bold;
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    transition: background 0.15s ease;
+}
+.user-badge-logout:hover {
+    background: #fee2e2;
+}
+.btn-user-name {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    color: #831843;
+    padding: 7px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.15s ease;
+}
+.btn-user-name:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+}
+
+/* Modal bắt buộc nhập tên */
+#welcome-name-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+.welcome-box {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 3px solid #f472b6;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 440px;
+    padding: 32px 28px;
+    text-align: center;
+    position: relative;
+}
+.welcome-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #fdf2f8;
+    border: 3px solid #fbcfe8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 4px 14px rgba(244, 114, 182, 0.25);
+}
+.welcome-title {
+    font-size: 22px;
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-weight: 800;
+}
+.welcome-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+.welcome-error-alert {
+    display: none;
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    color: #dc2626;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: left;
+}
+.welcome-form-group {
+    text-align: left;
+    margin-bottom: 16px;
+}
+.welcome-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+.welcome-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #fbcfe8;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.welcome-input:focus {
+    border-color: #db2777;
+}
+.welcome-hint {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+    display: block;
+}
+.welcome-admin-group {
+    display: none;
+    text-align: left;
+    margin-bottom: 18px;
+}
+.welcome-admin-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #db2777;
+    margin-bottom: 6px;
+}
+.welcome-admin-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #f43f5e;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    background: #fff1f2;
+    box-sizing: border-box;
+}
+.welcome-admin-hint {
+    font-size: 11px;
+    color: #e11d48;
+    margin-top: 4px;
+    display: block;
+}
+.welcome-submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: #db2777;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.3);
+    transition: all 0.15s ease;
+}
+.welcome-submit-btn:hover {
+    background: #be185d;
+}
+
+/* --- 2. Footer --- */
+.site-footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #888;
+    font-size: 13px;
+}
+
+/* --- 3. Home Page Components --- */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 65vh;
+    text-align: center;
+    padding: 20px 15px;
+    position: relative;
+    z-index: 5;
+}
+.home-title {
+    margin-bottom: 12px;
+    color: #1e293b;
+    font-size: 32px;
+    font-weight: 800;
+    text-shadow: 2px 2px 0px #fbcfe8;
+}
+.home-subtitle {
+    color: #64748b;
+    margin-bottom: 30px;
+    font-size: 16px;
+    max-width: 550px;
+    line-height: 1.5;
+}
+.home-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.btn-home-chat {
+    background: #db2777;
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 12px;
+    border: 2px solid #be185d;
+    box-shadow: 3px 3px 0px #9d174d;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s ease;
+}
+.btn-home-chat:hover {
+    transform: translateY(-2px);
+    background: #be185d;
+}
+.btn-home-mario {
+    background: #f59e0b;
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 12px;
+    border: 2px solid #b45309;
+    box-shadow: 3px 3px 0px #78350f;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s ease;
+}
+.btn-home-mario:hover {
+    transform: translateY(-2px);
+    background: #d97706;
+}
+.btn-home-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* --- 4. Chat Page Components --- */
+.chat-outer-wrapper {
+    max-width: 1200px;
+    margin: 20px auto 40px auto;
+    padding: 0 15px;
+    position: relative;
+    z-index: 5;
+}
+.char-switcher-bar {
+    max-width: 680px;
+    margin: 0 auto 12px auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0 8px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.char-switcher-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #831843;
+    white-space: nowrap;
+    margin-right: 2px;
+}
+.char-switcher-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    border: 1.5px solid rgba(251, 207, 232, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    color: #334155;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.char-switcher-link.active {
+    border-color: #db2777;
+    background: #db2777;
+    color: #ffffff;
+}
+.chat-layout-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+.mario-side-panel {
+    display: none;
+    background: #0f172a;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    border: 4px solid #38bdf8;
+    position: relative;
+    align-self: start;
+}
+.mario-panel-header {
+    background: #1e293b;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.mario-panel-title-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.mario-fps-badge {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10b981;
+    color: #34d399;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+}
+.mario-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.side-skin-btn {
+    background: #065f46;
+    border: 1.5px solid #10b981;
+    color: #a7f3d0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.side-audio-btn {
+    background: #334155;
+    border: 1.5px solid #64748b;
+    color: #fff;
+    padding: 4px 7px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+}
+.side-restart-btn {
+    background: #854d0e;
+    border: 1.5px solid #facc15;
+    color: #fef08a;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.side-fs-btn {
+    background: #1d4ed8;
+    border: 1.5px solid #60a5fa;
+    color: #eff6ff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(29, 78, 216, 0.3);
+}
+.mario-panel-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background: #5c94fc;
+    cursor: pointer;
+    outline: none;
+}
+.mario-panel-footer {
+    background: #1e293b;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 11px;
+    border-top: 1px solid #334155;
+}
+.side-vkey-btn {
+    background: #334155;
+    border: 1px solid #475569;
+    color: #f8fafc;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+.side-vkey-jump {
+    background: #ea580c;
+    border: 1px solid #fb923c;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Chat Main Card */
+.chat-card {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 20px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    border: 2px solid #fbcfe8 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 82vh;
+}
+.chat-header-bar {
+    background: #fff;
+    padding: 12px 18px;
+    border-bottom: 2px solid #fdf2f8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.chat-avatar-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fbcfe8;
+}
+.chat-avatar-placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fdf2f8;
+    border: 2px solid #fbcfe8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+.chat-title-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chat-character-title {
+    font-size: 16px;
+    margin: 0;
+    color: #1e293b;
+    font-weight: 700;
+}
+.chat-voice-btn {
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.chat-online-badge {
+    font-size: 11px;
+    color: #22c55e;
+    font-weight: 600;
+}
+.chat-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chat-tool-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.chat-toggle-mario-btn {
+    background: #fef08a;
+    border: 1.5px solid #facc15;
+    color: #854d0e;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 0 #eab308;
+}
+
+/* Chat Message Box */
+.message-box {
+    flex: 1;
+    padding: 18px;
+    overflow-y: auto;
+    background: #fdfbf7;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.message.bot {
+    align-self: flex-start;
+    background: #ffffff;
+    border: 1px solid #fbcfe8;
+    border-radius: 16px 16px 16px 4px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #1e293b;
+    max-width: 88%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    line-height: 1.5;
+}
+.message-author-bot {
+    color: #db2777;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.chat-media-img {
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid #fbcfe8;
+    margin-top: 10px;
+}
+.voice-bubble {
+    margin-top: 10px;
+    background: #fdf2f8;
+    border: 1.5px solid #fbcfe8;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 280px;
+}
+.btn-play-voice {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #db2777;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(219, 39, 119, 0.3);
+    flex-shrink: 0;
+}
+.voice-bubble-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #db2777;
+    margin-bottom: 2px;
+}
+.voice-wave-container {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 12px;
+}
+.voice-bar {
+    width: 3px;
+    background: #f472b6;
+    border-radius: 2px;
+}
+.voice-bar.active {
+    background: #db2777;
+}
+
+/* Question Options */
+.options-in-chat {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #ffffff;
+    padding: 10px 16px;
+    border-top: 1px dashed #fbcfe8;
+    max-height: 160px;
+    overflow-y: auto;
+    z-index: 5;
+}
+.options-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #db2777;
+    margin-bottom: 2px;
+}
+.question-btn {
+    width: 100%;
+    text-align: left;
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #db2777;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 2px;
+    transition: transform 0.1s ease;
+}
+.question-btn:hover {
+    background: #fce7f3;
+    border-color: #f472b6;
+}
+
+/* Chat Finished & Voice helpers */
+.char-switcher-icon {
+    font-size: 15px;
+}
+.mario-panel-game-title {
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 13px;
+}
+.mario-side-vkeys {
+    display: flex;
+    gap: 6px;
+}
+.voice-wave-wrapper {
+    flex: 1;
+}
+.voice-bar-1 { height: 5px; }
+.voice-bar-2 { height: 11px; }
+.voice-bar-3 { height: 7px; }
+.voice-bar-4 { height: 12px; }
+.voice-bar-5 { height: 6px; }
+.chat-finished-box {
+    text-align: center;
+    padding: 6px;
+}
+.chat-finished-text {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 6px 0;
+}
+.btn-chat-restart {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.25);
+    transition: background 0.15s ease;
+}
+.btn-chat-restart:hover {
+    background: #16a34a;
+}
+.welcome-error-msg {
+    margin-bottom: 8px;
+}
+.welcome-override-btn {
+    width: 100%;
+    background: #22c55e;
+    color: #ffffff;
+    border: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.welcome-override-btn:hover {
+    background: #16a34a;
+}
+.admin-login-group-last {
+    margin-bottom: 22px;
+}
+.mario-header-title-flex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mario-fs-icon {
+    font-size: 16px;
+}
+.mario-fs-text-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+.mario-fs-fps-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    font-size: 10px;
+}
+.mario-fs-guide-text {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-left: 6px;
+}
+.controls-guide-highlight {
+    font-weight: 700;
+    color: #db2777;
+}
+.mario-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.mario-chat-status {
+    font-size: 11px;
+    color: #22c55e;
+    font-weight: 600;
+}
+
+/* Chat Form Bottom */
+.chat-input-bar {
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid #f0eae1;
+    flex-shrink: 0;
+}
+.chat-free-form {
+    display: flex;
+    gap: 8px;
+}
+.chat-free-input {
+    flex: 1;
+    padding: 11px 16px;
+    border: 2px solid #fbcfe8;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.chat-free-input:focus {
+    border-color: #db2777;
+}
+.chat-send-btn {
+    background: #db2777;
+    color: #ffffff;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #be185d;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.chat-send-btn:hover {
+    background: #be185d;
+}
+
+/* --- 5. MarioChat Page Components --- */
+.mario-play-chat-wrapper {
+    max-width: 1350px;
+    margin: 15px auto 40px auto;
+    padding: 0 15px;
+    position: relative;
+    z-index: 5;
+}
+.mario-header-bar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 20px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid #fbcfe8;
+    box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);
+}
+.mario-header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.mario-header-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+.mario-header-h1 {
+    font-size: 19px;
+    margin: 0;
+    color: #1e293b;
+    font-weight: 800;
+}
+.mario-header-subtitle {
+    font-size: 12px;
+    margin: 0;
+    color: #64748b;
+}
+.mario-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-mario-skin {
+    background: #ecfdf5;
+    border: 2px solid #10b981;
+    color: #047857;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.btn-mario-sound {
+    background: #fdf2f8;
+    border: 2px solid #f472b6;
+    color: #db2777;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-mario-restart {
+    background: #fef08a;
+    border: 2px solid #facc15;
+    color: #854d0e;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-mario-fs {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+    color: #1d4ed8;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.mario-grid-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+.game-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.game-card {
+    background: #0f172a;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    border: 4px solid #38bdf8;
+    position: relative;
+}
+.game-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background: #5c94fc;
+    cursor: pointer;
+    outline: none;
+}
+.controls-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 18px;
+    border-radius: 16px;
+    border: 2px solid #fbcfe8;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.gamepad-dpad-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.gamepad-action-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.virtual-key {
+    background: #f1f5f9;
+    border: 2px solid #cbd5e1;
+    width: 56px;
+    height: 48px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 0 #94a3b8;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+.virtual-key-jump {
+    background: #fed7aa;
+    border: 2px solid #fb923c;
+    color: #c2410c;
+    padding: 0 20px;
+    height: 48px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 3px 0 #ea580c;
+    width: auto;
+}
+.controls-guide-text {
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    flex: 1;
+    min-width: 160px;
+    line-height: 1.4;
+}
+
+/* Mario Chat column */
+.chat-column {
+    display: flex;
+    flex-direction: column;
+}
+.mario-chat-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 2px solid #fbcfe8;
+    display: flex;
+    flex-direction: column;
+    height: 580px;
+    overflow: hidden;
+}
+.mario-chat-header {
+    background: #fff;
+    padding: 14px 18px;
+    border-bottom: 2px solid #fdf2f8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.mario-chat-hero-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dbeafe;
+    border: 2px solid #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.mario-chat-hero-name {
+    font-size: 15px;
+    margin: 0;
+    color: #1e293b;
+    font-weight: 700;
+}
+.mario-chat-tag {
+    font-size: 11px;
+    background: #fdf2f8;
+    color: #db2777;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid #fbcfe8;
+}
+.mario-quick-questions {
+    padding: 10px 14px;
+    background: #ffffff;
+    border-top: 1px dashed #fbcfe8;
+    flex-shrink: 0;
+    max-height: 120px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.quick-btn {
+    text-align: left;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #047857;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+.quick-btn:hover {
+    background: #d1fae5;
+}
+
+/* Fullscreen Top Header and HUD controls */
+.mario-fs-header {
+    display: none;
+}
+.mario-fs-title-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+}
+.mario-fs-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.fs-skin-btn {
+    background: #065f46;
+    border: 1.5px solid #10b981;
+    color: #a7f3d0;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.fs-sound-btn {
+    background: #334155;
+    border: 1.5px solid #64748b;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.fs-restart-btn {
+    background: #854d0e;
+    border: 1.5px solid #facc15;
+    color: #fef08a;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.mario-touch-hud {
+    display: none;
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    right: 14px;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 50;
+}
+.mario-hud-group {
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+}
+.hud-key {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+.hud-key-nav {
+    width: 58px;
+    height: 50px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.hud-key-jump {
+    min-width: 86px;
+    height: 50px;
+    padding: 0 18px;
+    border-radius: 14px;
+    background: rgba(234, 88, 12, 0.88);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);
+}
+.mario-message-box {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #fdfbf7;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.mario-welcome-bot-msg {
+    background: #ffffff;
+    border: 1px solid #fbcfe8;
+    border-radius: 14px 14px 14px 4px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.5;
+    max-width: 90%;
+}
+.chat-welcome-bot-title {
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+.mario-quick-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0284c7;
+}
+.mario-chat-input-bar {
+    padding: 12px 14px;
+    background: #ffffff;
+    border-top: 1px solid #f0eae1;
+    flex-shrink: 0;
+}
+.mario-chat-form {
+    display: flex;
+    gap: 8px;
+}
+.mario-chat-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #fbcfe8;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.mario-chat-input:focus {
+    border-color: #db2777;
+}
+.mario-chat-send-btn {
+    background: #db2777;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.mario-chat-send-btn:hover {
+    background: #be185d;
+}
+
+/* Select Character Page Components */
+.select-char-container {
+    text-align: center;
+}
+.select-char-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+.select-char-subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+.select-char-empty {
+    grid-column: span 2;
+    text-align: center;
+    color: #64748b;
+    width: 100%;
+}
+
+/* --- 6. Admin Login Components --- */
+.admin-login-wrapper {
+    max-width: 480px;
+    margin: 40px auto;
+    padding: 0 15px;
+    position: relative;
+    z-index: 5;
+}
+.admin-login-card {
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 2px solid #fbcfe8;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    padding: 32px 28px;
+    text-align: center;
+}
+.admin-login-icon {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #fef2f2;
+    border: 2px solid #fca5a5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+.admin-login-title {
+    font-size: 21px;
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-weight: 800;
+}
+.admin-login-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+.admin-login-group {
+    text-align: left;
+    margin-bottom: 16px;
+}
+.admin-login-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+.admin-login-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #fbcfe8;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.admin-login-input:focus {
+    border-color: #db2777;
+}
+.btn-admin-submit {
+    width: 100%;
+    padding: 13px;
+    background: #db2777;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25);
+    transition: background 0.15s ease;
+}
+.btn-admin-submit:hover {
+    background: #be185d;
+}
+.admin-login-back {
+    margin-top: 20px;
+    font-size: 13px;
+}
+.admin-login-back a {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 /* ========================================================================== */

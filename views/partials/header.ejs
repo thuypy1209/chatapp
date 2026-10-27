@@ -24,19 +24,19 @@
             <!-- Thông tin người dùng / Nút đổi tên -->
             <% if (typeof currentUser !== 'undefined' && currentUser) { %>
                 <li>
-                    <div class="user-badge" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                        <span style="font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 4px;">
+                    <div class="user-badge">
+                        <span class="user-badge-name">
                             <%= (typeof isAdmin !== 'undefined' && isAdmin) ? '⭐' : '👤' %> 
                             <span id="nav-username-display"><%= currentUser %></span>
                         </span>
-                        <a href="/auth/logout" title="Đổi tên / Đăng xuất" style="background: rgba(254, 226, 226, 0.7); color: #dc2626; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; text-decoration: none; font-weight: bold; border: 1px solid rgba(248, 113, 113, 0.35);">
+                        <a href="/auth/logout" title="Đổi tên / Đăng xuất" class="user-badge-logout">
                             ✕
                         </a>
                     </div>
                 </li>
             <% } else { %>
                 <li>
-                    <button type="button" class="btn-user-name" onclick="openWelcomeNameModal()" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid rgba(255, 255, 255, 0.65); color: #831843; padding: 7px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <button type="button" class="btn-user-name" onclick="openWelcomeNameModal()">
                         👋 Nhập tên bạn
                     </button>
                 </li>
@@ -50,50 +50,42 @@
     <div class="mario-ground"></div>
 
     <!-- MODAL BẮT BUỘC NHẬP TÊN KHI VÀO TRANG -->
-    <div id="welcome-name-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 15px;">
-        
-        <div class="welcome-box" style="background: #ffffff; border-radius: 24px; border: 3px solid #f472b6; box-shadow: 0 12px 40px rgba(0,0,0,0.3); width: 100%; max-width: 440px; padding: 32px 28px; text-align: center; position: relative;">
-            
-            <div style="width: 72px; height: 72px; border-radius: 50%; background: #fdf2f8; border: 3px solid #fbcfe8; display: flex; align-items: center; justify-content: center; font-size: 34px; margin: 0 auto 16px auto; box-shadow: 0 4px 14px rgba(244,114,182,0.25);">
+    <div id="welcome-name-modal">
+        <div class="welcome-box">
+            <div class="welcome-icon-circle">
                 🍄
             </div>
 
-            <h2 style="font-size: 22px; margin: 0 0 8px 0; color: #1e293b; font-weight: 800;">Chào mừng bạn đến Phổi bạn không phải tôi!</h2>
-            <p style="font-size: 13px; color: #64748b; margin: 0 0 20px 0; line-height: 1.5;">
+            <h2 class="welcome-title">Chào mừng bạn đến Phổi bạn không phải tôi!</h2>
+            <p class="welcome-desc">
                 Vui lòng nhập tên của bạn để bắt đầu trò chuyện & chơi game:
             </p>
 
             <!-- Khung báo lỗi -->
-            <div id="modal-name-error" style="display: none; background: #fef2f2; border: 1.5px solid #fca5a5; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px; text-align: left;"></div>
+            <div id="modal-name-error" class="welcome-error-alert"></div>
 
             <form id="welcome-name-form" onsubmit="submitUserName(event)">
-                <div style="text-align: left; margin-bottom: 16px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Tên của bạn (*):</label>
-                    <input type="text" id="modal-username-input" placeholder="VD: Huy, MarioFan, GamePro..." required autocomplete="off"
-                        style="width: 100%; padding: 12px 16px; border: 2px solid #fbcfe8; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s;"
-                        oninput="handleUsernameInput(this.value)"
-                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
-                    <span style="font-size: 11px; color: #94a3b8; margin-top: 4px; display: block;">* Tên không được trùng với người khác trong hệ thống</span>
+                <div class="welcome-form-group">
+                    <label class="welcome-label">Tên của bạn (*):</label>
+                    <input type="text" id="modal-username-input" class="welcome-input" placeholder="VD: Huy, MarioFan, GamePro..." required autocomplete="off"
+                        oninput="handleUsernameInput(this.value)">
+                    <span class="welcome-hint">* Tên không được trùng với người khác trong hệ thống</span>
                 </div>
 
                 <!-- Ô Mật khẩu hiển thị nếu tên là Admin -->
-                <div id="modal-password-group" style="display: none; text-align: left; margin-bottom: 18px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 6px;">
+                <div id="modal-password-group" class="welcome-admin-group">
+                    <label class="welcome-admin-label">
                         🔒 Mật khẩu Quản trị:
                     </label>
-                    <input type="password" id="modal-password-input" placeholder="Nhập mật khẩu quản trị..."
-                        style="width: 100%; padding: 12px 16px; border: 2px solid #f43f5e; border-radius: 12px; font-size: 14px; outline: none; background: #fff1f2;">
-                    <span style="font-size: 11px; color: #e11d48; margin-top: 4px; display: block;">* Vui lòng nhập mật khẩu tài khoản Quản trị để tiếp tục</span>
+                    <input type="password" id="modal-password-input" class="welcome-admin-input" placeholder="Nhập mật khẩu quản trị...">
+                    <span class="welcome-admin-hint">* Vui lòng nhập mật khẩu tài khoản Quản trị để tiếp tục</span>
                 </div>
 
-                <button type="submit" id="btn-modal-submit" style="width: 100%; padding: 13px; background: #db2777; color: #ffffff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(219,39,119,0.3); transition: all 0.15s ease;"
-                    onmouseover="this.style.background='#be185d'" onmouseout="this.style.background='#db2777'">
+                <button type="submit" id="btn-modal-submit" class="welcome-submit-btn">
                     Bắt đầu ngay 🚀
                 </button>
             </form>
-
         </div>
-
     </div>
 
     <script>
@@ -179,8 +171,8 @@
                 // Nếu tên đã có trên hệ thống, hiển thị nút cho phép tiếp tục vào
                 if (data.isExistingUser) {
                     errorDiv.innerHTML = `
-                        <div style="margin-bottom: 8px;">${data.error}</div>
-                        <button type="button" onclick="submitUserName(null, true)" style="width: 100%; background: #22c55e; color: #ffffff; border: none; padding: 9px 12px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(34,197,94,0.3); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <div class="welcome-error-msg">${data.error}</div>
+                        <button type="button" onclick="submitUserName(null, true)" class="welcome-override-btn">
                             👋 Tiếp tục vào với tên "${data.existingUsername}"
                         </button>
                     `;

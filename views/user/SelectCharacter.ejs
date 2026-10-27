@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
-    <div class="main-container" style="text-align: center;">
-        <h1>Chọn nhân vật bạn muốn trò chuyện</h1>
-        <p style="color: #666; margin-bottom: 25px;">Hihi.....</p>
+    <div class="main-container select-char-container">
+        <h1 class="select-char-title">Chọn nhân vật bạn muốn trò chuyện</h1>
+        <p class="select-char-subtitle">Hihi.....</p>
         <div class="character-grid">
             <% if (characters && characters.length > 0) { %>
                 <% characters.forEach(function(c) { %>
@@ -20,7 +20,7 @@
                     </div>
                 <% }); %>
             <% } else { %>
-                <p style="grid-column: span 2; text-align: center; color: #666; width: 100%;">
+                <p class="select-char-empty">
                     Chưa có nhân vật nào được tạo. Vui lòng vào <a href="/admin">Trang Quản trị</a> để thêm nhân vật và kịch bản.
                 </p>
             <% } %>
