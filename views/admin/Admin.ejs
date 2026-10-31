@@ -271,13 +271,13 @@
             <!-- Phần 4: Đính kèm Media & Âm thanh -->
             <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #e2e8f0; margin-bottom: 22px;">
                 <h3 style="font-size: 15px; margin: 0 0 14px 0; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                    <span>🎵</span> Đính kèm Media & Âm thanh mở đầu
+                    <span>🎵</span> Âm thanh chào mừng mở đầu của nhân vật (Voice Intro)
                 </h3>
 
                 <div id="dialogue-container">
-                    <div class="node-box" id="node-0" style="background: #fdfbf7; border: 1px solid #fbcfe8; padding: 14px; border-radius: 12px; margin-bottom: 12px;">
+                    <div class="node-box" id="node-0" style="background: #fdfbf7; border: 1px solid #fbcfe8; padding: 14px; border-radius: 12px; margin-bottom: 0;">
                         <div style="font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
-                            Âm thanh chào mừng (Bước 1):
+                            Âm thanh chào mừng nhân vật (Audio MP3 / WAV):
                         </div>
                         
                         <input type="file" id="audio-input" name="nodeAudio_0" accept="audio/*"
@@ -298,7 +298,8 @@
                     </div>
                 </div>
 
-                <button type="button" id="btn-add-node" style="background: #f1f5f9; border: 2px dashed #cbd5e1; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;">
+                <!-- Đã ẩn nút đính kèm thêm các bước tiếp theo theo yêu cầu người dùng -->
+                <button type="button" id="btn-add-node" style="display: none;">
                     ➕ Đính kèm thêm hình ảnh / âm thanh cho các bước tiếp theo
                 </button>
             </div>

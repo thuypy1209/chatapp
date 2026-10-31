@@ -338,44 +338,16 @@ function selectIcon(emoji) {
 
 // --- 5. ĐÍNH KÈM ĐỘNG CÁC BƯỚC (DYNAMIC NODES) ---
 function initDynamicNodes() {
-    let nodeCount = 1;
+    // Đã ẩn nút và các bước phụ theo yêu cầu giao diện tối giản
     const btnAddNode = document.getElementById('btn-add-node');
-    const container = document.getElementById('dialogue-container');
-
-    if (btnAddNode && container) {
-        btnAddNode.addEventListener('click', function() {
-            const newNode = document.createElement('div');
-            newNode.className = 'node-box';
-            newNode.id = `node-${nodeCount}`;
-            newNode.style.cssText = "background: #fdfbf7; border: 1px solid #fbcfe8; padding: 15px; border-radius: 12px; margin-bottom: 12px;";
-            
-            const currentIdx = nodeCount;
-            newNode.innerHTML = `
-                <div style="font-weight: 700; color: #db2777; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>Bước ${currentIdx + 1} (Tương ứng khối ${currentIdx + 1} trong kịch bản):</span>
-                    <button type="button" onclick="this.closest('.node-box').remove()" style="background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer; font-weight: 600;">✖ Xóa bước này</button>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Hình ảnh đính kèm:</label>
-                        <input type="file" name="nodeImage_${currentIdx}" accept="image/*" class="form-control" style="font-size: 13px;" onchange="previewNodeImage(this, 'node-img-${currentIdx}')">
-                        <div id="node-img-${currentIdx}" style="display: none; margin-top: 6px;">
-                            <img src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #fbcfe8;">
-                        </div>
-                    </div>
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Âm thanh đính kèm (Audio):</label>
-                        <input type="file" name="nodeAudio_${currentIdx}" accept="audio/*" class="form-control" style="font-size: 13px;" onchange="previewNodeAudio(this, 'node-aud-${currentIdx}')">
-                        <div id="node-aud-${currentIdx}" style="display: none; margin-top: 6px;">
-                            <audio controls style="width: 100%; height: 32px;"></audio>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(newNode);
-            nodeCount++;
-        });
+    if (btnAddNode) {
+        btnAddNode.style.display = 'none';
     }
+    // Dọn dẹp bất kỳ node phụ nào khác ngoài node-0 (âm thanh chào mừng)
+    const extraNodes = document.querySelectorAll('#dialogue-container .node-box:not(#node-0)');
+    extraNodes.forEach(function(node) {
+        node.remove();
+    });
 }
 
 function previewNodeImage(input, previewContainerId) {
