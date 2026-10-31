@@ -41,17 +41,23 @@
             <div class="admin-studio-grid" style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; background: #fdfbf7; padding: 20px; border-radius: 16px; border: 1px solid #fbcfe8; margin-bottom: 22px;">
                 
                 <!-- Icon Custom -->
+                <% 
+                    const commonIcons = (typeof adminIcons !== 'undefined' && Array.isArray(adminIcons) && adminIcons.length > 0) 
+                        ? adminIcons 
+                        : ['🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥']; 
+                    const currentSelectedIcon = character.icon || ((commonIcons.length > 0) ? commonIcons[0] : '🍄');
+                %>
                 <div>
                     <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
                         🎨 Icon đại diện tin nhắn (Custom Emoji):
                     </label>
                     <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
                         <div id="icon-display-large" style="width: 54px; height: 54px; border-radius: 14px; background: #ffffff; border: 2px solid #f472b6; box-shadow: 0 3px 0 #db2777; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">
-                            <%= character.icon || '🍄' %>
+                            <%= currentSelectedIcon %>
                         </div>
                         <div style="flex: 1;">
                             <div style="display: flex; gap: 6px;">
-                                <input type="text" id="iconInput" name="icon" value="<%= character.icon || '🍄' %>" placeholder="Gõ emoji bất kỳ..."
+                                <input type="text" id="iconInput" name="icon" value="<%= currentSelectedIcon %>" placeholder="Gõ emoji bất kỳ..."
                                     style="width: 100%; padding: 8px 12px; font-size: 18px; border: 2px solid #fbcfe8; border-radius: 8px; outline: none; background: #fff;"
                                     onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
                                 <button type="button" onclick="addCurrentInputToIconList()" title="Thêm emoji đang gõ vào danh sách bên dưới"
@@ -81,7 +87,6 @@
                     </div>
 
                     <div id="common-icon-picker-list" class="common-icon-picker" style="display: flex; gap: 6px; background: #ffffff; padding: 10px; border: 1px dashed #f59e0b; border-radius: 10px; flex-wrap: wrap; min-height: 48px; align-items: center;">
-                        <% const commonIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥']; %>
                         <% commonIcons.forEach(function(iconEmoji) { %>
                             <button type="button" onclick="selectCommonIcon('<%= iconEmoji %>')" 
                                     style="font-size: 18px; cursor: pointer; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">

@@ -307,22 +307,38 @@ function initIconPicker() {
 
     if (iconInput) {
         iconInput.addEventListener('input', function() {
+            this.dataset.userEdited = 'true';
             updateIconDisplay(this.value);
         });
     }
 
     function updateIconDisplay(val) {
-        const cleanVal = val.trim() || '🍄';
+        const cleanVal = val.trim();
         if (iconDisplayLarge) {
-            iconDisplayLarge.innerText = cleanVal;
+            iconDisplayLarge.innerText = cleanVal || '❓';
         }
         if (avatarPlaceholder && (!avatarImg || avatarImg.style.display === 'none')) {
-            avatarPlaceholder.innerText = cleanVal;
+            avatarPlaceholder.innerText = cleanVal || '❓';
         }
     }
 
     // Nạp danh sách icons từ server hoặc localStorage
     loadAdminIcons();
+}
+
+function syncSelectedIconIfDeleted() {
+    const iconInput = document.getElementById('iconInput');
+    if (!iconInput) return;
+
+    // Không can thiệp nếu là trang sửa nhân vật cũ có icon riêng
+    const isEditPage = !!document.querySelector('form[action*="/admin/character/update"]');
+    if (isEditPage) return;
+
+    const currentVal = iconInput.value.trim();
+    // Nếu icon trong ô nhập không có trong bảng (ví dụ icon tay cầm đã bị xóa) và người dùng chưa gõ tay emoji khác
+    if (!currentPickerIcons.includes(currentVal) && currentPickerIcons.length > 0) {
+        selectCommonIcon(currentPickerIcons[0]);
+    }
 }
 
 function loadAdminIcons() {
@@ -334,6 +350,7 @@ function loadAdminIcons() {
             if (Array.isArray(parsed) && parsed.length > 0) {
                 currentPickerIcons = parsed;
                 renderIconPickerList();
+                syncSelectedIconIfDeleted();
             }
         } catch (e) {}
     }
@@ -346,6 +363,7 @@ function loadAdminIcons() {
                 currentPickerIcons = data.icons;
                 localStorage.setItem('chatflex_admin_icons', JSON.stringify(currentPickerIcons));
                 renderIconPickerList();
+                syncSelectedIconIfDeleted();
             } else if (!cached) {
                 renderIconPickerList();
             }
@@ -360,7 +378,7 @@ function renderIconPickerList() {
     if (!container) return;
 
     if (currentPickerIcons.length === 0) {
-        container.innerHTML = '<span style="font-size: 12px; color: #94a3b8; padding: 4px 8px;">Chưa có icon nào trong bảng. Hãy bấm "➕ Thêm icon" hoặc "🔄 Đặt lại"!</span>';
+        container.innerHTML = '<span style="font-size: 12px; color: #94a3b8; padding: 4px 8px;">Chưa có icon nào trong bảng. Hãy bấm "🔍 Tìm & Thêm icon" để thêm emoji!</span>';
         return;
     }
 
@@ -397,10 +415,13 @@ function selectCommonIcon(emoji) {
     const avatarPlaceholder = document.getElementById('avatar-placeholder-icon');
     const avatarImg = document.getElementById('avatar-preview-img');
 
-    if (iconInput) iconInput.value = emoji;
-    if (iconDisplayLarge) iconDisplayLarge.innerText = emoji;
+    if (iconInput) {
+        iconInput.value = emoji;
+        iconInput.dataset.userEdited = 'true';
+    }
+    if (iconDisplayLarge) iconDisplayLarge.innerText = emoji || '❓';
     if (avatarPlaceholder && (!avatarImg || avatarImg.style.display === 'none')) {
-        avatarPlaceholder.innerText = emoji;
+        avatarPlaceholder.innerText = emoji || '❓';
     }
 }
 
@@ -434,6 +455,13 @@ function deletePickerIcon(emoji) {
     if (idx !== -1) {
         currentPickerIcons.splice(idx, 1);
         savePickerIcons();
+
+        // NẾU ICON BỊ XÓA ĐANG ĐƯỢC CHỌN Ở Ô NHẬP VÀ XEM TRƯỚC:
+        const iconInput = document.getElementById('iconInput');
+        if (iconInput && iconInput.value.trim() === emoji) {
+            const nextEmoji = currentPickerIcons.length > 0 ? currentPickerIcons[0] : '';
+            selectCommonIcon(nextEmoji);
+        }
     }
 }
 

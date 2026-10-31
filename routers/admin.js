@@ -102,10 +102,16 @@ router.get('/', async function(req, res) {
     try {
         var Admin = require('../schemas/Admin');
         var User = require('../schemas/User');
+        var Setting = require('../schemas/Setting');
         var characters = await Character.find({});
         var isSuperAdmin = !!req.isSuperAdmin;
         var admins = isSuperAdmin ? await Admin.find({}).select('-passwordHash').sort({ createdAt: 1 }) : [];
         var chatUsers = await User.find({}).sort({ lastActive: -1, createdAt: -1 });
+
+        // Tải danh sách icon gợi ý từ MongoDB Setting
+        var setting = await Setting.findOne({ key: 'admin_custom_icons' });
+        var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
+        var adminIcons = (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons;
 
         res.render('admin/Admin', { 
             title: 'Quản trị Admin',
@@ -115,11 +121,12 @@ router.get('/', async function(req, res) {
             formatDateVN: formatDateVN,
             currentAdmin: req.adminUser,
             currentAdminRole: req.adminObj ? req.adminObj.role : 'admin',
-            isSuperAdmin: isSuperAdmin
+            isSuperAdmin: isSuperAdmin,
+            adminIcons: adminIcons
         });
     } catch (err) {
         console.log("Lỗi lấy danh sách nhân vật cho admin:", err);
-        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser });
+        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser, adminIcons: [] });
     }
 });
 
@@ -315,9 +322,15 @@ router.get('/character/delete/:id', async function(req, res) {
 router.get('/character/edit/:id', async (req, res) => {
     try {
         const character = await Character.findById(req.params.id);
+        var Setting = require('../schemas/Setting');
+        var setting = await Setting.findOne({ key: 'admin_custom_icons' });
+        var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
+        var adminIcons = (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons;
+
         res.render('admin/EditCharacter', { 
             title: `Chỉnh sửa: ${character ? character.name : 'Nhân vật'}`,
-            character 
+            character,
+            adminIcons: adminIcons
         });
     } catch (err) {
         res.redirect('/admin');
