@@ -703,4 +703,35 @@ router.post('/api/chat-users/delete', requireSuperAdmin, async function(req, res
     }
 });
 
+// 3. API Quản lý danh sách Icon gợi ý (Custom Icons Picker)
+router.get('/api/icons', async function(req, res) {
+    try {
+        var Setting = require('../schemas/Setting');
+        var setting = await Setting.findOne({ key: 'admin_custom_icons' });
+        var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
+        res.json({ success: true, icons: (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons });
+    } catch (err) {
+        res.json({ success: false, error: 'Lỗi tải danh sách icon!' });
+    }
+});
+
+router.post('/api/icons', async function(req, res) {
+    try {
+        var Setting = require('../schemas/Setting');
+        var icons = req.body.icons;
+        if (!Array.isArray(icons)) {
+            return res.status(400).json({ success: false, error: 'Dữ liệu icon không hợp lệ!' });
+        }
+        await Setting.findOneAndUpdate(
+            { key: 'admin_custom_icons' },
+            { key: 'admin_custom_icons', value: icons, updatedAt: new Date() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true, message: 'Đã lưu danh sách icon thành công!' });
+    } catch (err) {
+        console.error('Lỗi lưu icons:', err);
+        res.status(500).json({ success: false, error: 'Lỗi khi lưu danh sách icon!' });
+    }
+});
+
 module.exports = router;

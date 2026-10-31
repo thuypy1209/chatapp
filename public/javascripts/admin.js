@@ -294,29 +294,101 @@ function setupSingleAudioPreview(inputId, playerId, wrapperId, nameId, removeBtn
     }
 }
 
-// --- 4. TÙY CHỈNH ICON (CUSTOM ICON & PICKER) ---
+// --- 4. TÙY CHỈNH ICON (CUSTOM ICON & PICKER - THÊM & XÓA ICON) ---
+const DEFAULT_PICKER_ICONS = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
+let currentPickerIcons = [...DEFAULT_PICKER_ICONS];
+let isIconDeleteMode = false;
+
 function initIconPicker() {
     const iconInput = document.getElementById('iconInput');
     const iconDisplayLarge = document.getElementById('icon-display-large');
     const avatarPlaceholder = document.getElementById('avatar-placeholder-icon');
     const avatarImg = document.getElementById('avatar-preview-img');
 
-    if (!iconInput) return;
-
-    iconInput.addEventListener('input', function() {
-        updateIconDisplay(this.value);
-    });
+    if (iconInput) {
+        iconInput.addEventListener('input', function() {
+            updateIconDisplay(this.value);
+        });
+    }
 
     function updateIconDisplay(val) {
         const cleanVal = val.trim() || '🍄';
         if (iconDisplayLarge) {
             iconDisplayLarge.innerText = cleanVal;
         }
-        // Nếu chưa chọn ảnh đại diện thì cập nhật icon vào placeholder của avatar
         if (avatarPlaceholder && (!avatarImg || avatarImg.style.display === 'none')) {
             avatarPlaceholder.innerText = cleanVal;
         }
     }
+
+    // Nạp danh sách icons từ server hoặc localStorage
+    loadAdminIcons();
+}
+
+function loadAdminIcons() {
+    // 1. Kiểm tra localStorage trước để hiện ngay tức thì
+    const cached = localStorage.getItem('chatflex_admin_icons');
+    if (cached) {
+        try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                currentPickerIcons = parsed;
+                renderIconPickerList();
+            }
+        } catch (e) {}
+    }
+
+    // 2. Đồng bộ từ Server MongoDB
+    fetch('/admin/api/icons')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && Array.isArray(data.icons) && data.icons.length > 0) {
+                currentPickerIcons = data.icons;
+                localStorage.setItem('chatflex_admin_icons', JSON.stringify(currentPickerIcons));
+                renderIconPickerList();
+            } else if (!cached) {
+                renderIconPickerList();
+            }
+        })
+        .catch(() => {
+            if (!cached) renderIconPickerList();
+        });
+}
+
+function renderIconPickerList() {
+    const container = document.getElementById('common-icon-picker-list');
+    if (!container) return;
+
+    if (currentPickerIcons.length === 0) {
+        container.innerHTML = '<span style="font-size: 12px; color: #94a3b8; padding: 4px 8px;">Chưa có icon nào trong bảng. Hãy bấm "➕ Thêm icon" hoặc "🔄 Đặt lại"!</span>';
+        return;
+    }
+
+    container.innerHTML = currentPickerIcons.map(emoji => {
+        const safeEmoji = escapeHtml(emoji);
+        if (isIconDeleteMode) {
+            return `
+                <div style="position: relative; display: inline-block;">
+                    <button type="button" onclick="deletePickerIcon('${safeEmoji}')" 
+                        title="Bấm để xóa icon ${safeEmoji}"
+                        style="font-size: 18px; cursor: pointer; background: #fee2e2; border: 1.5px solid #f87171; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.15s ease;">
+                        ${safeEmoji}
+                        <span style="position: absolute; top: -5px; right: -5px; background: #dc2626; color: #fff; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1;">✕</span>
+                    </button>
+                </div>
+            `;
+        } else {
+            return `
+                <button type="button" onclick="selectCommonIcon('${safeEmoji}')" 
+                    title="Chọn icon ${safeEmoji}"
+                    style="font-size: 18px; cursor: pointer; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease, background 0.15s ease;"
+                    onmouseover="this.style.transform='scale(1.2)'; this.style.background='#fce7f3';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.background='#fdf2f8';">
+                    ${safeEmoji}
+                </button>
+            `;
+        }
+    }).join('');
 }
 
 function selectCommonIcon(emoji) {
@@ -334,6 +406,90 @@ function selectCommonIcon(emoji) {
 
 function selectIcon(emoji) {
     selectCommonIcon(emoji);
+}
+
+function addCurrentInputToIconList() {
+    const iconInput = document.getElementById('iconInput');
+    const emoji = iconInput ? iconInput.value.trim() : '';
+    if (!emoji) {
+        alert('Vui lòng gõ hoặc chọn một emoji vào ô nhập trước khi thêm!');
+        return;
+    }
+    addNewPickerIcon(emoji);
+}
+
+function promptAddNewIcon() {
+    const emoji = prompt('Nhập emoji hoặc biểu tượng bạn muốn thêm vào bảng (VD: 🦄, 🍓, 🍕, 🐉, 🐱...):');
+    if (emoji && emoji.trim()) {
+        addNewPickerIcon(emoji.trim());
+    }
+}
+
+function addNewPickerIcon(emoji) {
+    if (!emoji) return;
+    if (currentPickerIcons.includes(emoji)) {
+        alert('Icon "' + emoji + '" đã có trong bảng gợi ý rồi!');
+        return;
+    }
+    currentPickerIcons.push(emoji);
+    savePickerIcons();
+    selectCommonIcon(emoji);
+}
+
+function deletePickerIcon(emoji) {
+    const idx = currentPickerIcons.indexOf(emoji);
+    if (idx !== -1) {
+        currentPickerIcons.splice(idx, 1);
+        savePickerIcons();
+    }
+}
+
+function toggleIconDeleteMode() {
+    isIconDeleteMode = !isIconDeleteMode;
+    const btn = document.getElementById('btn-toggle-delete-icon');
+    if (btn) {
+        if (isIconDeleteMode) {
+            btn.innerHTML = '✅ Xong';
+            btn.style.background = '#dcfce7';
+            btn.style.color = '#15803d';
+            btn.style.borderColor = '#86efac';
+        } else {
+            btn.innerHTML = '🗑️ Xóa icon';
+            btn.style.background = '#fee2e2';
+            btn.style.color = '#dc2626';
+            btn.style.borderColor = '#fca5a5';
+        }
+    }
+    renderIconPickerList();
+}
+
+function restoreDefaultIcons() {
+    if (confirm('Khôi phục danh sách icon gợi ý về mặc định ban đầu?')) {
+        currentPickerIcons = [...DEFAULT_PICKER_ICONS];
+        isIconDeleteMode = false;
+        const btn = document.getElementById('btn-toggle-delete-icon');
+        if (btn) {
+            btn.innerHTML = '🗑️ Xóa icon';
+            btn.style.background = '#fee2e2';
+            btn.style.color = '#dc2626';
+            btn.style.borderColor = '#fca5a5';
+        }
+        savePickerIcons();
+    }
+}
+
+function savePickerIcons() {
+    localStorage.setItem('chatflex_admin_icons', JSON.stringify(currentPickerIcons));
+    renderIconPickerList();
+
+    // Lưu đồng bộ lên MongoDB qua API
+    fetch('/admin/api/icons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ icons: currentPickerIcons })
+    }).catch(function(err) {
+        console.warn('Không thể đồng bộ icon lên server:', err);
+    });
 }
 
 // --- 5. ĐÍNH KÈM ĐỘNG CÁC BƯỚC (DYNAMIC NODES) ---

@@ -166,6 +166,12 @@ F:/ChatApp/
 | GET | `/admin/api/chat-users` | Lấy tất cả người dùng đã vào chat (sort `lastActive` giảm dần) |
 | POST | `/admin/api/chat-users/delete` | ⭐ CHỈ SUPER ADMIN – Xóa người dùng |
 
+#### Quản lý Icon gợi ý (Custom Icons)
+| Method | Path | Mô tả |
+|--------|------|--------|
+| GET | `/admin/api/icons` | Lấy danh sách icon gợi ý nhanh |
+| POST | `/admin/api/icons` | Lưu danh sách icon gợi ý (thêm/xóa) vào MongoDB Setting |
+
 ---
 
 ## 🗄️ SCHEMAS MONGODB
