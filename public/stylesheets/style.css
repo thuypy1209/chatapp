@@ -2,7 +2,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
 }
 
 body {
@@ -2881,4 +2885,127 @@ h1 {
     border-color: #fbcfe8;
     z-index: 2;
     box-shadow: 0 2px 6px rgba(219, 39, 119, 0.15);
+}
+
+/* ========================================================================== */
+/* ✨ IMPECCABLE UI/UX UPGRADES & POLISH                                      */
+/* ========================================================================== */
+
+/* 1. Custom Pastel Smooth Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(253, 242, 248, 0.6);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #fbcfe8;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f472b6;
+    background-clip: padding-box;
+}
+
+/* 2. Impeccable Input Focus Glow Ring */
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus,
+.chat-free-input:focus,
+.mario-chat-input:focus,
+.admin-modal-input:focus,
+#emoji-search-input:focus,
+#iconInput:focus {
+    outline: none !important;
+    border-color: #db2777 !important;
+    box-shadow: 0 0 0 3.5px rgba(219, 39, 119, 0.18) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 3. Primary Button Spring Micro-interaction */
+.btn-home-chat,
+.btn-home-mario,
+.chat-send-btn,
+.welcome-submit-btn,
+.btn-admin-submit,
+.mario-chat-send-btn,
+.admin-modal-btn-submit {
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, background 0.15s ease !important;
+}
+.btn-home-chat:hover,
+.btn-home-mario:hover,
+.chat-send-btn:hover,
+.welcome-submit-btn:hover,
+.btn-admin-submit:hover,
+.mario-chat-send-btn:hover,
+.admin-modal-btn-submit:hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.28) !important;
+}
+.btn-home-chat:active,
+.btn-home-mario:active,
+.chat-send-btn:active,
+.welcome-submit-btn:active,
+.btn-admin-submit:active,
+.mario-chat-send-btn:active,
+.admin-modal-btn-submit:active {
+    transform: translateY(1px) scale(0.99) !important;
+    box-shadow: 0 2px 6px rgba(219, 39, 119, 0.15) !important;
+}
+
+/* 4. Modal Close (✕) Rotate Micro-interaction */
+.admin-modal-close {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease, background 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+}
+.admin-modal-close:hover {
+    transform: rotate(90deg) scale(1.15) !important;
+    color: #e11d48 !important;
+    background: #fee2e2 !important;
+}
+
+/* 5. Skeleton Shimmer Loading Effect */
+@keyframes shimmerLoading {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #fdf2f8 25%, #fce7f3 50%, #fdf2f8 75%) !important;
+    background-size: 200% 100% !important;
+    animation: shimmerLoading 1.6s infinite ease-in-out !important;
+}
+
+/* 6. Question / Quick-reply Polish */
+.question-btn {
+    border-radius: 12px !important;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.question-btn:hover {
+    transform: translateY(-2px) scale(1.008) !important;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.14) !important;
+}
+.question-btn:active {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+/* 7. Enhanced Card & Modal Elevation */
+.admin-modal-box {
+    box-shadow: 0 20px 45px -10px rgba(219, 39, 119, 0.2), 0 0 0 1px rgba(251, 207, 232, 0.8) !important;
+}
+
+/* 8. Text Contrast & Readability (WCAG AA Compliant) */
+.welcome-hint, .welcome-admin-hint, .form-hint {
+    color: #64748b !important;
 }
