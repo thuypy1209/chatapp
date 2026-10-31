@@ -159,11 +159,12 @@
 
         // Tên người gửi (lấy từ cookie hoặc navbar)
         var userName = getCurrentUserName();
+        var userEmoji = (window.getEmojiForName && userName) ? window.getEmojiForName(userName) : '🐱';
 
         // Chèn tin nhắn của Người dùng
         var userMsgHtml = `
             <div class="message user" style="align-self: flex-end; background: #db2777; color: #fff; padding: 10px 16px; border-radius: 16px 16px 4px 16px; font-size: 14px; max-width: 82%; box-shadow: 0 2px 8px rgba(219,39,119,0.2); animation: fadeIn 0.15s ease;">
-                <b>${escapeHtml(userName)}:</b> ${escapeHtml(questionText)}
+                <span style="margin-right: 5px;">${userEmoji}</span><b>${escapeHtml(userName)}:</b> ${escapeHtml(questionText)}
             </div>
         `;
         messageBox.insertAdjacentHTML('beforeend', userMsgHtml);
@@ -286,11 +287,12 @@
 
         // Tên người gửi
         var userName = getCurrentUserName();
+        var userEmoji = (window.getEmojiForName && userName) ? window.getEmojiForName(userName) : '🐱';
 
         // Chèn tin nhắn của Người dùng
         var userMsgHtml = `
             <div class="message user" style="align-self: flex-end; background: #db2777; color: #fff; padding: 10px 16px; border-radius: 16px 16px 4px 16px; font-size: 14px; max-width: 82%; box-shadow: 0 2px 8px rgba(219,39,119,0.2);">
-                <b>${escapeHtml(userName)}:</b> ${escapeHtml(text)}
+                <span style="margin-right: 5px;">${userEmoji}</span><b>${escapeHtml(userName)}:</b> ${escapeHtml(text)}
             </div>
         `;
         messageBox.insertAdjacentHTML('beforeend', userMsgHtml);

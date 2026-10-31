@@ -461,9 +461,10 @@ function sendChatMessageToMario(text) {
 
     // 1. Chèn tin nhắn của Người dùng
     var displayName = document.getElementById('nav-username-display') ? document.getElementById('nav-username-display').innerText.trim() : '<%= (typeof currentUser !== "undefined" && currentUser) ? currentUser : "Bạn" %>';
+    var userEmoji = (window.getEmojiForName && displayName) ? window.getEmojiForName(displayName) : '🐱';
     var userHtml = `
         <div class="message user" style="align-self: flex-end; background: #db2777; color: #ffffff; border-radius: 14px 14px 4px 14px; padding: 10px 14px; font-size: 14px; max-width: 85%; box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);">
-            <b>${displayName}:</b> ${text}
+            <span style="margin-right: 5px;">${userEmoji}</span><b>${displayName}:</b> ${text}
         </div>
     `;
     msgBox.insertAdjacentHTML('beforeend', userHtml);

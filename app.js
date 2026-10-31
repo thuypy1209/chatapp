@@ -15,6 +15,7 @@ var marioRouter = require('./routers/mario');
 var authRouter = require('./routers/auth');
 var authUtils = require('./utils/auth');
 var settingsUtils = require('./utils/settings');
+var emojiUtils = require('./utils/emoji');
 var helmet = require('helmet');
 
 var app = express();
@@ -62,6 +63,7 @@ app.use(function(req, res, next) {
     res.locals.isAdmin = isAdmin;
     res.locals.adminUsername = adminUser || 'Admin';
     res.locals.activeMusicSetting = settingsUtils.getMusicSetting();
+    res.locals.getEmojiForName = emojiUtils.getEmojiForName;
     next();
 });
 
