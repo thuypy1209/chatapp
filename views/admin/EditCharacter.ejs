@@ -23,7 +23,7 @@
                 <!-- Tên nhân vật -->
                 <div>
                     <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Tên nhân vật (*):</label>
-                    <input type="text" name="name" value="<%= character.name %>" class="form-control" required
+                    <input type="text" name="name" value="<%= character.name %>" placeholder="VD: Mario Nấm Lùn, Bé Mèo Đi Hia..." class="form-control" required
                         style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
                         onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
                 </div>
@@ -31,7 +31,7 @@
                 <!-- Mô tả ngắn -->
                 <div>
                     <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Mô tả ngắn:</label>
-                    <input type="text" name="description" value="<%= character.description || '' %>" class="form-control"
+                    <input type="text" name="description" value="<%= character.description || '' %>" placeholder="VD: Người bạn vui tính, thích ăn nấm và hay tâm sự..." class="form-control"
                         style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
                         onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
                 </div>
