@@ -1,0 +1,74 @@
+<!-- MODAL KHO EMOJI & BIỂU TƯỢNG TÌM KIẾM TRỰC TIẾP -->
+<div id="modal-emoji-library" class="admin-modal-overlay" onclick="if(event.target===this) closeEmojiLibraryModal()" style="display: none; z-index: 999999;">
+    <div class="admin-modal-box" style="max-width: 620px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; padding: 22px; text-align: left; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #fbcfe8; padding-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 22px;">🎨</span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #db2777;">
+                    Kho Emoji & Biểu Tượng (Chọn để thêm vào bảng)
+                </h3>
+            </div>
+            <button type="button" class="admin-modal-close" onclick="closeEmojiLibraryModal()" title="Đóng (ESC)" style="position: static; font-size: 18px; cursor: pointer; background: none; border: none; color: #94a3b8; font-weight: bold;">✕</button>
+        </div>
+
+        <!-- Ô Tìm kiếm Trực tiếp ngay trên khung -->
+        <div style="margin-bottom: 10px;">
+            <div style="position: relative;">
+                <input type="text" id="emoji-search-input" placeholder="🔍 Gõ từ khóa tìm emoji ngay tại đây (vd: mèo, cat, kiếm, tim, nấm, sao, game, lửa...)..."
+                    oninput="handleSearchEmojiLibrary(this.value)"
+                    style="width: 100%; padding: 10px 14px 10px 38px; border: 2px solid #fbcfe8; border-radius: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; background: #fff;"
+                    onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'">
+                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #94a3b8; pointer-events: none;">🔍</span>
+            </div>
+        </div>
+
+        <!-- Thanh nhúng liên kết tra cứu online & Dán nhanh -->
+        <div style="background: #fdf2f8; border: 1px dashed #fbcfe8; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 6px; color: #64748b; font-weight: 600;">
+                <span>🌐 Link kho emoji online:</span>
+                <a href="https://emojipedia.org" target="_blank" rel="noopener noreferrer" style="background: #ffffff; border: 1px solid #fbcfe8; color: #db2777; padding: 2px 8px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;" title="Mở Emojipedia để tra cứu tất cả emoji">
+                    📖 Emojipedia ↗
+                </a>
+                <a href="https://getemoji.com" target="_blank" rel="noopener noreferrer" style="background: #ffffff; border: 1px solid #fbcfe8; color: #db2777; padding: 2px 8px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;" title="Copy & Paste emoji nhanh">
+                    📋 GetEmoji ↗
+                </a>
+            </div>
+
+            <!-- Ô dán emoji nhanh nếu copy từ web ngoài -->
+            <div style="display: flex; gap: 4px; align-items: center;">
+                <input type="text" id="manual-paste-emoji" placeholder="Hoặc dán emoji vào đây..." 
+                    style="width: 160px; padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #fff;">
+                <button type="button" onclick="submitManualPasteEmoji()" 
+                    style="background: #db2777; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                    ➕ Thêm
+                </button>
+            </div>
+        </div>
+
+        <!-- Bộ lọc danh mục nhanh (Pills) -->
+        <div id="emoji-category-tabs" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px;">
+            <button type="button" class="emoji-cat-btn active" onclick="filterEmojiCategory('all', this)">Tất cả</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('game', this)">🎮 Game & Retro</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('animals', this)">🐱 Thú cưng</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('food', this)">🍔 Ẩm thực</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('nature', this)">🌸 Cây cỏ & Hoa</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('smileys', this)">💖 Cảm xúc</button>
+            <button type="button" class="emoji-cat-btn" onclick="filterEmojiCategory('fantasy', this)">✨ Phép thuật</button>
+        </div>
+
+        <!-- Lưới Emoji (Cuộn mượt mà) -->
+        <div id="emoji-library-grid" style="flex: 1; overflow-y: auto; max-height: 320px; display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; padding: 6px; background: #fafafa; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <!-- Render bằng JavaScript -->
+        </div>
+
+        <div style="margin-top: 10px; font-size: 11px; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+            <span>💡 <i>Mẹo: Bấm vào emoji bất kỳ để thêm ngay vào bảng gợi ý và tự động chọn.</i></span>
+            <button type="button" onclick="closeEmojiLibraryModal()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                Đóng
+            </button>
+        </div>
+
+    </div>
+</div>

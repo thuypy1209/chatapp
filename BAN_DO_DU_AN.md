@@ -63,6 +63,7 @@ F:/ChatApp/
 │       ├── Login.ejs             ← Đăng nhập Admin [87 dòng]
 │       ├── Admin.ejs             ← Bảng điều khiển chính [1877 dòng]
 │       ├── EditCharacter.ejs     ← Chỉnh sửa nhân vật [215 dòng]
+│       ├── emojiModal.ejs        ← Modal kho emoji tìm kiếm & tra cứu liên kết online
 │       └── index.ejs             ← (Không dùng)
 │
 ├── public/

@@ -105,17 +105,13 @@
                             ⭐ Bảng icon mẫu (Click để chọn):
                         </span>
                         <div style="display: flex; gap: 6px;">
-                            <button type="button" onclick="promptAddNewIcon()" title="Thêm một emoji mới vào bảng"
-                                style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                ➕ Thêm icon
+                            <button type="button" onclick="openEmojiLibraryModal()" title="Mở kho emoji để tìm kiếm và chọn icon thêm vào bảng"
+                                style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1d4ed8; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <span>🔍</span> Tìm & Thêm icon
                             </button>
                             <button type="button" id="btn-toggle-delete-icon" onclick="toggleIconDeleteMode()" title="Bật chế độ xóa bớt icon khỏi bảng"
-                                style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                style="background: #fee2e2; border: 1.5px solid #fca5a5; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
                                 🗑️ Xóa icon
-                            </button>
-                            <button type="button" onclick="restoreDefaultIcons()" title="Khôi phục lại danh sách icon mặc định"
-                                style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                🔄 Đặt lại
                             </button>
                         </div>
                     </div>
@@ -1901,5 +1897,8 @@ document.addEventListener('keydown', function(e) {
     </div>
 </div>
 <% } %>
+
+<!-- MODAL KHO EMOJI TÌM KIẾM TRỰC TIẾP -->
+<%- include('emojiModal') %>
 
 <%- include('../partials/footer') %>

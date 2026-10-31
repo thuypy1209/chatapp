@@ -418,17 +418,10 @@ function addCurrentInputToIconList() {
     addNewPickerIcon(emoji);
 }
 
-function promptAddNewIcon() {
-    const emoji = prompt('Nhập emoji hoặc biểu tượng bạn muốn thêm vào bảng (VD: 🦄, 🍓, 🍕, 🐉, 🐱...):');
-    if (emoji && emoji.trim()) {
-        addNewPickerIcon(emoji.trim());
-    }
-}
-
 function addNewPickerIcon(emoji) {
     if (!emoji) return;
     if (currentPickerIcons.includes(emoji)) {
-        alert('Icon "' + emoji + '" đã có trong bảng gợi ý rồi!');
+        selectCommonIcon(emoji);
         return;
     }
     currentPickerIcons.push(emoji);
@@ -463,21 +456,6 @@ function toggleIconDeleteMode() {
     renderIconPickerList();
 }
 
-function restoreDefaultIcons() {
-    if (confirm('Khôi phục danh sách icon gợi ý về mặc định ban đầu?')) {
-        currentPickerIcons = [...DEFAULT_PICKER_ICONS];
-        isIconDeleteMode = false;
-        const btn = document.getElementById('btn-toggle-delete-icon');
-        if (btn) {
-            btn.innerHTML = '🗑️ Xóa icon';
-            btn.style.background = '#fee2e2';
-            btn.style.color = '#dc2626';
-            btn.style.borderColor = '#fca5a5';
-        }
-        savePickerIcons();
-    }
-}
-
 function savePickerIcons() {
     localStorage.setItem('chatflex_admin_icons', JSON.stringify(currentPickerIcons));
     renderIconPickerList();
@@ -490,6 +468,249 @@ function savePickerIcons() {
     }).catch(function(err) {
         console.warn('Không thể đồng bộ icon lên server:', err);
     });
+}
+
+// --- KHO EMOJI TÌM KIẾM TRỰC TIẾP & BỘ SƯU TẬP PHONG PHÚ ---
+const EMOJI_CATALOG = [
+    // Game & Retro & Vũ khí
+    { emoji: '🎮', name: 'tay cam game choi dien tu console video game', cat: 'game' },
+    { emoji: '🕹️', name: 'can gat joystick retro arcade game', cat: 'game' },
+    { emoji: '👾', name: 'quai vat alien space invader pixel retro', cat: 'game' },
+    { emoji: '🍄', name: 'nam mario mushroom super 1up red', cat: 'game' },
+    { emoji: '⭐', name: 'sao star vang mario invincible bat tu', cat: 'game' },
+    { emoji: '🌟', name: 'sao lap lanh glowing star toa sang', cat: 'game' },
+    { emoji: '✨', name: 'lap lanh sparkles phep thuat magic blink', cat: 'game' },
+    { emoji: '⚡', name: 'set tia set lightning zap pikachu dien', cat: 'game' },
+    { emoji: '🔥', name: 'lua fire flame hoa cau lua', cat: 'game' },
+    { emoji: '💥', name: 'no boom explosion bup', cat: 'game' },
+    { emoji: '⚔️', name: 'kiem vu khi swords combat chien dau song kiem', cat: 'game' },
+    { emoji: '🗡️', name: 'dao gam dagger sword vu khi', cat: 'game' },
+    { emoji: '🏹', name: 'cung ten bow arrow minecraft skeleton', cat: 'game' },
+    { emoji: '🛡️', name: 'khien giap shield phong thu bao ve', cat: 'game' },
+    { emoji: '⛏️', name: 'cup cuoc dao pickaxe minecraft steve khoang san', cat: 'game' },
+    { emoji: '🔨', name: 'bua hammer tho sua chua', cat: 'game' },
+    { emoji: '💎', name: 'kim cuong diamond gem quy bao vat', cat: 'game' },
+    { emoji: '👑', name: 'vuong mien crown vua cong chua peach king quyen luc', cat: 'game' },
+    { emoji: '🔮', name: 'qua cau pha le crystal ball tien tri phap su phep', cat: 'fantasy' },
+    { emoji: '📜', name: 'cuon giay scroll kich ban thu phap mat thu', cat: 'fantasy' },
+    { emoji: '🧙‍♂️', name: 'phap su phu thuy wizard mage magic phu thuy', cat: 'fantasy' },
+    { emoji: '🧝', name: 'yeu tinh elf cung thu tien toc', cat: 'fantasy' },
+    { emoji: '🧞', name: 'than den genie uoc nguyen phep mau', cat: 'fantasy' },
+    { emoji: '🧜', name: 'nguoi ca mermaid duoi ca', cat: 'fantasy' },
+    { emoji: '🤖', name: 'robot nguoi may ai bot mecha', cat: 'game' },
+    { emoji: '🚀', name: 'ten lua rocket vu tru bay', cat: 'game' },
+    { emoji: '🛸', name: 'dia bay ufo alien ngoai hanh tinh', cat: 'game' },
+    { emoji: '🏆', name: 'cup vo dich trophy winner chien thang', cat: 'game' },
+    { emoji: '🎯', name: 'bia ban target phi tieu chinh xac', cat: 'game' },
+    { emoji: '🎲', name: 'xuc xac dice roll game may man', cat: 'game' },
+    { emoji: '💻', name: 'laptop may tinh macbook code dev tin hoc', cat: 'game' },
+    { emoji: '🧳', name: 'vali hanh ly du lich luggage travel phuot', cat: 'game' },
+    { emoji: '🪙', name: 'dong xu coin mario gold tien vang tien xu', cat: 'game' },
+    { emoji: '💰', name: 'tui tien money bag dola giau co tien bac', cat: 'game' },
+
+    // Thú cưng & Động vật
+    { emoji: '🐱', name: 'meo cat meow kitten con meo meo de thuong', cat: 'animals' },
+    { emoji: '😸', name: 'meo cuoi cat grin mieng cuoi', cat: 'animals' },
+    { emoji: '😻', name: 'meo yeu cat love heart eyes mat tim', cat: 'animals' },
+    { emoji: '🐰', name: 'tho rabbit bunny con tho tho bay mau tai dai', cat: 'animals' },
+    { emoji: '🦊', name: 'cao fox con cao tinh ranh', cat: 'animals' },
+    { emoji: '🐼', name: 'gau truc panda bear truc trung quoc', cat: 'animals' },
+    { emoji: '🐨', name: 'gau koala uc de thuong', cat: 'animals' },
+    { emoji: '🐹', name: 'hamster chuot chuot tui', cat: 'animals' },
+    { emoji: '🐶', name: 'cho dog puppy cun con pet gau gau', cat: 'animals' },
+    { emoji: '🐻', name: 'gau bear teddy gau nau', cat: 'animals' },
+    { emoji: '🦁', name: 'su tu lion rung xanh chúa son lam', cat: 'animals' },
+    { emoji: '🐯', name: 'ho tiger cop chua son lam', cat: 'animals' },
+    { emoji: '🐮', name: 'bo cow sua be de thuong', cat: 'animals' },
+    { emoji: '🐷', name: 'heo pig lon con mui heo u in', cat: 'animals' },
+    { emoji: '🐸', name: 'ech frog toad ech xanh pepe', cat: 'animals' },
+    { emoji: '🐵', name: 'khi monkey ngo nghinh', cat: 'animals' },
+    { emoji: '🐔', name: 'ga chicken con ga trong o o o', cat: 'animals' },
+    { emoji: '🐧', name: 'canh cut penguin chim nam cuc', cat: 'animals' },
+    { emoji: '🦆', name: 'vit duck con vit quack', cat: 'animals' },
+    { emoji: '🦄', name: 'ky lan unicorn cau vong phep thuat', cat: 'fantasy' },
+    { emoji: '🦋', name: 'buom butterfly xinh buom buom bay', cat: 'animals' },
+    { emoji: '🐝', name: 'ong bee mat ong cham chi', cat: 'animals' },
+    { emoji: '🐞', name: 'bo rua ladybug may man', cat: 'animals' },
+    { emoji: '🐢', name: 'rua turtle koopa mario mai rua cham chap', cat: 'animals' },
+    { emoji: '🐍', name: 'ran snake bo sat', cat: 'animals' },
+    { emoji: '🐙', name: 'bach tuoc octopus bien sau', cat: 'animals' },
+    { emoji: '🐬', name: 'ca heo dolphin thong minh', cat: 'animals' },
+    { emoji: '🐳', name: 'ca voi whale phun nuoc', cat: 'animals' },
+    { emoji: '🦈', name: 'ca map shark hung du', cat: 'animals' },
+    { emoji: '🐉', name: 'rong dragon bowser rong than', cat: 'fantasy' },
+    { emoji: '🦖', name: 'khung long t-rex yoshi mario bao chua', cat: 'animals' },
+
+    // Cây cỏ & Hoa quả
+    { emoji: '🌸', name: 'hoa cherry blossom anh dao pink hong nhat ban', cat: 'nature' },
+    { emoji: '🌺', name: 'hoa hibiscus dam but do nhiet doi', cat: 'nature' },
+    { emoji: '🌻', name: 'hoa huong duong sunflower mat troi vang', cat: 'nature' },
+    { emoji: '🌹', name: 'hoa hong rose love tinh yeu do', cat: 'nature' },
+    { emoji: '🌷', name: 'hoa tulip ha lan', cat: 'nature' },
+    { emoji: '🌼', name: 'hoa cuc daisy vang trang', cat: 'nature' },
+    { emoji: '🌱', name: 'mam cay seedling mam xanh bat dau', cat: 'nature' },
+    { emoji: '🌿', name: 'la cay herb la xanh cay thien nhien', cat: 'nature' },
+    { emoji: '🍀', name: 'co 4 la four leaf clover may man clover', cat: 'nature' },
+    { emoji: '🍁', name: 'la phong maple leaf mua thu do', cat: 'nature' },
+    { emoji: '🍂', name: 'la rung fallen leaf mua thu', cat: 'nature' },
+    { emoji: '🍓', name: 'dau tay strawberry trai cay ngot do', cat: 'nature' },
+    { emoji: '🍑', name: 'dao peach cong chua qua dao hong', cat: 'nature' },
+    { emoji: '🍒', name: 'cherry qua anh dao do doi cherry', cat: 'nature' },
+    { emoji: '🍎', name: 'tao red apple trai tao do', cat: 'nature' },
+    { emoji: '🍉', name: 'dua hau watermelon mat lanh', cat: 'nature' },
+    { emoji: '🍇', name: 'nho grapes trai nho tim', cat: 'nature' },
+    { emoji: '🍋', name: 'chanh lemon vang chua', cat: 'nature' },
+    { emoji: '🍌', name: 'chuoi banana vang khi thich', cat: 'nature' },
+    { emoji: '🍍', name: 'dua thom pineapple mat troi', cat: 'nature' },
+    { emoji: '🥭', name: 'xoai mango thom ngon', cat: 'nature' },
+    { emoji: '🥑', name: 'bo avocado qua bo xanh', cat: 'nature' },
+    { emoji: '🌈', name: 'cau vong rainbow may troi 7 mau', cat: 'nature' },
+    { emoji: '☀️', name: 'mat troi sun ngay nang toa sang', cat: 'nature' },
+    { emoji: '🌙', name: 'mat trang moon dem trăng trang luoi liem', cat: 'nature' },
+
+    // Ẩm thực & Đồ ăn
+    { emoji: '🍔', name: 'burger hamburger banh mi bo fastfood', cat: 'food' },
+    { emoji: '🍟', name: 'khoai tay chien french fries gion', cat: 'food' },
+    { emoji: '🍕', name: 'pizza banh pizza y cheese pho mai', cat: 'food' },
+    { emoji: '🌭', name: 'xuc xich hotdog banh mi', cat: 'food' },
+    { emoji: '🥪', name: 'sandwich banh mi kep bua sang', cat: 'food' },
+    { emoji: '🍳', name: 'trung op la fried egg chao bua sang', cat: 'food' },
+    { emoji: '🍜', name: 'mi ramen mi goi noodle nong hoi', cat: 'food' },
+    { emoji: '🍝', name: 'my y spaghetti pasta sot ca', cat: 'food' },
+    { emoji: '🍣', name: 'sushi com cuon nhat ban ca hoi', cat: 'food' },
+    { emoji: '🍦', name: 'kem ice cream oc que kem mat lanh', cat: 'food' },
+    { emoji: '🍧', name: 'da bao shaved ice siro', cat: 'food' },
+    { emoji: '🍩', name: 'banh donut banh ran doraemon ngot', cat: 'food' },
+    { emoji: '🍪', name: 'banh quy cookie quy gung socola', cat: 'food' },
+    { emoji: '🎂', name: 'banh sinh nhat birthday cake party', cat: 'food' },
+    { emoji: '🍰', name: 'banh ngot shortcake kem dau', cat: 'food' },
+    { emoji: '🧁', name: 'cupcake banh kem mini', cat: 'food' },
+    { emoji: '🍫', name: 'socola chocolate bar ngot ngao', cat: 'food' },
+    { emoji: '🍬', name: 'keo candy ngot', cat: 'food' },
+    { emoji: '🍭', name: 'keo mut lollipop kẹo xoay', cat: 'food' },
+    { emoji: '🍮', name: 'flan pudding caramen thom', cat: 'food' },
+    { emoji: '🧋', name: 'tra sua boba milk tea tran chau', cat: 'food' },
+    { emoji: '☕', name: 'ca phe coffee tach ca phe nong', cat: 'food' },
+    { emoji: '🥤', name: 'nuoc ngot cup soda nuoc giai khat', cat: 'food' },
+
+    // Cảm xúc & Biểu tượng
+    { emoji: '😀', name: 'cuoi grin smile vui ve toe toet', cat: 'smileys' },
+    { emoji: '🥰', name: 'yeu love tim yeu thuong hanh phuc', cat: 'smileys' },
+    { emoji: '😍', name: 'mat tim heart eyes me man thich', cat: 'smileys' },
+    { emoji: '🤩', name: 'mat sao star eyes bat ngo thich thu', cat: 'smileys' },
+    { emoji: '😎', name: 'ngau cool kinh ram sunglasses ba dao', cat: 'smileys' },
+    { emoji: '🥳', name: 'tiec party le hoi chuc mung sinh nhat', cat: 'smileys' },
+    { emoji: '🥺', name: 'cau xin pleading de thuong lam nung', cat: 'smileys' },
+    { emoji: '😴', name: 'ngu sleep zzz buon ngu', cat: 'smileys' },
+    { emoji: '💖', name: 'tim sparkling heart yeu thuong lap lanh', cat: 'smileys' },
+    { emoji: '💝', name: 'hop qua tim gift heart tang ban', cat: 'smileys' },
+    { emoji: '❤️', name: 'trai tim do red heart love yeu', cat: 'smileys' },
+    { emoji: '🎀', name: 'no ribbon no hong cute trang tri', cat: 'smileys' },
+    { emoji: '🎈', name: 'bong bong balloon bong bay sinh nhat', cat: 'smileys' },
+    { emoji: '🎉', name: 'phao hoa party popper chuc mung vui ve', cat: 'smileys' },
+    { emoji: '🎁', name: 'qua tang gift hop qua bat ngo', cat: 'smileys' },
+    { emoji: '🧸', name: 'gau bong teddy bear do choi em be', cat: 'smileys' }
+];
+
+let activeEmojiCategory = 'all';
+
+function openEmojiLibraryModal() {
+    const modal = document.getElementById('modal-emoji-library');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    const searchInput = document.getElementById('emoji-search-input');
+    if (searchInput) {
+        searchInput.value = '';
+        setTimeout(function() { searchInput.focus(); }, 100);
+    }
+
+    activeEmojiCategory = 'all';
+    updateCategoryTabsUI();
+    renderEmojiLibrary(EMOJI_CATALOG);
+}
+
+function closeEmojiLibraryModal() {
+    const modal = document.getElementById('modal-emoji-library');
+    if (modal) modal.style.display = 'none';
+}
+
+function handleSearchEmojiLibrary(query) {
+    const q = (query || '').toLowerCase().trim();
+    let filtered = EMOJI_CATALOG;
+
+    if (activeEmojiCategory !== 'all') {
+        filtered = filtered.filter(function(item) {
+            return item.cat === activeEmojiCategory;
+        });
+    }
+
+    if (q) {
+        filtered = filtered.filter(function(item) {
+            return item.name.toLowerCase().includes(q) || item.emoji.includes(q);
+        });
+    }
+
+    renderEmojiLibrary(filtered);
+}
+
+function filterEmojiCategory(cat, btnEl) {
+    activeEmojiCategory = cat;
+    updateCategoryTabsUI();
+
+    const searchInput = document.getElementById('emoji-search-input');
+    const query = searchInput ? searchInput.value : '';
+    handleSearchEmojiLibrary(query);
+}
+
+function updateCategoryTabsUI() {
+    const buttons = document.querySelectorAll('.emoji-cat-btn');
+    buttons.forEach(function(b) {
+        const onclickAttr = b.getAttribute('onclick') || '';
+        const match = onclickAttr.match(/'([^']+)'/);
+        if (match && match[1] === activeEmojiCategory) {
+            b.classList.add('active');
+        } else {
+            b.classList.remove('active');
+        }
+    });
+}
+
+function renderEmojiLibrary(list) {
+    const grid = document.getElementById('emoji-library-grid');
+    if (!grid) return;
+
+    if (!list || list.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 24px; text-align: center; color: #94a3b8; font-size: 13px;">Không tìm thấy emoji nào phù hợp. Bạn hãy gõ từ khóa khác hoặc dán trực tiếp emoji vào ô dán nhanh!</div>';
+        return;
+    }
+
+    grid.innerHTML = list.map(function(item) {
+        return `
+            <button type="button" class="emoji-grid-item" onclick="selectEmojiFromLibrary('${item.emoji}')" title="${escapeHtml(item.name)}">
+                ${item.emoji}
+            </button>
+        `;
+    }).join('');
+}
+
+function selectEmojiFromLibrary(emoji) {
+    addNewPickerIcon(emoji);
+    selectCommonIcon(emoji);
+    closeEmojiLibraryModal();
+}
+
+function submitManualPasteEmoji() {
+    const input = document.getElementById('manual-paste-emoji');
+    const emoji = input ? input.value.trim() : '';
+    if (!emoji) {
+        alert('Vui lòng dán hoặc nhập ít nhất một emoji!');
+        return;
+    }
+    addNewPickerIcon(emoji);
+    selectCommonIcon(emoji);
+    if (input) input.value = '';
+    closeEmojiLibraryModal();
 }
 
 // --- 5. ĐÍNH KÈM ĐỘNG CÁC BƯỚC (DYNAMIC NODES) ---
