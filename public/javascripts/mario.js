@@ -403,6 +403,13 @@
         }
 
         notifyChat(type, msg) {
+            // Không bao giờ gửi tin nhắn game vào phòng chat nhân vật (/chat) để tránh mất chỗ trò chuyện của người dùng
+            if (this.canvasId === 'mario-side-canvas') {
+                return;
+            }
+            if (typeof window !== 'undefined' && window.location && window.location.pathname.indexOf('/chat') !== -1) {
+                return;
+            }
             if (window.marioChatBridge && typeof window.marioChatBridge === 'function') {
                 window.marioChatBridge(type, msg);
             }
