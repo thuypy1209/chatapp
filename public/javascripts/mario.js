@@ -342,7 +342,7 @@
 
         bindEvents() {
             // Focus canvas when clicked
-            this.canvas.addEventListener('click', () => {
+            this.canvas.addEventListener('click', (e) => {
                 this.canvas.focus();
                 this.gameFocus = true;
                 audio.init();
@@ -354,11 +354,58 @@
                         this.notifyChat('start', '🍄 Trò chơi Mario đã bắt đầu! Dùng phím A/D hoặc Mũi tên để di chuyển, Phím Cách hoặc W để nhảy!');
                     }
                 } else if (this.gameState === 'GAMEOVER') {
-                    if (typeof window.showGameOverCard === 'function') {
-                        window.showGameOverCard(this.score, this.coins, () => {
-                            this.restart();
-                        });
+                    // Xác định vị trí bấm chuột xem bên trong hay bên ngoài tấm thiệp
+                    const rect = this.canvas.getBoundingClientRect();
+                    const scaleX = this.width / rect.width;
+                    const scaleY = this.height / rect.height;
+                    const mouseX = (e.clientX - rect.left) * scaleX;
+                    const mouseY = (e.clientY - rect.top) * scaleY;
+
+                    const cardW = Math.min(540, this.width - 40);
+                    const cardH = Math.min(270, this.height - 30);
+                    const cardX = (this.width - cardW) / 2;
+                    const cardY = (this.height - cardH) / 2;
+
+                    const isInsideCard = (
+                        mouseX >= cardX && mouseX <= cardX + cardW &&
+                        mouseY >= cardY && mouseY <= cardY + cardH
+                    );
+
+                    if (isInsideCard) {
+                        // Bấm vào thiệp: Mở thiệp to!
+                        if (typeof window.showGameOverCard === 'function') {
+                            window.showGameOverCard(this.score, this.coins, () => {
+                                this.restart();
+                            });
+                        }
+                    } else {
+                        // Bấm vào bên ngoài thiệp: Bắt đầu chơi lại!
+                        this.restart();
                     }
+                }
+            });
+
+            this.canvas.addEventListener('mousemove', (e) => {
+                if (this.gameState === 'GAMEOVER') {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const scaleX = this.width / rect.width;
+                    const scaleY = this.height / rect.height;
+                    const mouseX = (e.clientX - rect.left) * scaleX;
+                    const mouseY = (e.clientY - rect.top) * scaleY;
+
+                    const cardW = Math.min(540, this.width - 40);
+                    const cardH = Math.min(270, this.height - 30);
+                    const cardX = (this.width - cardW) / 2;
+                    const cardY = (this.height - cardH) / 2;
+
+                    const isInsideCard = (
+                        mouseX >= cardX && mouseX <= cardX + cardW &&
+                        mouseY >= cardY && mouseY <= cardY + cardH
+                    );
+
+                    this.canvas.style.cursor = isInsideCard ? 'pointer' : 'default';
+                } else {
+                    this.canvas.style.cursor = 'default';
                 }
             });
 
@@ -1814,7 +1861,7 @@
             // Hướng dẫn click
             ctx.fillStyle = '#94a3b8';
             ctx.font = '600 11px "Quicksand", sans-serif';
-            ctx.fillText('Nhấn phím [R] để chơi lại  •  Bấm chuột để mở thiệp to 💌', cardX + cardW / 2, cardY + cardH - 18);
+            ctx.fillText('Bấm vào thiệp để mở to 💌  •  Bấm bên ngoài (hoặc phím R) để chơi lại 🔄', cardX + cardW / 2, cardY + cardH - 18);
 
             ctx.restore();
         }
