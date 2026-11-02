@@ -14,9 +14,9 @@
         <!-- Phong bì & Tấm thiệp chính -->
         <div class="game-card-inner">
             
-            <!-- Phần nắp thiệp dập nổi sáp niêm phong -->
+            <!-- Phần nắp thiệp dập nổi sáp niêm phong (bấm để đổi câu ngẫu nhiên) -->
             <div class="game-card-seal-row">
-                <div class="game-card-seal">
+                <div class="game-card-seal" onclick="rollNextRandomCard(event)" title="Bấm vào tem sáp để đổi lời chúc ngẫu nhiên">
                     <span>💌</span>
                 </div>
             </div>
@@ -34,6 +34,13 @@
             <!-- Nội dung bức thiệp (Text thiệp) -->
             <div id="game-card-message" class="game-card-message">
                 <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.message) ? gameOverCard.message : 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖' %>
+            </div>
+
+            <!-- Nút đổi lời chúc ngẫu nhiên (chỉ hiện khi có nhiều hơn 1 câu) -->
+            <div id="game-card-roll-row" style="text-align: center; margin-top: -6px; margin-bottom: 12px;">
+                <button type="button" onclick="rollNextRandomCard(event)" class="game-card-btn-roll" title="Bấm để ngẫu nhiên một câu động viên khác">
+                    <span>🎲</span> Đổi lời chúc khác
+                </button>
             </div>
 
             <!-- Huy hiệu điểm số đã đạt được trong lần chơi -->
@@ -66,11 +73,16 @@
 (function() {
     // Biến lưu callback khi người dùng bấm Chơi lại từ thiệp
     window.__gameCardRestartCallback = null;
+    window.__needNewCard = true;
+    window.__lastPickedCardIndex = -1;
+    window.__activeCardMessage = null;
 
     // Bộ nhớ đệm dữ liệu thiệp trên client
     window.__currentCardData = {
         title: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.title) ? gameOverCard.title.replace(/'/g, "\\'") : "Tấm Thiệp Động Viên 💌" %>',
         message: `<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message) ? gameOverCard.message.replace(/`/g, "\\`").replace(/\\/g, "\\\\") : "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖" %>`,
+        messages: <%- JSON.stringify((typeof gameOverCard !== "undefined" && gameOverCard && Array.isArray(gameOverCard.messages) && gameOverCard.messages.length > 0) ? gameOverCard.messages : [(typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message) ? gameOverCard.message : "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖"]) %>,
+        isRandom: <%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.isRandom !== undefined) ? !!gameOverCard.isRandom : true %>,
         sender: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.sender) ? gameOverCard.sender.replace(/'/g, "\\'") : "Từ Vương Quốc Nấm 🍄" %>',
         buttonText: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.buttonText) ? gameOverCard.buttonText.replace(/'/g, "\\'") : "🔄 Chơi lại ngay" %>'
     };
@@ -82,6 +94,9 @@
             .then(data => {
                 if (data && data.success && data.card) {
                     window.__currentCardData = Object.assign({}, window.__currentCardData, data.card);
+                    if (!window.__activeCardMessage) {
+                        window.__activeCardMessage = window.__currentCardData.message;
+                    }
                     updateCardDOM();
                 }
             })
@@ -89,24 +104,83 @@
     }
     syncCardSettingFromServer();
 
+    // Hàm chọn 1 câu ngẫu nhiên trong kho thiệp
+    window.pickRandomGameCard = function() {
+        const data = window.__currentCardData || {};
+        const list = (Array.isArray(data.messages) && data.messages.length > 0)
+            ? data.messages
+            : [data.message || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖'];
+
+        if (data.isRandom !== false && list.length > 1) {
+            let nextIndex;
+            let tries = 0;
+            do {
+                nextIndex = Math.floor(Math.random() * list.length);
+                tries++;
+            } while (nextIndex === window.__lastPickedCardIndex && tries < 10);
+            window.__lastPickedCardIndex = nextIndex;
+            window.__activeCardMessage = list[nextIndex];
+        } else {
+            window.__activeCardMessage = data.message || list[0];
+        }
+
+        updateCardDOM();
+        return window.__activeCardMessage;
+    };
+
+    // Hàm bấm nút đổi lời chúc khác trên giao diện
+    window.rollNextRandomCard = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        const msgEl = document.getElementById('game-card-message');
+        if (msgEl) {
+            msgEl.style.opacity = '0.3';
+            msgEl.style.transform = 'scale(0.97)';
+            setTimeout(() => {
+                window.pickRandomGameCard();
+                msgEl.style.transition = 'all 0.25s ease';
+                msgEl.style.opacity = '1';
+                msgEl.style.transform = 'scale(1)';
+            }, 120);
+        } else {
+            window.pickRandomGameCard();
+        }
+    };
+
     function updateCardDOM() {
         const titleEl = document.getElementById('game-card-title');
         const msgEl = document.getElementById('game-card-message');
         const senderEl = document.getElementById('game-card-sender');
         const btnRestartEl = document.getElementById('game-card-restart-btn');
+        const rollRow = document.getElementById('game-card-roll-row');
+
+        const curMsg = window.__activeCardMessage || window.__currentCardData.message;
 
         if (titleEl && window.__currentCardData.title) titleEl.innerText = window.__currentCardData.title;
-        if (msgEl && window.__currentCardData.message) msgEl.innerText = window.__currentCardData.message;
+        if (msgEl && curMsg) msgEl.innerText = curMsg;
         if (senderEl && window.__currentCardData.sender) senderEl.innerText = '— ' + window.__currentCardData.sender + ' —';
         if (btnRestartEl && window.__currentCardData.buttonText) btnRestartEl.innerText = window.__currentCardData.buttonText;
+
+        if (rollRow) {
+            const hasMany = Array.isArray(window.__currentCardData.messages) && window.__currentCardData.messages.length > 1;
+            rollRow.style.display = hasMany ? 'block' : 'none';
+        }
     }
 
+    // Lấy câu thiệp đang active để Canvas & Khung chat dùng chung
     window.getCurrentGameCardText = function() {
-        return (window.__currentCardData && window.__currentCardData.message) ? window.__currentCardData.message : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+        if (window.__activeCardMessage) return window.__activeCardMessage;
+        if (window.__currentCardData && window.__currentCardData.message) return window.__currentCardData.message;
+        return 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
     };
 
     window.showGameOverCard = function(score, coins, onRestart) {
         window.__gameCardRestartCallback = onRestart || null;
+
+        // Nếu là lượt thua mới, tự động chọn ngẫu nhiên 1 câu thiệp
+        if (!window.__activeCardMessage || window.__needNewCard) {
+            window.pickRandomGameCard();
+            window.__needNewCard = false;
+        }
 
         const overlay = document.getElementById('game-card-modal-overlay');
         const scoreBox = document.getElementById('game-card-score-box');
@@ -131,6 +205,7 @@
 
     window.restartFromCard = function() {
         window.closeGameOverCard();
+        window.__needNewCard = true; // Đánh dấu lượt chơi mới cần thiệp mới khi thua
 
         if (typeof window.__gameCardRestartCallback === 'function') {
             window.__gameCardRestartCallback();

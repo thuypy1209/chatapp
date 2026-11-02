@@ -766,13 +766,25 @@ router.get('/api/game-card', async function(req, res) {
 router.post('/api/game-card', async function(req, res) {
     try {
         var settingsUtils = require('../utils/settings');
-        var { title, message, sender, buttonText } = req.body;
-        if (!message || !message.trim()) {
-            return res.status(400).json({ success: false, error: 'Nội dung thiệp không được để trống!' });
+        var { title, message, messages, isRandom, sender, buttonText } = req.body;
+        
+        var validMessages = Array.isArray(messages) 
+            ? messages.map(function(m) { return String(m).trim(); }).filter(Boolean) 
+            : [];
+            
+        if (validMessages.length === 0 && message && message.trim()) {
+            validMessages = [message.trim()];
         }
+        
+        var primaryMessage = (message && message.trim()) 
+            ? message.trim() 
+            : (validMessages[0] || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖');
+
         var updatedCard = await settingsUtils.updateGameCardSetting({
             title: title ? title.trim() : 'Tấm Thiệp Động Viên 💌',
-            message: message.trim(),
+            message: primaryMessage,
+            messages: (validMessages.length > 0) ? validMessages : settingsUtils.DEFAULT_CARD_MESSAGES,
+            isRandom: (isRandom !== undefined) ? (isRandom === true || isRandom === 'true' || isRandom === 1) : true,
             sender: sender ? sender.trim() : 'Từ Vương Quốc Nấm 🍄',
             buttonText: buttonText ? buttonText.trim() : '🔄 Chơi lại ngay'
         });

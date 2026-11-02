@@ -413,6 +413,7 @@
             this.coins = 0;
             this.lives = 3;
             this.gameState = 'PLAYING';
+            window.__needNewCard = true;
             this.initLevel();
             var hero = this.skin === 'minecraft' ? 'Steve Minecraft' : 'Mario';
             this.notifyChat('restart', 'Đã khởi động lại màn chơi ' + hero + '! Cố lên bạn ơi!');
@@ -424,6 +425,11 @@
             if (this.lives <= 0) {
                 this.gameState = 'GAMEOVER';
                 audio.die();
+
+                // Chọn ngẫu nhiên một câu thiệp động viên mới cho lượt Game Over này
+                if (typeof window.pickRandomGameCard === 'function') {
+                    window.pickRandomGameCard();
+                }
 
                 // Tự động mở Tấm Thiệp Động Viên khi chơi thua
                 if (typeof window.showGameOverCard === 'function') {

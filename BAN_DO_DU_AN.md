@@ -464,7 +464,8 @@ PORT=3000                            # Port (Render tự inject)
 
 | Commit | Nội dung |
 |--------|----------|
-| `HEAD` | Set animal avatar: Add cool 3D motorcycle cat avatar image and sanitize emoji list to 100% animals |
+| `HEAD` | Random Text Thiệp: Thêm kho lời nhắn ngẫu nhiên khi thua game Mario, hỗ trợ CRUD danh sách câu và nút đổi lời chúc 🎲 |
+| `657abe0` | Set animal avatar: Add cool 3D motorcycle cat avatar image and sanitize emoji list to 100% animals |
 | `758b13d` | Add heartwarming Game Over Greeting Card modal and canvas drawing with custom admin text settings |
 | `2537cbb` | Apply Impeccable UI polish: rounded Quicksand font, glow focus rings, micro-interaction animations |
 | `aa49aa9` | Fix hardcoded gamepad icon: dynamically bind default icon to saved admin icons |

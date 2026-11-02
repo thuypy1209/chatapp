@@ -478,10 +478,27 @@
 
         <div id="game-card-body" style="margin-top: 18px; border-top: 2px dashed #fbcfe8; padding-top: 18px;">
             <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
-                💡 <b>Tính năng:</b> Khi người chơi hết 3 mạng trong Game Mario và thua cuộc, hệ thống sẽ tự động bung mở một <b>Tấm thiệp động viên</b> tuyệt đẹp với lời nhắn yêu thương do bạn tùy chỉnh dưới đây!
+                💡 <b>Tính năng:</b> Khi người chơi hết 3 mạng trong Game Mario và thua cuộc, hệ thống sẽ tự động bung mở một <b>Tấm thiệp động viên</b> tuyệt đẹp với lời nhắn yêu thương. Bạn có thể bật tính năng <b>Random Text</b> để mỗi lần thua cuộc xuất hiện một câu động viên bất ngờ khác nhau!
             </p>
 
             <form id="form-game-card-setting" onsubmit="handleSaveGameCardSetting(event)">
+                
+                <!-- BẬT/TẮT RANDOM CHẾ ĐỘ THIỆP -->
+                <div style="background: #fdf2f8; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 26px;">🎲</span>
+                        <div>
+                            <strong style="color: #db2777; font-size: 14px; display: block;">Chế độ Ngẫu nhiên Text Thiệp (Random Messages)</strong>
+                            <span style="color: #64748b; font-size: 12px;">Mỗi lần người chơi thua game sẽ xuất hiện một câu động viên bất ngờ khác nhau</span>
+                        </div>
+                    </div>
+                    <label class="admin-toggle-switch" title="Gạt để Bật / Tắt chế độ Random Text Thiệp">
+                        <input type="checkbox" id="admin-card-is-random" <%= (typeof gameCard === 'undefined' || !gameCard || gameCard.isRandom !== false) ? 'checked' : '' %> onchange="onCardRandomToggleChange(this.checked)">
+                        <span class="admin-toggle-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Tiêu đề & Người gửi -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
                     <div>
                         <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
@@ -505,16 +522,58 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 16px;">
+                <!-- KHU VỰC QUẢN LÝ KHO LỜI NHẮN RANDOM -->
+                <div id="admin-card-random-section" style="background: #ffffff; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="font-size: 13px; font-weight: 800; color: #db2777;">
+                                📜 Kho Lời Nhắn Động Viên Ngẫu Nhiên (<span id="admin-card-msg-count">0</span> câu):
+                            </span>
+                            <div style="font-size: 11px; color: #64748b;">Mỗi lần chơi thua hệ thống sẽ chọn ngẫu nhiên một câu dưới đây để gửi tặng</div>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" onclick="testRollAdminCardMessage()" style="background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                🎲 Thử bốc ngẫu nhiên
+                            </button>
+                            <button type="button" onclick="resetDefaultRandomCardMessages()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                🔄 Khôi phục 10 câu mẫu
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách các câu thẻ đang có -->
+                    <div id="admin-card-messages-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px; margin-bottom: 14px;">
+                        <!-- Render qua Javascript -->
+                    </div>
+
+                    <!-- Ô thêm câu mới -->
+                    <div style="background: #fdfbf7; border: 1px dashed #f59e0b; border-radius: 10px; padding: 10px 12px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 6px;">
+                            ➕ Thêm lời chúc / động viên mới vào kho ngẫu nhiên:
+                        </label>
+                        <div style="display: flex; gap: 8px; align-items: flex-start;">
+                            <textarea id="admin-card-new-msg-input" rows="2" placeholder="Gõ câu động viên ấm áp mới (VD: Cố lên nào bạn ơi, thành công đang ở phía trước! 🌸✨)..."
+                                style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff;"
+                                onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'"></textarea>
+                            <button type="button" onclick="addNewCardMessageToList()" style="background: #db2777; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; height: 38px;">
+                                ➕ Thêm câu này
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu chính khi tắt Random -->
+                <div id="admin-card-single-section" style="margin-bottom: 16px; <%= (typeof gameCard === 'undefined' || !gameCard || gameCard.isRandom !== false) ? 'display: none;' : '' %>">
                     <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 6px;">
-                        Nội dung Text Thiệp (Lời nhắn an ủi / chúc động viên khi Game Over) (*):
+                        Nội dung Text Thiệp Cố Định (Dùng khi TẮT chế độ ngẫu nhiên):
                     </label>
-                    <textarea id="admin-card-message-input" rows="3" required
+                    <textarea id="admin-card-message-input" rows="3"
                         placeholder="Nhập nội dung bức thiệp gửi tặng người chơi khi bị thua game..."
                         style="width: 100%; padding: 12px 14px; border: 2px solid #fbcfe8; border-radius: 12px; font-size: 14px; line-height: 1.6; outline: none; background: #fff;"
                         onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'"><%= (typeof gameCard !== 'undefined' && gameCard && gameCard.message) ? gameCard.message : 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖' %></textarea>
                 </div>
 
+                <!-- Cụm nút Lưu & Xem trước -->
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <button type="submit" id="btn-save-game-card"
                         style="background: linear-gradient(135deg, #db2777, #be185d); color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(219,39,119,0.25);">
@@ -1758,6 +1817,9 @@ loadCurrentMusicSetting();
 initCollapsibleSections();
 </script>
 
+<script>
+    window.__ADMIN_GAME_CARD_DATA = <%- JSON.stringify(typeof gameCard !== 'undefined' && gameCard ? gameCard : {}) %>;
+</script>
 <script src="/javascripts/admin.js"></script>
 <script>
 

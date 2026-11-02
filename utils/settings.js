@@ -16,10 +16,26 @@ let cachedMusicSetting = {
     updatedAt: Date.now()
 };
 
+// Kho các câu Text Thiệp ngẫu nhiên động viên khi Game Over
+const DEFAULT_CARD_MESSAGES = [
+    "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖",
+    "Thất bại chỉ là một trạm dừng chân nhỏ trên hành trình chinh phục đỉnh cao thôi! Công chúa và Vương quốc Nấm vẫn luôn tin tưởng vào bạn. Cố lên nhé anh hùng! 🍄👑✨",
+    "Game Over không phải là kết thúc, mà là cơ hội để bạn bắt đầu lại với nhiều kinh nghiệm hơn! Uống một ngụm nước ấm rồi bấm nút thử lại nào! ☕💪🌈",
+    "Mỗi lần vấp ngã là một lần bạn nhảy cao hơn! Ngay cả Mario cũng phải rơi xuống hố hàng chục lần mới giải cứu được thế giới cơ mà. Bạn đỉnh nhất! 🌟🎮🔥",
+    "Trời hôm nay có thể mưa, nhưng ngày mai nắng sẽ lại lên rực rỡ! Điểm số chỉ là tạm thời, phong độ của bạn mới là mãi mãi. Thử lại ngay thôi nào! ☀️🌻🎈",
+    "Bạn đã né được bao nhiêu chướng ngại vật rồi đấy, siêu lắm luôn! Thêm một hiệp nữa để phá kỷ lục của chính mình nào người bạn dũng cảm! 🚀🎯🐾",
+    "Hôm nay bạn đã làm rất tốt rồi! Hãy dành tặng cho bản thân một tràng pháo tay thật lớn nhé. Nhấn Chơi lại để tiếp tục tỏa sáng nha! 👏🧸💖",
+    "Không có gì phải tiếc nuối cả, bạn đã có những pha xử lý đỉnh cao! Hít một hơi thật sâu, thả lỏng đôi bàn tay và cùng bứt phá kỷ lục mới nào! 🍀💫🍄",
+    "Dù màn hình hiện Game Over, nhưng trong mắt mọi người bạn luôn là nhà vô địch! Hãy mỉm cười thật tươi rồi vào trận mới nha! 🏆😊✨",
+    "Đừng để một thử thách nhỏ làm bạn chùn bước chứ! Lần này hãy nhảy thật chuẩn và chinh phục kỷ lục mới nào! 🐢💨💥"
+];
+
 // Cài đặt mặc định cho Bức Thiệp Động Viên khi Game Over
 const DEFAULT_GAME_CARD = {
     title: 'Tấm Thiệp Động Viên 💌',
-    message: 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖',
+    message: DEFAULT_CARD_MESSAGES[0],
+    messages: DEFAULT_CARD_MESSAGES,
+    isRandom: true,
     sender: 'Từ Vương Quốc Nấm 🍄',
     buttonText: '🔄 Chơi lại ngay'
 };
@@ -50,8 +66,17 @@ async function initSettings() {
         // Nạp cài đặt bức thiệp game over từ MongoDB
         const cardItem = await Setting.findOne({ key: 'game_over_card' });
         if (cardItem && cardItem.value) {
-            cachedGameCardSetting = { ...DEFAULT_GAME_CARD, ...cardItem.value };
-            console.log('Đã nạp cài đặt text thiệp Game Over từ MongoDB');
+            let cardVal = cardItem.value;
+            let msgs = (Array.isArray(cardVal.messages) && cardVal.messages.length > 0)
+                ? cardVal.messages
+                : (cardVal.message ? [cardVal.message, ...DEFAULT_CARD_MESSAGES.slice(1)] : DEFAULT_CARD_MESSAGES);
+            cachedGameCardSetting = {
+                ...DEFAULT_GAME_CARD,
+                ...cardVal,
+                messages: msgs,
+                isRandom: (cardVal.isRandom !== undefined) ? !!cardVal.isRandom : true
+            };
+            console.log('Đã nạp cài đặt text thiệp Game Over từ MongoDB, số câu:', cachedGameCardSetting.messages.length, 'random:', cachedGameCardSetting.isRandom);
         }
     } catch (e) {
         console.error('Lỗi nạp settings ban đầu:', e);
@@ -64,6 +89,15 @@ function getMusicSetting() {
 
 function getGameCardSetting() {
     return cachedGameCardSetting;
+}
+
+function getRandomCardMessage() {
+    const card = cachedGameCardSetting;
+    if (!card.isRandom || !Array.isArray(card.messages) || card.messages.length === 0) {
+        return card.message || DEFAULT_GAME_CARD.message;
+    }
+    const randomIndex = Math.floor(Math.random() * card.messages.length);
+    return card.messages[randomIndex];
 }
 
 async function updateGameCardSetting(newSetting) {
@@ -110,5 +144,7 @@ module.exports = {
     updateMusicSetting,
     getGameCardSetting,
     updateGameCardSetting,
+    getRandomCardMessage,
+    DEFAULT_CARD_MESSAGES,
     initSettings
 };
