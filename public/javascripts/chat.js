@@ -461,6 +461,25 @@
 
             // Khởi tạo Game Mario nếu chưa khởi tạo
             if (!window.marioSideGameInstance && window.MarioGame) {
+                if (!window.marioChatBridge) {
+                    window.marioChatBridge = function(type, message) {
+                        var msgBox = document.getElementById('message-box');
+                        if (!msgBox) return;
+                        var isMc = (window.marioSideGameInstance && window.marioSideGameInstance.skin === 'minecraft');
+                        var hero = isMc ? 'Steve Minecraft' : 'Super Mario';
+                        var icon = isMc ? '⛏️' : '🍄';
+                        var liveMsgHtml = `
+                            <div class="message bot live-event" style="background: #fffdfa; border: 1px solid #fbcfe8; border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #1e293b; line-height: 1.4; animation: fadeIn 0.2s ease;">
+                                <b style="color: #db2777; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                                    <span>${icon}</span> ${hero}:
+                                </b>
+                                ${message}
+                            </div>
+                        `;
+                        msgBox.insertAdjacentHTML('beforeend', liveMsgHtml);
+                        msgBox.scrollTop = msgBox.scrollHeight;
+                    };
+                }
                 window.marioSideGameInstance = new window.MarioGame('mario-side-canvas');
             }
 

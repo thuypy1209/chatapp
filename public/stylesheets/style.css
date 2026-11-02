@@ -3197,30 +3197,6 @@ select:focus,
     transform: translateX(22px);
 }
 
-.game-card-btn-roll {
-    background: #fdf2f8;
-    color: #db2777;
-    border: 1px solid #fbcfe8;
-    border-radius: 16px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(219, 39, 119, 0.08);
-}
-.game-card-btn-roll:hover {
-    background: #fce7f3;
-    transform: translateY(-1px) scale(1.04);
-    box-shadow: 0 3px 8px rgba(219, 39, 119, 0.18);
-}
-.game-card-btn-roll:active {
-    transform: translateY(0) scale(0.96);
-}
-
 .game-card-stats-badge {
     display: inline-flex;
     align-items: center;

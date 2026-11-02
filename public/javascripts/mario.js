@@ -426,12 +426,14 @@
                 this.gameState = 'GAMEOVER';
                 audio.die();
 
-                // Chọn ngẫu nhiên một câu thiệp động viên mới cho lượt Game Over này
-                if (typeof window.pickRandomGameCard === 'function') {
-                    window.pickRandomGameCard();
-                }
+                // 1. Tự động bốc ngẫu nhiên một bức thiệp mới cho lần thua này
+                const cardText = (typeof window.pickRandomGameCard === 'function')
+                    ? window.pickRandomGameCard()
+                    : ((typeof window.getCurrentGameCardText === 'function') 
+                        ? window.getCurrentGameCardText() 
+                        : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖');
 
-                // Tự động mở Tấm Thiệp Động Viên khi chơi thua
+                // 2. Tự động mở Tấm Thiệp Động Viên khi chơi thua
                 if (typeof window.showGameOverCard === 'function') {
                     setTimeout(() => {
                         window.showGameOverCard(this.score, this.coins, () => {
@@ -440,11 +442,7 @@
                     }, 450);
                 }
 
-                // Gửi thông điệp bức thiệp vào khung chat
-                const cardText = (typeof window.getCurrentGameCardText === 'function') 
-                    ? window.getCurrentGameCardText() 
-                    : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
-                
+                // 3. Tự động gửi thông điệp bức thiệp ngẫu nhiên vào khung chat
                 this.notifyChat('gameover', `
                     <div style="background: linear-gradient(135deg, #fffdfa 0%, #fff1f2 100%); border: 1.5px dashed #fbcfe8; border-radius: 12px; padding: 10px 12px; margin-top: 4px;">
                         <div style="font-weight: 800; color: #db2777; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
