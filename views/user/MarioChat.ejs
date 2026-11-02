@@ -464,7 +464,7 @@ function sendChatMessageToMario(text) {
     var userEmoji = (window.getEmojiForName && displayName) ? window.getEmojiForName(displayName) : '🐱';
     var userHtml = `
         <div class="message user" style="align-self: flex-end; background: #db2777; color: #ffffff; border-radius: 14px 14px 4px 14px; padding: 10px 14px; font-size: 14px; max-width: 85%; box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);">
-            <span style="margin-right: 5px;">${userEmoji}</span><b>${displayName}:</b> ${text}
+            <img src="/images/cat-avatar.png" alt="Avatar" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 5px; border: 1px solid rgba(255,255,255,0.7); display: inline-block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span style="display: none; margin-right: 5px;">${userEmoji}</span><b>${displayName}:</b> ${text}
         </div>
     `;
     msgBox.insertAdjacentHTML('beforeend', userHtml);

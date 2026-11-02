@@ -1,35 +1,36 @@
 /**
- * ChatFlex - Emoji Avatar dễ thương
- * Tự động gán emoji ngẫu nhiên (ổn định theo tên) cho badge người dùng trên navbar và trong chat
+ * ChatFlex - Emoji & Image Avatar dễ thương
+ * Tự động gán hình con vật / emoji động vật đáng yêu cho người dùng
  */
 (function () {
     'use strict';
 
+    // Danh sách 100% Con Vật (Animals) siêu đáng yêu
     var CUTE_EMOJIS = [
         '🐱', // Mèo con
+        '🐶', // Cún con
         '🐰', // Thỏ trắng
         '🦊', // Cáo con
         '🐼', // Gấu trúc
         '🐨', // Koala
         '🐹', // Hamster
-        '🐶', // Cún con
         '🐻', // Gấu nâu
-        '🦄', // Kỳ lân
-        '🌸', // Hoa anh đào
-        '🍓', // Dâu tây
-        '🍑', // Quả đào
-        '🍒', // Cherry
-        '🍄', // Nấm Mario
-        '✨', // Ngôi sao lấp lánh
-        '🐸', // Ếch con
-        '🐧', // Cánh cụt
+        '🐯', // Hổ con
+        '🦁', // Sư tử con
+        '🐮', // Bò sữa
+        '🐷', // Heo hồng
+        '🐸', // Ếch xanh
+        '🐵', // Khỉ con
+        '🐧', // Chim cánh cụt
         '🐥', // Gà con
-        '🎀', // Nơ hồng
-        '🎈', // Bong bóng
-        '🍭', // Kẹo mút
-        '⭐', // Ngôi sao vàng
-        '🌈', // Cầu vồng
-        '🦋'  // Bướm xinh
+        '🦄', // Kỳ lân
+        '🦭', // Hải cẩu
+        '🐬', // Cá heo
+        '🦔', // Nhím con
+        '🐿️', // Sóc chuột
+        '🦌', // Hươu sao
+        '🐺', // Sói tuyết
+        '🦉'  // Cú mèo
     ];
 
     function getEmojiForName(name) {
@@ -49,8 +50,12 @@
         var nameEl  = document.getElementById('nav-username-display');
 
         if (emojiEl && nameEl && window.IS_ADMIN !== true) {
-            var username = nameEl.textContent.trim();
-            emojiEl.textContent = getEmojiForName(username);
+            // Nếu đã có thẻ <img> hình con vật bên trong thì giữ nguyên hình ảnh
+            var hasImg = emojiEl.querySelector('img');
+            if (!hasImg) {
+                var username = nameEl.textContent.trim();
+                emojiEl.textContent = getEmojiForName(username);
+            }
         }
 
         // Cập nhật tất cả các avatar user trong bảng quản trị nếu có

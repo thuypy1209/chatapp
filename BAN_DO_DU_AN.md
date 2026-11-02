@@ -464,6 +464,10 @@ PORT=3000                            # Port (Render tự inject)
 
 | Commit | Nội dung |
 |--------|----------|
+| `HEAD` | Set animal avatar: Add cool 3D motorcycle cat avatar image and sanitize emoji list to 100% animals |
+| `758b13d` | Add heartwarming Game Over Greeting Card modal and canvas drawing with custom admin text settings |
+| `2537cbb` | Apply Impeccable UI polish: rounded Quicksand font, glow focus rings, micro-interaction animations |
+| `aa49aa9` | Fix hardcoded gamepad icon: dynamically bind default icon to saved admin icons |
 | `85c4f3e` | Fix script tag, chuyển modal xóa ra ngoài body, tăng z-index |
 | `a9206c0` | Phân quyền Super Admin: chỉ Super Admin xóa Chat User, Custom Modal |
 | `b7b400c` | Sửa timestamp giả lastActive, force múi giờ GMT+7 |

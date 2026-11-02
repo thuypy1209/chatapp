@@ -1,33 +1,34 @@
 /**
  * Tiện ích tạo Emoji Avatar dễ thương từ tên người dùng
- * Đảm bảo đồng bộ 100% giữa Server EJS và Client JavaScript
+ * Đảm bảo 100% là CON VẬT (Animals) siêu đáng yêu, không dùng biểu tượng hay đồ vật
+ * Đồng bộ 100% giữa Server EJS và Client JavaScript
  */
 
 const CUTE_EMOJIS = [
     '🐱', // Mèo con
+    '🐶', // Cún con
     '🐰', // Thỏ trắng
     '🦊', // Cáo con
     '🐼', // Gấu trúc
     '🐨', // Koala
     '🐹', // Hamster
-    '🐶', // Cún con
     '🐻', // Gấu nâu
-    '🦄', // Kỳ lân
-    '🌸', // Hoa anh đào
-    '🍓', // Dâu tây
-    '🍑', // Quả đào
-    '🍒', // Cherry
-    '🍄', // Nấm Mario
-    '✨', // Ngôi sao lấp lánh
-    '🐸', // Ếch con
-    '🐧', // Cánh cụt
+    '🐯', // Hổ con
+    '🦁', // Sư tử con
+    '🐮', // Bò sữa
+    '🐷', // Heo hồng
+    '🐸', // Ếch xanh
+    '🐵', // Khỉ con
+    '🐧', // Chim cánh cụt
     '🐥', // Gà con
-    '🎀', // Nơ hồng
-    '🎈', // Bong bóng
-    '🍭', // Kẹo mút
-    '⭐', // Ngôi sao vàng
-    '🌈', // Cầu vồng
-    '🦋'  // Bướm xinh
+    '🦄', // Kỳ lân
+    '🦭', // Hải cẩu
+    '🐬', // Cá heo
+    '🦔', // Nhím con
+    '🐿️', // Sóc chuột
+    '🦌', // Hươu sao
+    '🐺', // Sói tuyết
+    '🦉'  // Cú mèo
 ];
 
 function getEmojiForName(name) {

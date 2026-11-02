@@ -31,9 +31,11 @@
                     <div class="user-badge">
                         <span class="user-badge-name">
                             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                                <span class="user-avatar-emoji" id="nav-user-emoji">⭐</span>
+                                <span class="user-avatar-emoji" id="nav-user-emoji" title="Quản trị viên">⭐</span>
                             <% } else { %>
-                                <span class="user-avatar-emoji" id="nav-user-emoji"><%= (typeof getEmojiForName === 'function') ? getEmojiForName(currentUser) : '🐱' %></span>
+                                <span class="user-avatar-emoji" id="nav-user-emoji" title="Hình nhân vật thú cưng">
+                                    <img src="/images/cat-avatar.png" alt="Avatar" class="user-avatar-img" onerror="this.style.display='none'; this.parentElement.innerText='<%= (typeof getEmojiForName === 'function') ? getEmojiForName(currentUser) : '🐱' %>';">
+                                </span>
                             <% } %>
                             <span id="nav-username-display"><%= currentUser %></span>
                         </span>
@@ -60,8 +62,8 @@
     <!-- MODAL BẮT BUỘC NHẬP TÊN KHI VÀO TRANG -->
     <div id="welcome-name-modal">
         <div class="welcome-box">
-            <div class="welcome-icon-circle">
-                🍄
+            <div class="welcome-icon-circle" style="overflow: hidden; padding: 0; border: 3px solid #f472b6; box-shadow: 0 4px 14px rgba(244, 114, 182, 0.35); display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; margin: 0 auto 12px auto; border-radius: 50%; background: #fdf2f8;">
+                <img src="/images/cat-avatar.png" alt="Avatar Thú Cưng" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerText='🐱';">
             </div>
 
             <h2 class="welcome-title">Chào mừng bạn đến Phổi bạn không phải tôi!</h2>
