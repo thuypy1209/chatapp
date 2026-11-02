@@ -1,0 +1,162 @@
+<!-- MODAL BỨC THIỆP ĐỘNG VIÊN KHI GAME OVER -->
+<div id="game-card-modal-overlay" class="game-card-modal-overlay" style="display: none;" onclick="if(event.target===this) closeGameOverCard()">
+    <div class="game-card-wrapper" role="dialog" aria-modal="true" aria-labelledby="game-card-title">
+        
+        <!-- Nút đóng nhanh góc trên -->
+        <button type="button" class="game-card-close-btn" onclick="closeGameOverCard()" title="Đóng thiệp (ESC)">✕</button>
+
+        <!-- Trái tim & Ngôi sao trang trí bay bay -->
+        <div class="card-floating-deco card-deco-1">🌸</div>
+        <div class="card-floating-deco card-deco-2">✨</div>
+        <div class="card-floating-deco card-deco-3">💖</div>
+        <div class="card-floating-deco card-deco-4">⭐</div>
+
+        <!-- Phong bì & Tấm thiệp chính -->
+        <div class="game-card-inner">
+            
+            <!-- Phần nắp thiệp dập nổi sáp niêm phong -->
+            <div class="game-card-seal-row">
+                <div class="game-card-seal">
+                    <span>💌</span>
+                </div>
+            </div>
+
+            <!-- Tiêu đề thiệp -->
+            <h3 id="game-card-title" class="game-card-title">
+                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.title) ? gameOverCard.title : 'Tấm Thiệp Động Viên 💌' %>
+            </h3>
+
+            <!-- Dải ruy băng mờ trang trí -->
+            <div class="game-card-ribbon">
+                <span>✦ ✦ ✦</span>
+            </div>
+
+            <!-- Nội dung bức thiệp (Text thiệp) -->
+            <div id="game-card-message" class="game-card-message">
+                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.message) ? gameOverCard.message : 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖' %>
+            </div>
+
+            <!-- Huy hiệu điểm số đã đạt được trong lần chơi -->
+            <div class="game-card-stats-badge">
+                <span id="game-card-score-box">⭐ Điểm số: <b>0</b></span>
+                <span style="color: #cbd5e1;">|</span>
+                <span id="game-card-coins-box">🪙 Đồng xu: <b>0</b></span>
+            </div>
+
+            <!-- Ký tên người gửi thiệp -->
+            <div id="game-card-sender" class="game-card-sender">
+                — <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.sender) ? gameOverCard.sender : 'Từ Vương Quốc Nấm 🍄' %> —
+            </div>
+
+            <!-- Các nút hành động dưới đáy thiệp -->
+            <div class="game-card-actions">
+                <button type="button" id="game-card-restart-btn" class="game-card-btn-restart" onclick="restartFromCard()">
+                    <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.buttonText) ? gameOverCard.buttonText : '🔄 Chơi lại ngay' %>
+                </button>
+                <button type="button" class="game-card-btn-close" onclick="closeGameOverCard()">
+                    Đóng thiệp
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Biến lưu callback khi người dùng bấm Chơi lại từ thiệp
+    window.__gameCardRestartCallback = null;
+
+    // Bộ nhớ đệm dữ liệu thiệp trên client
+    window.__currentCardData = {
+        title: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.title) ? gameOverCard.title.replace(/'/g, "\\'") : "Tấm Thiệp Động Viên 💌" %>',
+        message: `<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message) ? gameOverCard.message.replace(/`/g, "\\`").replace(/\\/g, "\\\\") : "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖" %>`,
+        sender: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.sender) ? gameOverCard.sender.replace(/'/g, "\\'") : "Từ Vương Quốc Nấm 🍄" %>',
+        buttonText: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.buttonText) ? gameOverCard.buttonText.replace(/'/g, "\\'") : "🔄 Chơi lại ngay" %>'
+    };
+
+    // Tự động đồng bộ cấu hình thiệp mới nhất từ server
+    function syncCardSettingFromServer() {
+        fetch('/api/game-card')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.card) {
+                    window.__currentCardData = Object.assign({}, window.__currentCardData, data.card);
+                    updateCardDOM();
+                }
+            })
+            .catch(() => {});
+    }
+    syncCardSettingFromServer();
+
+    function updateCardDOM() {
+        const titleEl = document.getElementById('game-card-title');
+        const msgEl = document.getElementById('game-card-message');
+        const senderEl = document.getElementById('game-card-sender');
+        const btnRestartEl = document.getElementById('game-card-restart-btn');
+
+        if (titleEl && window.__currentCardData.title) titleEl.innerText = window.__currentCardData.title;
+        if (msgEl && window.__currentCardData.message) msgEl.innerText = window.__currentCardData.message;
+        if (senderEl && window.__currentCardData.sender) senderEl.innerText = '— ' + window.__currentCardData.sender + ' —';
+        if (btnRestartEl && window.__currentCardData.buttonText) btnRestartEl.innerText = window.__currentCardData.buttonText;
+    }
+
+    window.getCurrentGameCardText = function() {
+        return (window.__currentCardData && window.__currentCardData.message) ? window.__currentCardData.message : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+    };
+
+    window.showGameOverCard = function(score, coins, onRestart) {
+        window.__gameCardRestartCallback = onRestart || null;
+
+        const overlay = document.getElementById('game-card-modal-overlay');
+        const scoreBox = document.getElementById('game-card-score-box');
+        const coinsBox = document.getElementById('game-card-coins-box');
+
+        if (scoreBox) scoreBox.innerHTML = '⭐ Điểm số: <b>' + (score || 0) + '</b>';
+        if (coinsBox) coinsBox.innerHTML = '🪙 Đồng xu: <b>' + (coins || 0) + '</b>';
+
+        updateCardDOM();
+
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+    };
+
+    window.closeGameOverCard = function() {
+        const overlay = document.getElementById('game-card-modal-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    };
+
+    window.restartFromCard = function() {
+        window.closeGameOverCard();
+
+        if (typeof window.__gameCardRestartCallback === 'function') {
+            window.__gameCardRestartCallback();
+            return;
+        }
+
+        // Tự động tìm game instance để restart
+        if (window.marioInstance && typeof window.marioInstance.restart === 'function') {
+            window.marioInstance.restart();
+            const c = document.getElementById('mario-canvas');
+            if (c) c.focus();
+        } else if (window.marioSideGameInstance && typeof window.marioSideGameInstance.restart === 'function') {
+            window.marioSideGameInstance.restart();
+            const sc = document.getElementById('mario-side-canvas');
+            if (sc) sc.focus();
+        }
+    };
+
+    // Đóng khi nhấn phím ESC
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+            const overlay = document.getElementById('game-card-modal-overlay');
+            if (overlay && overlay.style.display !== 'none') {
+                window.closeGameOverCard();
+            }
+        }
+    });
+})();
+</script>

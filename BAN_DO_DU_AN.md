@@ -52,7 +52,8 @@ F:/ChatApp/
 │   ├── error.ejs                 ← Trang lỗi chung
 │   ├── partials/
 │   │   ├── header.ejs            ← <head> + <nav> dùng chung [212 dòng]
-│   │   └── footer.ejs            ← </body></html> + script links
+│   │   ├── footer.ejs            ← </body></html> + script links
+│   │   └── cardModal.ejs         ← Modal Tấm Thiệp động viên khi chơi game thua (Game Over)
 │   ├── page/
 │   │   └── home.ejs              ← Landing page
 │   ├── user/
@@ -172,6 +173,13 @@ F:/ChatApp/
 |--------|------|--------|
 | GET | `/admin/api/icons` | Lấy danh sách icon gợi ý nhanh |
 | POST | `/admin/api/icons` | Lưu danh sách icon gợi ý (thêm/xóa) vào MongoDB Setting |
+
+#### Quản lý Text Thiệp Game Over
+| Method | Path | Mô tả |
+|--------|------|--------|
+| GET | `/api/game-card` | API public lấy cấu hình text thiệp động viên |
+| GET | `/admin/api/game-card` | Lấy cấu hình text thiệp cho Admin |
+| POST | `/admin/api/game-card` | Cập nhật nội dung text thiệp vào MongoDB Setting (`game_over_card`) |
 
 ---
 

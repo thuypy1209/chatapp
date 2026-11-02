@@ -353,6 +353,12 @@
                     } else {
                         this.notifyChat('start', '🍄 Trò chơi Mario đã bắt đầu! Dùng phím A/D hoặc Mũi tên để di chuyển, Phím Cách hoặc W để nhảy!');
                     }
+                } else if (this.gameState === 'GAMEOVER') {
+                    if (typeof window.showGameOverCard === 'function') {
+                        window.showGameOverCard(this.score, this.coins, () => {
+                            this.restart();
+                        });
+                    }
                 }
             });
 
@@ -418,7 +424,37 @@
             if (this.lives <= 0) {
                 this.gameState = 'GAMEOVER';
                 audio.die();
-                this.notifyChat('gameover', '💀 Ôi không! ' + hero + ' đã hết mạng. Điểm của bạn: ' + this.score + '. Nhấn "Chơi lại" để thử lại nhé!');
+
+                // Tự động mở Tấm Thiệp Động Viên khi chơi thua
+                if (typeof window.showGameOverCard === 'function') {
+                    setTimeout(() => {
+                        window.showGameOverCard(this.score, this.coins, () => {
+                            this.restart();
+                        });
+                    }, 450);
+                }
+
+                // Gửi thông điệp bức thiệp vào khung chat
+                const cardText = (typeof window.getCurrentGameCardText === 'function') 
+                    ? window.getCurrentGameCardText() 
+                    : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+                
+                this.notifyChat('gameover', `
+                    <div style="background: linear-gradient(135deg, #fffdfa 0%, #fff1f2 100%); border: 1.5px dashed #fbcfe8; border-radius: 12px; padding: 10px 12px; margin-top: 4px;">
+                        <div style="font-weight: 800; color: #db2777; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                            <span>💌</span> Bức thiệp gửi bạn:
+                        </div>
+                        <div style="font-style: italic; color: #334155; line-height: 1.5; margin-bottom: 8px;">
+                            "${cardText}"
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; border-top: 1px solid #fce7f3; padding-top: 6px;">
+                            <span>⭐ Điểm: <b>${this.score}</b> | 🪙 Xu: <b>${this.coins}</b></span>
+                            <button type="button" onclick="if(window.showGameOverCard) window.showGameOverCard(${this.score}, ${this.coins})" style="background: #ffffff; border: 1px solid #fbcfe8; color: #db2777; border-radius: 8px; padding: 2px 8px; font-weight: 700; cursor: pointer;">
+                                💌 Xem thiệp
+                            </button>
+                        </div>
+                    </div>
+                `);
             } else {
                 this.initLevel();
                 this.mario.invincible = 180;
@@ -797,8 +833,7 @@
                 const title = this.skin === 'minecraft' ? 'VICTORY ROYALE! STEVE CHIẾN THẮNG!' : 'STAGE CLEAR! BẠN ĐÃ CHIẾN THẮNG!';
                 this.drawOverlayScreen(ctx, title, 'Điểm số: ' + this.score + ' | Nhấn [R] để chơi lại', '#22c55e');
             } else if (this.gameState === 'GAMEOVER') {
-                const title = this.skin === 'minecraft' ? 'YOU DIED! (GAME OVER)' : 'GAME OVER';
-                this.drawOverlayScreen(ctx, title, 'Điểm: ' + this.score + ' | Nhấn [R] hoặc nút Chơi lại để thử lại', '#ef4444');
+                this.drawGameOverCard(ctx);
             }
         }
 
@@ -1701,6 +1736,132 @@
             ctx.fillText(subtitle, this.width / 2, this.height / 2 + 25);
 
             ctx.restore();
+        }
+
+        drawGameOverCard(ctx) {
+            ctx.save();
+            // Nền tối mờ phía sau
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+            ctx.fillRect(0, 0, this.width, this.height);
+
+            const cardW = Math.min(540, this.width - 40);
+            const cardH = Math.min(270, this.height - 30);
+            const cardX = (this.width - cardW) / 2;
+            const cardY = (this.height - cardH) / 2;
+
+            // Thân thiệp màu kem ấm
+            const grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+            grad.addColorStop(0, '#fffdfa');
+            grad.addColorStop(1, '#fff1f2');
+            ctx.fillStyle = grad;
+            this.roundRect(ctx, cardX, cardY, cardW, cardH, 20, true, false);
+
+            // Viền thiệp nét đứt hồng pastel
+            ctx.strokeStyle = '#fbcfe8';
+            ctx.lineWidth = 3;
+            this.roundRect(ctx, cardX, cardY, cardW, cardH, 20, false, true);
+
+            // Nắp thiệp / Dải ribbon
+            const ribbonH = 44;
+            const rGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
+            rGrad.addColorStop(0, '#f43f5e');
+            rGrad.addColorStop(1, '#db2777');
+            ctx.fillStyle = rGrad;
+            this.roundRectTop(ctx, cardX, cardY, cardW, ribbonH, 20);
+
+            // Tiêu đề trên ribbon
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px "Quicksand", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('💌 TẤM THIỆP ĐỘNG VIÊN 💌', cardX + cardW / 2, cardY + ribbonH / 2);
+
+            // Nội dung Text Thiệp
+            const cardText = (typeof window.getCurrentGameCardText === 'function') 
+                ? window.getCurrentGameCardText() 
+                : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+            
+            ctx.fillStyle = '#334155';
+            ctx.font = 'italic 600 13px "Quicksand", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            this.drawWrappedText(ctx, '"' + cardText + '"', cardX + cardW / 2, cardY + ribbonH + 16, cardW - 50, 20);
+
+            // Huy hiệu điểm số
+            const badgeY = cardY + cardH - 64;
+            ctx.fillStyle = '#ffffff';
+            this.roundRect(ctx, cardX + (cardW - 240) / 2, badgeY, 240, 26, 13, true, false);
+            ctx.strokeStyle = '#fbcfe8';
+            ctx.lineWidth = 1.5;
+            this.roundRect(ctx, cardX + (cardW - 240) / 2, badgeY, 240, 26, 13, false, true);
+
+            ctx.fillStyle = '#db2777';
+            ctx.font = 'bold 12px "Quicksand", sans-serif';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⭐ Điểm: ' + this.score + '  |  🪙 Xu: ' + this.coins, cardX + cardW / 2, badgeY + 13);
+
+            // Hướng dẫn click
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '600 11px "Quicksand", sans-serif';
+            ctx.fillText('Nhấn phím [R] để chơi lại  •  Bấm chuột để mở thiệp to 💌', cardX + cardW / 2, cardY + cardH - 18);
+
+            ctx.restore();
+        }
+
+        roundRect(ctx, x, y, w, h, r, fill = true, stroke = false) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        roundRectTop(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h);
+            ctx.lineTo(x, y + h);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            let linesDrawn = 0;
+            const maxLines = 4;
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line.trim(), x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                    linesDrawn++;
+                    if (linesDrawn >= maxLines - 1) {
+                        ctx.fillText((line + words.slice(n + 1).join(' ')).slice(0, 50) + '...', x, currentY);
+                        return;
+                    }
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line.trim(), x, currentY);
         }
 
         loop(timestamp) {

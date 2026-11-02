@@ -820,3 +820,72 @@ function formatBytes(bytes, decimals = 1) {
 function escapeHtml(string) {
     return String(string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+
+// --- 6. QUẢN LÝ CÀI ĐẶT TEXT THIỆP KHI GAME OVER ---
+function handleSaveGameCardSetting(event) {
+    if (event) event.preventDefault();
+    const title = document.getElementById('admin-card-title-input').value.trim();
+    const message = document.getElementById('admin-card-message-input').value.trim();
+    const sender = document.getElementById('admin-card-sender-input').value.trim();
+    const statusEl = document.getElementById('game-card-save-status');
+
+    if (!message) {
+        alert('Vui lòng nhập nội dung bức thiệp!');
+        return;
+    }
+
+    if (statusEl) statusEl.innerText = 'Đang lưu...';
+
+    fetch('/admin/api/game-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, message, sender })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            if (statusEl) {
+                statusEl.innerText = '✅ Đã lưu cài đặt thiệp thành công!';
+                setTimeout(() => { statusEl.innerText = ''; }, 3500);
+            }
+            if (window.__currentCardData) {
+                window.__currentCardData = Object.assign({}, window.__currentCardData, data.card);
+            }
+        } else {
+            alert('Lỗi: ' + (data.error || 'Không thể lưu cài đặt thiệp!'));
+            if (statusEl) statusEl.innerText = '';
+        }
+    })
+    .catch(err => {
+        console.error('Lỗi lưu thiệp:', err);
+        alert('Lỗi kết nối khi lưu thiệp!');
+        if (statusEl) statusEl.innerText = '';
+    });
+}
+
+function previewGameCardFromAdmin() {
+    const title = document.getElementById('admin-card-title-input').value.trim() || 'Tấm Thiệp Động Viên 💌';
+    const message = document.getElementById('admin-card-message-input').value.trim() || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+    const sender = document.getElementById('admin-card-sender-input').value.trim() || 'Từ Vương Quốc Nấm 🍄';
+
+    if (window.__currentCardData) {
+        window.__currentCardData.title = title;
+        window.__currentCardData.message = message;
+        window.__currentCardData.sender = sender;
+    }
+
+    if (typeof window.showGameOverCard === 'function') {
+        window.showGameOverCard(1250, 42);
+    } else {
+        alert('Tiêu đề: ' + title + '\n\nNội dung:\n' + message + '\n\nKý tên: ' + sender);
+    }
+}
+
+function resetDefaultGameCardText() {
+    if (confirm('Khôi phục nội dung bức thiệp về mặc định ấm áp ban đầu?')) {
+        document.getElementById('admin-card-title-input').value = 'Tấm Thiệp Động Viên 💌';
+        document.getElementById('admin-card-message-input').value = 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖';
+        document.getElementById('admin-card-sender-input').value = 'Từ Vương Quốc Nấm 🍄';
+    }
+}

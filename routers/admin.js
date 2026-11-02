@@ -113,6 +113,10 @@ router.get('/', async function(req, res) {
         var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
         var adminIcons = (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons;
 
+        // Tải cài đặt Text Thiệp Game Over
+        var settingsUtils = require('../utils/settings');
+        var gameCard = settingsUtils.getGameCardSetting();
+
         res.render('admin/Admin', { 
             title: 'Quản trị Admin',
             characters: characters,
@@ -122,11 +126,13 @@ router.get('/', async function(req, res) {
             currentAdmin: req.adminUser,
             currentAdminRole: req.adminObj ? req.adminObj.role : 'admin',
             isSuperAdmin: isSuperAdmin,
-            adminIcons: adminIcons
+            adminIcons: adminIcons,
+            gameCard: gameCard
         });
     } catch (err) {
         console.log("Lỗi lấy danh sách nhân vật cho admin:", err);
-        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser, adminIcons: [] });
+        var settingsUtils = require('../utils/settings');
+        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser, adminIcons: [], gameCard: settingsUtils.getGameCardSetting() });
     }
 });
 
@@ -744,6 +750,36 @@ router.post('/api/icons', async function(req, res) {
     } catch (err) {
         console.error('Lỗi lưu icons:', err);
         res.status(500).json({ success: false, error: 'Lỗi khi lưu danh sách icon!' });
+    }
+});
+
+// 4. API Quản lý Text Thiệp khi Game Over
+router.get('/api/game-card', async function(req, res) {
+    try {
+        var settingsUtils = require('../utils/settings');
+        res.json({ success: true, card: settingsUtils.getGameCardSetting() });
+    } catch (err) {
+        res.json({ success: false, error: 'Lỗi tải cài đặt thiệp!' });
+    }
+});
+
+router.post('/api/game-card', async function(req, res) {
+    try {
+        var settingsUtils = require('../utils/settings');
+        var { title, message, sender, buttonText } = req.body;
+        if (!message || !message.trim()) {
+            return res.status(400).json({ success: false, error: 'Nội dung thiệp không được để trống!' });
+        }
+        var updatedCard = await settingsUtils.updateGameCardSetting({
+            title: title ? title.trim() : 'Tấm Thiệp Động Viên 💌',
+            message: message.trim(),
+            sender: sender ? sender.trim() : 'Từ Vương Quốc Nấm 🍄',
+            buttonText: buttonText ? buttonText.trim() : '🔄 Chơi lại ngay'
+        });
+        res.json({ success: true, message: 'Đã lưu cài đặt text thiệp thành công!', card: updatedCard });
+    } catch (err) {
+        console.error('Lỗi lưu text thiệp:', err);
+        res.status(500).json({ success: false, error: 'Lỗi khi lưu cài đặt text thiệp!' });
     }
 });
 

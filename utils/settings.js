@@ -16,6 +16,16 @@ let cachedMusicSetting = {
     updatedAt: Date.now()
 };
 
+// Cài đặt mặc định cho Bức Thiệp Động Viên khi Game Over
+const DEFAULT_GAME_CARD = {
+    title: 'Tấm Thiệp Động Viên 💌',
+    message: 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖',
+    sender: 'Từ Vương Quốc Nấm 🍄',
+    buttonText: '🔄 Chơi lại ngay'
+};
+
+let cachedGameCardSetting = { ...DEFAULT_GAME_CARD };
+
 async function initSettings() {
     try {
         const item = await Setting.findOne({ key: 'music_setting' });
@@ -36,6 +46,13 @@ async function initSettings() {
             };
             console.log('Đã nạp cài đặt nhạc từ MongoDB:', cachedMusicSetting.versionIndex, 'bài:', cachedMusicSetting.versions.length);
         }
+
+        // Nạp cài đặt bức thiệp game over từ MongoDB
+        const cardItem = await Setting.findOne({ key: 'game_over_card' });
+        if (cardItem && cardItem.value) {
+            cachedGameCardSetting = { ...DEFAULT_GAME_CARD, ...cardItem.value };
+            console.log('Đã nạp cài đặt text thiệp Game Over từ MongoDB');
+        }
     } catch (e) {
         console.error('Lỗi nạp settings ban đầu:', e);
     }
@@ -43,6 +60,28 @@ async function initSettings() {
 
 function getMusicSetting() {
     return cachedMusicSetting;
+}
+
+function getGameCardSetting() {
+    return cachedGameCardSetting;
+}
+
+async function updateGameCardSetting(newSetting) {
+    cachedGameCardSetting = {
+        ...cachedGameCardSetting,
+        ...newSetting,
+        updatedAt: Date.now()
+    };
+    try {
+        await Setting.findOneAndUpdate(
+            { key: 'game_over_card' },
+            { key: 'game_over_card', value: cachedGameCardSetting, updatedAt: new Date() },
+            { upsert: true, returnDocument: 'after' }
+        );
+    } catch (e) {
+        console.error('Lỗi lưu cài đặt text thiệp vào MongoDB:', e);
+    }
+    return cachedGameCardSetting;
 }
 
 async function updateMusicSetting(newSetting) {
@@ -69,5 +108,7 @@ setTimeout(initSettings, 1500);
 module.exports = {
     getMusicSetting,
     updateMusicSetting,
+    getGameCardSetting,
+    updateGameCardSetting,
     initSettings
 };

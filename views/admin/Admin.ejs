@@ -457,6 +457,78 @@
         </div>
     </div>
 
+    <!-- KHỐI: CÀI ĐẶT BỨC THIỆP ĐỘNG VIÊN GAME OVER -->
+    <div id="section-game-card" class="admin-card" style="background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(244,114,182,0.1); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('game-card-body', 'game-card-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #db2777; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>💌</span> Cài đặt Text Thiệp khi Game Over (Khi chơi thua)
+            </h2>
+            <button type="button" id="game-card-toggle-btn"
+                style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="game-card-body" style="margin-top: 18px; border-top: 2px dashed #fbcfe8; padding-top: 18px;">
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                💡 <b>Tính năng:</b> Khi người chơi hết 3 mạng trong Game Mario và thua cuộc, hệ thống sẽ tự động bung mở một <b>Tấm thiệp động viên</b> tuyệt đẹp với lời nhắn yêu thương do bạn tùy chỉnh dưới đây!
+            </p>
+
+            <form id="form-game-card-setting" onsubmit="handleSaveGameCardSetting(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                            Tiêu đề thiệp:
+                        </label>
+                        <input type="text" id="admin-card-title-input" class="form-control" 
+                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.title) ? gameCard.title : 'Tấm Thiệp Động Viên 💌' %>"
+                            placeholder="VD: Tấm Thiệp Động Viên 💌, Lời Nhắn Gửi Bạn 💖..."
+                            style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
+                            onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                            Người gửi thiệp (Ký tên):
+                        </label>
+                        <input type="text" id="admin-card-sender-input" class="form-control" 
+                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.sender) ? gameCard.sender : 'Từ Vương Quốc Nấm 🍄' %>"
+                            placeholder="VD: Từ Vương Quốc Nấm 🍄, Từ Huymn gửi bạn yêu dấu 🌸..."
+                            style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
+                            onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 6px;">
+                        Nội dung Text Thiệp (Lời nhắn an ủi / chúc động viên khi Game Over) (*):
+                    </label>
+                    <textarea id="admin-card-message-input" rows="3" required
+                        placeholder="Nhập nội dung bức thiệp gửi tặng người chơi khi bị thua game..."
+                        style="width: 100%; padding: 12px 14px; border: 2px solid #fbcfe8; border-radius: 12px; font-size: 14px; line-height: 1.6; outline: none; background: #fff;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'"><%= (typeof gameCard !== 'undefined' && gameCard && gameCard.message) ? gameCard.message : 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖' %></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button type="submit" id="btn-save-game-card"
+                        style="background: linear-gradient(135deg, #db2777, #be185d); color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(219,39,119,0.25);">
+                        <span>💾</span> Lưu cài đặt thiệp
+                    </button>
+                    <button type="button" onclick="previewGameCardFromAdmin()"
+                        style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <span>👁️</span> Xem trước thiệp
+                    </button>
+                    <button type="button" onclick="resetDefaultGameCardText()"
+                        style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        🔄 Khôi phục mặc định
+                    </button>
+                    <span id="game-card-save-status" style="font-size: 13px; font-weight: 700; color: #16a34a; margin-left: 8px;"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- KHỐI 3: DANH SÁCH NHÂN VẬT HIỆN CÓ -->
     <div class="admin-card" style="background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(0,0,0,0.06); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 2px dashed #fbcfe8; padding-bottom: 12px;">
