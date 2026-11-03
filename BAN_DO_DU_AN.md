@@ -1,6 +1,6 @@
 # 🗺️ BẢN ĐỒ DỰ ÁN – ChatFlex (ChatApp)
 
-> **Cập nhật lần cuối:** 02/11/2026  
+> **Cập nhật lần cuối:** 03/11/2026  
 > **Thư mục local:** `F:\ChatApp`  
 > **GitHub:** https://github.com/thuypy1209/chatapp  
 > **Live URL:** https://chatflex-2vco.onrender.com  
@@ -464,7 +464,8 @@ PORT=3000                            # Port (Render tự inject)
 
 | Commit | Nội dung |
 |--------|----------|
-| `HEAD` | Click vào thiệp mở modal to & Click bên ngoài để chơi lại ngay lập tức |
+| `HEAD` | Custom Modal Chỉnh sửa & Xóa câu thiệp động viên: Thay thế window.prompt/confirm bằng giao diện Pastel Glassmorphism, hỗ trợ textarea nhiều dòng, đếm ký tự và chèn nhanh emoji |
+| `d256df9` | Click vào thiệp mở modal to & Click bên ngoài để chơi lại ngay lập tức |
 | `0e03be8` | Tắt gửi tin nhắn game vào phòng chat (/chat): Giữ nguyên vẹn toàn bộ đoạn hội thoại với nhân vật bot khi chơi side game Mario |
 | `dfd9ba9` | Auto-random gameover card: Automatically pick and send random card on loss, remove manual roll button from card modal |
 | `213ed90` | Random Text Thiệp: Thêm kho lời nhắn ngẫu nhiên khi thua game Mario, hỗ trợ CRUD danh sách câu và nút đổi lời chúc 🎲 |

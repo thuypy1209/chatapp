@@ -904,24 +904,135 @@ function addNewCardMessageToList() {
     }
 }
 
+// ==================== QUẢN LÝ SỬA & XÓA CÂU LỜI CHÚC THIỆP (MODAL) ====================
+function editCardMessage(idx) {
+    openEditCardMessageModal(idx);
+}
+
+function openEditCardMessageModal(idx) {
+    const current = adminCardMessages[idx] || '';
+    const modal = document.getElementById('modal-edit-card-message');
+    if (!modal) {
+        const updated = prompt('Chỉnh sửa nội dung câu lời chúc:', current);
+        if (updated !== null && updated.trim()) {
+            adminCardMessages[idx] = updated.trim();
+            renderAdminCardMessagesList();
+        }
+        return;
+    }
+
+    document.getElementById('modal-edit-card-index').value = idx;
+    const labelEl = document.getElementById('modal-edit-card-index-label');
+    if (labelEl) labelEl.innerText = '#' + (idx + 1);
+
+    const textarea = document.getElementById('modal-edit-card-text');
+    if (textarea) {
+        textarea.value = current;
+        updateCardCharCount(current);
+    }
+
+    const errEl = document.getElementById('modal-edit-card-error');
+    if (errEl) {
+        errEl.style.display = 'none';
+        errEl.innerText = '';
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    }, 60);
+}
+
+function closeEditCardMessageModal() {
+    const modal = document.getElementById('modal-edit-card-message');
+    if (modal) modal.style.display = 'none';
+}
+
+function updateCardCharCount(val) {
+    const countEl = document.getElementById('modal-edit-card-char-count');
+    if (countEl) countEl.innerText = (val ? val.length : 0) + ' ký tự';
+}
+
+function insertEmojiToEditCard(emoji) {
+    const textarea = document.getElementById('modal-edit-card-text');
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + emoji + text.substring(end);
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+    updateCardCharCount(textarea.value);
+}
+
+function submitEditCardMessage(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const idx = parseInt(document.getElementById('modal-edit-card-index').value, 10);
+    const textarea = document.getElementById('modal-edit-card-text');
+    const errEl = document.getElementById('modal-edit-card-error');
+    const val = textarea ? textarea.value.trim() : '';
+
+    if (!val) {
+        if (errEl) {
+            errEl.style.display = 'block';
+            errEl.innerText = 'Vui lòng không để trống nội dung câu lời chúc!';
+        }
+        if (textarea) textarea.focus();
+        return;
+    }
+
+    if (!isNaN(idx) && idx >= 0 && idx < adminCardMessages.length) {
+        adminCardMessages[idx] = val;
+        renderAdminCardMessagesList();
+    }
+    closeEditCardMessageModal();
+}
+
 function deleteCardMessage(idx) {
     if (adminCardMessages.length <= 1) {
         alert('Cần giữ lại ít nhất 1 câu thiệp trong danh sách!');
         return;
     }
-    if (confirm('Bạn có chắc chắn muốn xóa câu lời nhắn này khỏi danh sách ngẫu nhiên?')) {
+    openDeleteCardMessageModal(idx);
+}
+
+function openDeleteCardMessageModal(idx) {
+    const modal = document.getElementById('modal-delete-card-message');
+    if (!modal) {
+        if (confirm('Bạn có chắc chắn muốn xóa câu lời nhắn này khỏi danh sách ngẫu nhiên?')) {
+            adminCardMessages.splice(idx, 1);
+            renderAdminCardMessagesList();
+        }
+        return;
+    }
+
+    document.getElementById('modal-del-card-index').value = idx;
+    const labelEl = document.getElementById('modal-del-card-index-label');
+    if (labelEl) labelEl.innerText = '#' + (idx + 1);
+
+    const previewEl = document.getElementById('modal-del-card-preview');
+    if (previewEl) {
+        previewEl.innerText = '"' + (adminCardMessages[idx] || '') + '"';
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeDeleteCardMessageModal() {
+    const modal = document.getElementById('modal-delete-card-message');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmDeleteCardMessage() {
+    const idx = parseInt(document.getElementById('modal-del-card-index').value, 10);
+    if (!isNaN(idx) && idx >= 0 && idx < adminCardMessages.length) {
         adminCardMessages.splice(idx, 1);
         renderAdminCardMessagesList();
     }
-}
-
-function editCardMessage(idx) {
-    const current = adminCardMessages[idx] || '';
-    const updated = prompt('Chỉnh sửa nội dung câu lời chúc:', current);
-    if (updated !== null && updated.trim()) {
-        adminCardMessages[idx] = updated.trim();
-        renderAdminCardMessagesList();
-    }
+    closeDeleteCardMessageModal();
 }
 
 function onCardRandomToggleChange(checked) {
@@ -1059,5 +1170,13 @@ function resetDefaultGameCardText() {
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('admin-card-messages-list')) {
         initAdminCardMessages();
+    }
+});
+
+// Phím ESC đóng modal thiệp
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.keyCode === 27) {
+        if (typeof closeEditCardMessageModal === 'function') closeEditCardMessageModal();
+        if (typeof closeDeleteCardMessageModal === 'function') closeDeleteCardMessageModal();
     }
 });

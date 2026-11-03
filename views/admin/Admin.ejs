@@ -2042,6 +2042,90 @@ document.addEventListener('keydown', function(e) {
 </div>
 <% } %>
 
+<!-- MODAL CHỈNH SỬA CÂU LỜI CHÚC THIỆP ĐỘNG VIÊN -->
+<div id="modal-edit-card-message" class="admin-modal-overlay" onclick="if(event.target===this) closeEditCardMessageModal()" style="display: none; z-index: 999999;">
+    <div class="admin-modal-box" style="max-width: 540px; width: 92%; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <button type="button" class="admin-modal-close" onclick="closeEditCardMessageModal()" title="Đóng (ESC)">✕</button>
+        <div class="admin-modal-icon" style="background: linear-gradient(135deg, #fdf2f8, #fce7f3); color: #db2777; border: 2px solid #fbcfe8;">
+            💌
+        </div>
+        <h3 class="admin-modal-title" style="color: #db2777; margin-top: 0; font-weight: 800;">Chỉnh sửa câu lời chúc</h3>
+        <p class="admin-modal-desc" style="margin-bottom: 14px; font-size: 13px; color: #64748b;">
+            Chỉnh sửa nội dung thiệp động viên <b id="modal-edit-card-index-label" style="color: #db2777;">#1</b> khi người chơi Game Over:
+        </p>
+
+        <div id="modal-edit-card-error" class="welcome-error-alert" style="display: none; margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; font-size: 13px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;"></div>
+
+        <form id="form-modal-edit-card" onsubmit="submitEditCardMessage(event)">
+            <input type="hidden" id="modal-edit-card-index">
+            <div class="admin-modal-group" style="text-align: left; margin-bottom: 8px;">
+                <label class="admin-modal-label" style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #334155; font-size: 12px; margin-bottom: 6px;">
+                    <span>Nội dung lời chúc / động viên (*):</span>
+                    <span id="modal-edit-card-char-count" style="font-size: 11px; font-weight: 600; color: #94a3b8;">0 ký tự</span>
+                </label>
+                <textarea id="modal-edit-card-text" class="admin-modal-input" rows="4"
+                    placeholder="Nhập nội dung câu chúc ấm áp, thêm emoji tùy thích (VD: Bạn đã chơi rất xuất sắc rồi! Cố gắng lần sau nhé! 🌸✨)..."
+                    style="width: 100%; box-sizing: border-box; resize: vertical; min-height: 100px; font-size: 13.5px; line-height: 1.6; padding: 12px 14px; border-radius: 12px; border: 2px solid #fbcfe8; outline: none; transition: all 0.2s; font-family: 'Quicksand', sans-serif; background: #fff;"
+                    onfocus="this.style.borderColor='#db2777'; this.style.boxShadow='0 0 0 3px rgba(219,39,119,0.15)'"
+                    onblur="this.style.borderColor='#fbcfe8'; this.style.boxShadow='none'"
+                    oninput="updateCardCharCount(this.value)"></textarea>
+            </div>
+
+            <!-- Gợi ý chèn nhanh emoji -->
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 18px;">
+                <span style="font-size: 11px; color: #64748b; font-weight: 700;">Chèn nhanh:</span>
+                <span onclick="insertEmojiToEditCard('🌸')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Hoa anh đào">🌸</span>
+                <span onclick="insertEmojiToEditCard('✨')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Lấp lánh">✨</span>
+                <span onclick="insertEmojiToEditCard('💖')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Trái tim">💖</span>
+                <span onclick="insertEmojiToEditCard('🍄')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Cây nấm">🍄</span>
+                <span onclick="insertEmojiToEditCard('⭐')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Ngôi sao">⭐</span>
+                <span onclick="insertEmojiToEditCard('🏆')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Cúp vô địch">🏆</span>
+                <span onclick="insertEmojiToEditCard('😊')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Mặt cười">😊</span>
+                <span onclick="insertEmojiToEditCard('💪')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Cố lên">💪</span>
+                <span onclick="insertEmojiToEditCard('🎉')" style="cursor: pointer; font-size: 14px; background: #fff; padding: 2px 7px; border-radius: 6px; border: 1px solid #fbcfe8; user-select: none;" title="Pháo bông">🎉</span>
+            </div>
+
+            <div class="admin-modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="admin-modal-btn-cancel" onclick="closeEditCardMessageModal()">
+                    Hủy bỏ
+                </button>
+                <button type="submit" id="btn-modal-edit-card-submit" class="admin-modal-btn-submit" style="background: linear-gradient(135deg, #db2777, #be185d);">
+                    💾 Cập nhật lời chúc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL XÁC NHẬN XÓA CÂU LỜI CHÚC THIỆP -->
+<div id="modal-delete-card-message" class="admin-modal-overlay" onclick="if(event.target===this) closeDeleteCardMessageModal()" style="display: none; z-index: 999999;">
+    <div class="admin-modal-box" style="max-width: 480px; width: 92%; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <button type="button" class="admin-modal-close" onclick="closeDeleteCardMessageModal()" title="Đóng (ESC)">✕</button>
+        <div class="admin-modal-icon danger">
+            🗑️
+        </div>
+        <h3 class="admin-modal-title" style="color: #dc2626; margin-top: 0; font-weight: 800;">Xác nhận xóa câu lời chúc</h3>
+        <p class="admin-modal-desc" style="margin-bottom: 12px; font-size: 13px; color: #64748b;">
+            Bạn có chắc muốn xóa câu lời chúc <b id="modal-del-card-index-label" style="color: #dc2626;">#1</b> khỏi kho ngẫu nhiên không?
+        </p>
+
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #991b1b; line-height: 1.5; font-style: italic; margin-bottom: 16px; word-break: break-word;" id="modal-del-card-preview">
+            "..."
+        </div>
+
+        <input type="hidden" id="modal-del-card-index">
+
+        <div class="admin-modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="admin-modal-btn-cancel" onclick="closeDeleteCardMessageModal()">
+                Hủy bỏ
+            </button>
+            <button type="button" class="admin-modal-btn-danger" onclick="confirmDeleteCardMessage()">
+                🗑️ Xóa khỏi danh sách
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL KHO EMOJI TÌM KIẾM TRỰC TIẾP -->
 <%- include('emojiModal') %>
 
