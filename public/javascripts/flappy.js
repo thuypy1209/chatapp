@@ -820,9 +820,9 @@
             ctx.fillStyle = '#2b3d17';
             ctx.fillRect(0, gy + 14, this.width, 2.5);
 
-            // Lớp đất cát màu kem vàng
+            // Lớp đất cát màu kem vàng (phủ kín hoàn toàn xuống đáy canvas, không để hở khe)
             ctx.fillStyle = '#ded895';
-            ctx.fillRect(0, gy + 16, this.width, gh - 16);
+            ctx.fillRect(0, gy + 16, this.width, gh + 40);
 
             // Họa tiết kẻ caro chéo cuộn trôi liên tục theo tốc độ game
             ctx.strokeStyle = '#cbb86e';
@@ -833,7 +833,7 @@
             ctx.beginPath();
             for (let x = startX - stripeW; x < this.width + stripeW; x += stripeW) {
                 ctx.moveTo(x, gy + 16);
-                ctx.lineTo(x + 12, gy + gh);
+                ctx.lineTo(x + 12, gy + gh + 40);
             }
             ctx.stroke();
 
@@ -931,6 +931,18 @@
         drawReadyScreen(ctx) {
             ctx.save();
 
+            // Hiển thị kỷ lục ở góc trên bên phải đồng bộ với màn hình chơi
+            if (this.bestScore > 0) {
+                ctx.font = 'bold 16px "Quicksand", sans-serif';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'top';
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 3;
+                ctx.strokeText('🏆 Kỷ lục: ' + this.bestScore, this.width - 20, 24);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('🏆 Kỷ lục: ' + this.bestScore, this.width - 20, 24);
+            }
+
             // Dòng chữ GET READY!
             ctx.font = '900 38px "Quicksand", sans-serif';
             ctx.textAlign = 'center';
@@ -942,20 +954,14 @@
             ctx.fillStyle = '#facc15';
             ctx.fillText('GET READY! 🚀', this.width / 2, 130);
 
-            // Hướng dẫn tương tác nhấp nháy
-            const alpha = 0.6 + Math.sin(Date.now() * 0.006) * 0.4;
+            // Hướng dẫn tương tác nhấp nháy mượt mà có viền bóng đổ, không vẽ hộp trắng che nền
+            const alpha = 0.75 + Math.sin(Date.now() * 0.006) * 0.25;
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.font = 'bold 15px "Quicksand", sans-serif';
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.7)';
+            ctx.lineWidth = 3;
+            ctx.strokeText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
             ctx.fillText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
-
-            // Huy hiệu kỷ lục
-            if (this.bestScore > 0) {
-                ctx.fillStyle = '#ffffff';
-                this.roundRect(ctx, this.width / 2 - 90, 320, 180, 28, 14, true, false);
-                ctx.fillStyle = '#db2777';
-                ctx.font = 'bold 13px "Quicksand", sans-serif';
-                ctx.fillText('🏆 Kỷ lục điểm: ' + this.bestScore, this.width / 2, 335);
-            }
 
             ctx.restore();
         }
