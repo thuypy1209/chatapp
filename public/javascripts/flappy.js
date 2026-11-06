@@ -87,13 +87,24 @@
     }
 
     const audio = new RetroAudio();
+    window.FlappyAudio = audio;
+    window.MarioAudio = audio;
 
     // --- Flappy Bird (Flappy Cat) Game Engine ---
     class FlappyGame {
         constructor(canvasId) {
+            this.canvasId = canvasId;
             this.canvas = document.getElementById(canvasId);
             if (!this.canvas) return;
             this.ctx = this.canvas.getContext('2d');
+
+            // Lưu instance toàn cục để các nút điều khiển bên ngoài tương tác trực tiếp
+            window.flappyInstance = this;
+            window.marioInstance = this;
+            if (canvasId === 'mario-side-canvas') {
+                window.flappySideGameInstance = this;
+                window.marioSideGameInstance = this;
+            }
 
             this.width = 800;
             this.height = 450;
@@ -1078,4 +1089,172 @@
     window.FlappyBirdGame = FlappyGame;
     window.MarioGame = FlappyGame;
     window.RetroAudio = RetroAudio;
+    window.FlappyAudio = audio;
+    window.MarioAudio = audio;
+
+    // --- CÁC HÀM TIỆN ÍCH ĐIỀU KHIỂN TOÀN CỤC ---
+    // 1. Chơi lại (Restart)
+    window.restartFlappyGame = function() {
+        var g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
+        if (g && typeof g.restart === 'function') {
+            g.restart();
+        }
+        // Đóng thiệp modal nếu đang mở
+        if (typeof window.closeGameOverCard === 'function') {
+            window.closeGameOverCard();
+        }
+        var overlay = document.getElementById('game-card-modal-overlay');
+        if (overlay) overlay.style.display = 'none';
+
+        var canvas = document.getElementById('mario-canvas') || document.getElementById('mario-side-canvas');
+        if (canvas) {
+            try { canvas.focus(); } catch(e) {}
+        }
+    };
+    window.restartMarioGame = window.restartFlappyGame;
+
+    // 2. Bật / Tắt Âm thanh (Sound)
+    window.toggleGameAudio = function() {
+        var a = window.FlappyAudio || window.MarioAudio || audio;
+        if (a) {
+            a.muted = !a.muted;
+        }
+        var isMuted = a ? a.muted : false;
+
+        // Cập nhật text & icon trên tất cả các nút âm thanh
+        var soundIcon = document.getElementById('sound-icon');
+        var soundText = document.getElementById('sound-text');
+        var btnSound = document.getElementById('btn-toggle-sound');
+        var fsSoundBtn = document.getElementById('fs-sound-btn');
+        var sideAudioBtn = document.getElementById('side-audio-btn');
+
+        if (soundIcon) soundIcon.innerText = isMuted ? '🔇' : '🔊';
+        if (soundText) soundText.innerText = isMuted ? 'Âm thanh: Tắt' : 'Âm thanh: Bật';
+        if (fsSoundBtn) fsSoundBtn.innerText = isMuted ? '🔇' : '🔊';
+        if (sideAudioBtn) sideAudioBtn.innerText = isMuted ? '🔇' : '🔊';
+
+        if (btnSound) {
+            if (isMuted) {
+                btnSound.style.background = '#f1f5f9';
+                btnSound.style.borderColor = '#cbd5e1';
+                btnSound.style.color = '#64748b';
+            } else {
+                btnSound.style.background = '#fdf2f8';
+                btnSound.style.borderColor = '#f472b6';
+                btnSound.style.color = '#db2777';
+            }
+        }
+        return !isMuted;
+    };
+
+    // 3. Toàn màn hình (Fullscreen)
+    window.toggleFullscreenMario = function(containerId) {
+        containerId = containerId || 'mario-game-container';
+        var elem = document.getElementById(containerId);
+        if (!elem) {
+            elem = document.getElementById('mario-game-container') || document.getElementById('mario-side-panel');
+        }
+        if (!elem) return;
+
+        var isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+        if (!isFs && !elem.classList.contains('is-mario-fullscreen')) {
+            // Vào Fullscreen
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(function() {
+                    elem.classList.add('is-mario-fullscreen');
+                });
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            } else {
+                elem.classList.add('is-mario-fullscreen');
+            }
+            elem.classList.add('is-mario-fullscreen');
+            document.body.classList.add('in-mario-fullscreen-mode');
+
+            // Cập nhật text nút toàn màn hình
+            var fsText = elem.querySelector('.fs-text') || document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+            var fsIcon = elem.querySelector('.fs-icon') || document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+            if (fsText) fsText.innerText = 'Thu nhỏ';
+            if (fsIcon) fsIcon.innerText = '🗗';
+
+            var canvas = elem.querySelector('canvas') || document.getElementById('mario-canvas');
+            if (canvas) {
+                setTimeout(function() {
+                    try { canvas.focus(); } catch(e) {}
+                }, 100);
+            }
+        } else {
+            window.exitFullscreenMario(containerId);
+        }
+    };
+
+    window.exitFullscreenMario = function(containerId) {
+        if (document.exitFullscreen && (document.fullscreenElement || document.webkitFullscreenElement)) {
+            document.exitFullscreen().catch(function() {});
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+
+        var containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
+        containers.forEach(function(c) {
+            c.classList.remove('is-mario-fullscreen');
+        });
+        document.body.classList.remove('in-mario-fullscreen-mode');
+
+        var fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+        var fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+        if (fsText) fsText.innerText = 'Toàn màn hình';
+        if (fsIcon) fsIcon.innerText = '⛶';
+
+        var canvas = document.getElementById('mario-canvas') || document.getElementById('mario-side-canvas');
+        if (canvas) {
+            setTimeout(function() {
+                try { canvas.focus(); } catch(e) {}
+            }, 50);
+        }
+    };
+
+    // Theo dõi sự thay đổi toàn màn hình từ hệ điều hành (nhấn ESC hoặc F11)
+    var handleFsChange = function() {
+        var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        if (!isFs) {
+            var containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
+            containers.forEach(function(c) {
+                c.classList.remove('is-mario-fullscreen');
+            });
+            document.body.classList.remove('in-mario-fullscreen-mode');
+            var fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+            var fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+            if (fsText) fsText.innerText = 'Toàn màn hình';
+            if (fsIcon) fsIcon.innerText = '⛶';
+        }
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    document.addEventListener('mozfullscreenchange', handleFsChange);
+    document.addEventListener('MSFullscreenChange', handleFsChange);
+
+    // Xử lý phím ESC khi ở fallback .is-mario-fullscreen
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.code === 'Escape') {
+            window.exitFullscreenMario();
+        }
+    });
+
+    // 4. Bay lên (Flap)
+    window.flapGameHero = function() {
+        var g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
+        if (g && typeof g.flap === 'function') {
+            g.flap();
+        }
+    };
 })();

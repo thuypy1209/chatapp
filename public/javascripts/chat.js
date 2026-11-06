@@ -539,14 +539,37 @@
     };
 
     window.toggleSideAudio = function() {
-        if (window.MarioAudio) {
-            window.MarioAudio.muted = !window.MarioAudio.muted;
+        var audio = window.FlappyAudio || window.MarioAudio;
+        if (audio) {
+            audio.muted = !audio.muted;
             var audioBtn = document.getElementById('side-audio-btn');
             if (audioBtn) {
-                audioBtn.innerHTML = window.MarioAudio.muted ? '🔇' : '🔊';
+                audioBtn.innerHTML = audio.muted ? '🔇' : '🔊';
             }
         }
     };
+
+    if (!window.toggleFullscreenMario) {
+        window.toggleFullscreenMario = function(containerId) {
+            containerId = containerId || 'mario-side-panel';
+            var elem = document.getElementById(containerId);
+            if (!elem) return;
+            var isFs = document.fullscreenElement || document.webkitFullscreenElement;
+            if (!isFs && !elem.classList.contains('is-mario-fullscreen')) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(function() { elem.classList.add('is-mario-fullscreen'); });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else {
+                    elem.classList.add('is-mario-fullscreen');
+                }
+                elem.classList.add('is-mario-fullscreen');
+                document.body.classList.add('in-mario-fullscreen-mode');
+            } else {
+                if (window.exitFullscreenMario) window.exitFullscreenMario(containerId);
+            }
+        };
+    }
 
     window.triggerSideKey = function(keyName, isDown) {
         if (!window.marioSideGameInstance && window.MarioGame) {

@@ -1262,6 +1262,7 @@ h1 {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
     border: 4px solid #38bdf8;
     position: relative;
+    z-index: 105;
     align-self: start;
 }
 .mario-panel-header {
@@ -1761,7 +1762,7 @@ h1 {
     margin: 15px auto 40px auto;
     padding: 0 15px;
     position: relative;
-    z-index: 5;
+    z-index: 105;
 }
 .mario-header-bar {
     background: rgba(255, 255, 255, 0.95);
@@ -1776,6 +1777,8 @@ h1 {
     gap: 10px;
     border: 2px solid #fbcfe8;
     box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);
+    position: relative;
+    z-index: 105;
 }
 .mario-header-title-box {
     display: flex;
@@ -1857,11 +1860,15 @@ h1 {
     grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
     gap: 20px;
     align-items: start;
+    position: relative;
+    z-index: 105;
 }
 .game-column {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    z-index: 105;
 }
 .game-card {
     background: #0f172a;
@@ -1870,6 +1877,7 @@ h1 {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
     border: 4px solid #38bdf8;
     position: relative;
+    z-index: 105;
 }
 .game-canvas {
     display: block;
@@ -1879,6 +1887,8 @@ h1 {
     background: #5c94fc;
     cursor: pointer;
     outline: none;
+    position: relative;
+    z-index: 105;
 }
 .controls-card {
     background: rgba(255, 255, 255, 0.95);
@@ -1891,6 +1901,8 @@ h1 {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+    position: relative;
+    z-index: 105;
 }
 .gamepad-dpad-left {
     display: flex;

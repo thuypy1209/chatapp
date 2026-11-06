@@ -370,9 +370,8 @@
             // Bắt sự kiện click vào trang web để tạo hiệu ứng bùng nổ tiền (nếu click vào nền)
             let lastBgBurstTime = 0;
             document.addEventListener('pointerdown', (e) => {
-                // Không nổ tiền khi click vào input, button, textarea, widget nhạc, v.v.
-                const targetTag = e.target.tagName.toLowerCase();
-                if (['input', 'textarea', 'select', 'button', 'a'].includes(targetTag) || e.target.closest('button, a, input, textarea, form, .mario-card, #chatflex-music-widget')) {
+                // Tuyệt đối không kích hoạt nổ tiền khi click vào khung game, thanh điều khiển, nút bấm, input...
+                if (this.isElementInsideGame(e.target) || this.isPointInsideGame(e.clientX, e.clientY, 15)) {
                     return;
                 }
                 const now = Date.now();
@@ -380,6 +379,47 @@
                 lastBgBurstTime = now;
                 this.burstAt(e.clientX, e.clientY, 10);
             });
+        }
+
+        // Kiểm tra xem phần tử HTML có thuộc vùng cấm nổ tiền hay không
+        isElementInsideGame(el) {
+            if (!el) return false;
+            const tag = el.tagName ? el.tagName.toLowerCase() : '';
+            if (['input', 'textarea', 'select', 'button', 'a', 'canvas', 'video', 'audio'].includes(tag)) {
+                return true;
+            }
+            if (el.closest('button, a, input, textarea, form, canvas, .game-card, .game-column, #mario-game-container, #mario-canvas, #mario-side-panel, #mario-side-canvas, .controls-card, .mario-touch-hud, .mario-header-bar, .mario-header-tools, .mario-grid-container, .mario-play-chat-wrapper, .mario-chat-card, #chatflex-music-widget, .game-card-modal-overlay, .game-card-wrapper, .mario-fs-header, .mario-side-panel-wrapper')) {
+                return true;
+            }
+            return false;
+        }
+
+        // Kiểm tra xem tọa độ (x, y) có nằm trong bất kỳ khung trò chơi nào hay không
+        isPointInsideGame(x, y, padding = 12) {
+            const selectors = [
+                '#mario-game-container',
+                '#mario-canvas',
+                '.game-card',
+                '.controls-card',
+                '.mario-header-bar',
+                '#mario-side-panel',
+                '#mario-side-canvas',
+                '.mario-touch-hud',
+                '.mario-chat-card',
+                '.game-card-modal-overlay',
+                '#chatflex-music-widget'
+            ];
+            for (let i = 0; i < selectors.length; i++) {
+                const el = document.querySelector(selectors[i]);
+                if (el && el.offsetWidth > 0 && el.offsetHeight > 0) {
+                    const r = el.getBoundingClientRect();
+                    if (x >= r.left - padding && x <= r.right + padding &&
+                        y >= r.top - padding && y <= r.bottom + padding) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         handleResize() {
@@ -408,6 +448,9 @@
         }
 
         burstAt(x, y, count = 20) {
+            // Không kích hoạt nổ tiền nếu tọa độ nằm trong khung trò chơi
+            if (this.isPointInsideGame(x, y, 15)) return;
+
             // Giới hạn số lượng hạt bùng nổ tối đa trên màn hình để chống giật lag
             const availableSlots = this.maxBurstParticles - this.burstParticles.length;
             if (availableSlots <= 0) return;
@@ -440,11 +483,50 @@
             if (this.isRunning) {
                 this.ctx.clearRect(0, 0, this.width, this.height);
 
+                // Lấy tọa độ các khung trò chơi và widget để hoàn toàn không vẽ tiền đè lên game
+                const excludedRects = [];
+                const candidateSelectors = [
+                    '#mario-game-container',
+                    '#mario-canvas',
+                    '.game-card',
+                    '.controls-card',
+                    '#mario-side-panel',
+                    '#mario-side-canvas',
+                    '.mario-touch-hud',
+                    '.game-card-modal-overlay'
+                ];
+
+                for (let s = 0; s < candidateSelectors.length; s++) {
+                    const el = document.querySelector(candidateSelectors[s]);
+                    if (el && el.offsetWidth > 0 && el.offsetHeight > 0) {
+                        const r = el.getBoundingClientRect();
+                        // Thêm padding 14px để mép của tờ tiền hoặc đồng xu không bị lẹm vào khung game
+                        excludedRects.push({
+                            left: r.left - 14,
+                            right: r.right + 14,
+                            top: r.top - 14,
+                            bottom: r.bottom + 14
+                        });
+                    }
+                }
+
+                const isInsideGameArea = (x, y) => {
+                    for (let j = 0; j < excludedRects.length; j++) {
+                        const r = excludedRects[j];
+                        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+
                 // Cập nhật và vẽ hạt mưa tiền ambient
                 for (let i = 0; i < this.particles.length; i++) {
                     const p = this.particles[i];
                     p.update(this.width, this.height);
-                    p.draw(this.ctx);
+                    if (!isInsideGameArea(p.x, p.y)) {
+                        p.draw(this.ctx);
+                    }
                 }
 
                 // Cập nhật và vẽ các hạt tiền nổ (burst)
@@ -454,7 +536,9 @@
                     if (!alive) {
                         this.burstParticles.splice(i, 1);
                     } else {
-                        bp.draw(this.ctx);
+                        if (!isInsideGameArea(bp.x, bp.y)) {
+                            bp.draw(this.ctx);
+                        }
                     }
                 }
             }

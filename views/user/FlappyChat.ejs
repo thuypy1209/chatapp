@@ -16,13 +16,13 @@
         </div>
 
         <div class="mario-header-tools">
-            <button id="btn-toggle-sound" type="button" class="tool-btn btn-mario-sound">
+            <button id="btn-toggle-sound" type="button" class="tool-btn btn-mario-sound" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh trò chơi">
                 <span id="sound-icon">🔊</span> <span id="sound-text">Âm thanh: Bật</span>
             </button>
-            <button id="btn-restart-game" type="button" class="tool-btn btn-mario-restart">
+            <button id="btn-restart-game" type="button" class="tool-btn btn-mario-restart" onclick="window.restartFlappyGame()" title="Chơi lại ván mới">
                 🔄 Chơi lại
             </button>
-            <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle btn-mario-fs" onclick="toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi">
+            <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle btn-mario-fs" onclick="window.toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi">
                 <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
             </button>
         </div>
@@ -38,18 +38,18 @@
                 <div class="mario-fs-header">
                     <div class="mario-fs-title-box">
                         <span class="mario-fs-icon">🚀</span>
-                        <span class="mario-fs-text-title">Flappy Bird - Bangboo (Zenless Zone Zero)</span>
+                        <span class="mario-fs-text-title">Flappy Bangboo (Zenless Zone Zero)</span>
                         <span class="mario-fps-badge mario-fs-fps-badge">⚡ 120 FPS</span>
                         <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
                     </div>
                     <div class="mario-fs-actions">
-                        <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="document.getElementById('btn-toggle-sound').click()">
+                        <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh">
                             🔊
                         </button>
-                        <button type="button" class="fs-restart-btn" onclick="document.getElementById('btn-restart-game').click()">
+                        <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame()" title="Chơi lại">
                             🔄 Chơi lại
                         </button>
-                        <button type="button" class="btn-exit-fullscreen" onclick="exitFullscreenMario()">
+                        <button type="button" class="btn-exit-fullscreen" onclick="window.exitFullscreenMario('mario-game-container')" title="Thoát toàn màn hình (ESC)">
                             ✕ Thoát (ESC)
                         </button>
                     </div>
@@ -60,18 +60,18 @@
 
                 <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
                 <div class="mario-touch-hud" style="justify-content: center; gap: 12px;">
-                    <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4);" onmousedown="if(window.marioInstance) window.marioInstance.flap();" ontouchstart="if(window.marioInstance) window.marioInstance.flap(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
-                    <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="if(window.marioInstance) window.marioInstance.restart();">🔄</button>
+                    <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4);" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
+                    <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="window.restartFlappyGame()" title="Chơi lại">🔄</button>
                 </div>
             </div>
 
             <!-- Bàn phím điều khiển ảo cho Di động & Máy tính -->
             <div class="controls-card" style="display: flex; gap: 12px; align-items: center; justify-content: space-between;">
                 <!-- Nút bay to bản -->
-                <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 14px; font-size: 15px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3);" onmousedown="if(window.marioInstance) window.marioInstance.flap();" ontouchstart="if(window.marioInstance) window.marioInstance.flap(); event.preventDefault();" title="Bấm để bay lên (Space / Chạm)">
+                <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 14px; font-size: 15px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3);" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();" title="Bấm để bay lên (Space / Chạm)">
                     🚀 BAY LÊN (Space / Chuột / Chạm)
                 </button>
-                <button type="button" class="virtual-key" style="padding: 14px 20px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer;" onclick="if(window.marioInstance) window.marioInstance.restart();" title="Chơi lại">
+                <button type="button" class="virtual-key" style="padding: 14px 20px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer;" onclick="window.restartFlappyGame()" title="Chơi lại">
                     🔄 Chơi lại
                 </button>
             </div>
@@ -451,9 +451,8 @@ function sendChatMessageToMario(text) {
     msgBox.scrollTop = msgBox.scrollHeight;
 
     // 2. Chèn trạng thái Đang gõ
-    var isMinecraft = (window.MarioGame && window.marioInstance && window.marioInstance.skin === 'minecraft') || (localStorage.getItem('chatflex_mario_skin') === 'minecraft');
-    var botIcon = isMinecraft ? '⛏️' : '🍄';
-    var botName = isMinecraft ? 'Steve' : 'Mario';
+    var botIcon = '🤖';
+    var botName = 'Bangboo (Zenless Zone Zero)';
 
     var typingId = 'typing-' + Date.now();
     var typingHtml = `
@@ -477,10 +476,10 @@ function sendChatMessageToMario(text) {
         var typingElem = document.getElementById(typingId);
         if (typingElem) typingElem.remove();
 
-        var botReply = (data && data.reply) ? data.reply : 'Yahoo! Đang tập trung chơi game nè!';
-        var headerColor = isMinecraft ? '#0284c7' : '#db2777';
+        var botReply = (data && data.reply) ? data.reply : 'Eh-nah! Tôi đang tập trung nẹt pô xe mô tô bay qua các cột ống nước nè! 🚀🤖';
+        var headerColor = '#0284c7';
         var botHtml = `
-            <div class="message bot" style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 14px 14px 14px 4px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 14px; color: #1e293b; line-height: 1.5; max-width: 90%;">
+            <div class="message bot" style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 14px 14px 14px 4px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 14px; color: #1e293b; line-height: 1.5; max-width: 90%;">
                 <b style="color: ${headerColor}; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
                     <span>${botIcon}</span> ${botName}:
                 </b>
