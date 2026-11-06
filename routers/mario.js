@@ -65,39 +65,51 @@ router.get('/', async function(req, res) {
         }
 
         res.render('user/MarioChat', {
-            title: 'Super Mario Bros & Chat Trực Tuyến',
+            title: 'Flappy Cat: Cuộc Phiêu Lưu Trên Không 🚀',
             character: mario,
             questions: questions
         });
     } catch (err) {
         console.error('Lỗi tải trang Mario:', err);
         res.render('user/MarioChat', {
-            title: 'Super Mario Bros & Chat',
-            character: { name: 'Super Mario', icon: '🍄' },
+            title: 'Flappy Cat: Cuộc Phiêu Lưu Trên Không 🚀',
+            character: { name: 'Mèo Mô Tô', icon: '🚀' },
             questions: []
         });
     }
 });
 
-// POST /mario/message: Xử lý tin nhắn văn bản tự do người dùng gửi cho Mario
+// POST /mario/message: Xử lý tin nhắn văn bản tự do người dùng gửi cho Mèo Phi Công Flappy Cat
 router.post('/message', function(req, res) {
-    trackUserActivity(req, 'Chat Mario');
+    trackUserActivity(req, 'Chat Flappy Cat');
     var message = (req.body.message || '').trim().toLowerCase();
 
     var reply = '';
 
     if (!message) {
-        reply = 'Bạn hãy nói gì đó với tôi nào! Yahoo!';
+        reply = 'Meo meo! Bạn hãy nói gì đó với Mèo Phi Công nào! 🚀🐾';
     } else if (message.includes('chào') || message.includes('hello') || message.includes('hi')) {
-        reply = 'Xin chào bạn nha! Bạn đã sẵn sàng cùng tôi vượt qua các chướng ngại vật và khám phá vương quốc pixel chưa? ⭐⛏️';
-    } else if (message.includes('bản mario') || message.includes('kết hợp') || message.includes('minecraft') || message.includes('mod') || message.includes('nào hay')) {
-        reply = 'Có nhiều bản Mario kết hợp Minecraft cực đỉnh: 1. Bản "Minecraft: Super Mario Mash-up Pack" chính thức từ Nintendo & Mojang. 2. Map "Super Minecraft Maker" nổi tiếng tự build màn chơi bằng block. 3. Và đặc biệt là chế độ "Minecraft Edition" độc quyền đang chạy mượt mà ngay trên canvas bên cạnh bạn đó! Hãy vung Kiếm Kim Cương và chém Creeper nhé! 💎⚔️';
-    } else if (message.includes('steve') || message.includes('creeper') || message.includes('kiếm')) {
-        reply = 'Trong chế độ Minecraft Edition, Steve mang Kiếm Kim Cương sắc lẹm! Khi gặp Creeper xanh lá, hãy căn cú nhảy đạp hoặc chém chuẩn xác từ trên cao để nó nổ khói trắng mà bạn không bị mất tim nhé! 💥🗡️';
-    } else if (message.includes('kim cương') || message.includes('diamond')) {
-        reply = 'Viên Kim Cương Diamond 💎 sáng lấp lánh ẩn trong các Khối May Mắn Lucky Block vàng và bay lơ lửng trên không trung. Thu thập mỗi viên bạn sẽ được thưởng +200 điểm!';
-    } else if (message.includes('nether') || message.includes('cổng') || message.includes('portal') || message.includes('ống cống')) {
-        reply = 'Ống nước cổ điển đã được chuyển hóa thành Cổng Địa Ngục Nether Portal huyền bí làm từ đá Hắc Diệu Thạch Obsidian và luồng ánh sáng ma thuật tím xoáy lộng lẫy!';
+        reply = 'Meo meo! Xin chào bạn nha! Bạn đã sẵn sàng điều khiển chiếc xe mô tô cùng tôi nẹt pô bay qua các cột ống nước xanh retro chưa? Nhấn Space hoặc chạm màn hình để bay nhé! 🚀🐱';
+    } else if (message.includes('bay') || message.includes('chơi') || message.includes('cách') || message.includes('điều khiển')) {
+        reply = 'Mẹo bay đỉnh cao: Mỗi lần bạn chạm màn hình hoặc bấm phím Space, xe mô tô sẽ nẹt pô bay vút lên! Đừng bấm quá liên tục kẻo đụng trần, hãy nhấp nhả nhịp nhàng theo hình sin để lách chuẩn qua khe hở giữa hai ống nước nha! 💨⭐';
+    } else if (message.includes('ống') || message.includes('ống nước') || message.includes('pipe') || message.includes('khe')) {
+        reply = 'Các cột ống nước xanh Flappy Bird có độ cao ngẫu nhiên! Khi bạn bay qua được 1 cặp ống, hệ thống sẽ phát âm thanh "ting" và bạn nhận được ngay +1 điểm! Vượt qua càng nhiều ống điểm càng cao! 🏆✨';
+    } else if (message.includes('mèo') || message.includes('xe') || message.includes('mô tô') || message.includes('kính') || message.includes('khăn')) {
+        reply = 'Chiếc xe mô tô phân khối lớn của tôi được trang bị kính phi công chống gió và khăn choàng lụa xanh bay phần phật trong gió! Mỗi lần vút lên đều có khói pô trắng xả ra cực ngầu luôn đó! 🏍️🕶️✨';
+    } else if (message.includes('kỷ lục') || message.includes('điểm cao') || message.includes('score')) {
+        reply = 'Kỷ lục Flappy Cat được lưu tự động trên máy của bạn! Cố gắng bay qua từ 10 đến 20 ống nước là bạn đã lọt top phi công siêu đẳng rồi đó! Cố lên nha! 🥇🌟';
+    } else if (message.includes('thua') || message.includes('chết') || message.includes('đụng') || message.includes('ngã')) {
+        reply = 'Đừng buồn khi một lần dừng bước nhé! Ngay cả phi công cừ khôi nhất cũng phải va ống nước hàng chục lần mới thành tài cơ mà! Bấm ra ngoài thiệp hoặc bấm phím [R] là chúng mình vào ngay lượt bay mới! 🌸💖';
+    } else {
+        reply = 'Meo meo! Tôi đang tập trung giữ tay lái mô tô nè! Cố gắng nhấp nhả Space đều tay để chúng ta cùng nhau phá kỷ lục điểm số hôm nay nhé! Cố lên bạn ơi! 🚀🐾✨';
+    }
+
+    res.json({
+        success: true,
+        reply: reply,
+        hero: 'Mèo Mô Tô'
+    });
+});
     } else if (message.includes('nhảy') || message.includes('phím') || message.includes('điều khiển') || message.includes('chơi')) {
         reply = 'Rất dễ thôi! Dùng phím A/D hoặc Mũi tên Trái/Phải để chạy, Phím Cách (Space) hoặc W để nhảy! Nhấn Shift để phi nước đại nhé!';
     } else if (message.includes('goomba') || message.includes('quái') || message.includes('nấm nâu')) {

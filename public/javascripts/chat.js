@@ -555,8 +555,9 @@
         if (window.marioSideGameInstance) {
             window.marioSideGameInstance.keys[keyName] = isDown;
             if (isDown) {
-                if (window.MarioAudio) window.MarioAudio.init();
-                if (window.marioSideGameInstance.gameState === 'READY') {
+                if (typeof window.marioSideGameInstance.flap === 'function') {
+                    window.marioSideGameInstance.flap();
+                } else if (window.marioSideGameInstance.gameState === 'READY') {
                     window.marioSideGameInstance.gameState = 'PLAYING';
                 }
             }

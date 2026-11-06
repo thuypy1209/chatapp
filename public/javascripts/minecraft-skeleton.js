@@ -456,13 +456,11 @@
         }
     }
 
-    // Khởi chạy khi DOM sẵn sàng
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            window.minecraftSkeletonInstance = new MinecraftSkeleton();
-        });
-    } else {
-        window.minecraftSkeletonInstance = new MinecraftSkeleton();
-    }
-
+    // Vô hiệu hóa Skeleton theo yêu cầu người dùng
+    try {
+        const el = document.getElementById('minecraft-skeleton-container');
+        if (el) el.remove();
+        const st = document.getElementById('minecraft-skeleton-styles');
+        if (st) st.remove();
+    } catch(e) {}
 })();

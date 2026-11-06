@@ -5,20 +5,17 @@
     <!-- Thanh tiêu đề & Công cụ điều khiển nhanh -->
     <div class="mario-header-bar">
         <div class="mario-header-title-box">
-            <span class="mario-header-icon">🍄</span>
+            <span class="mario-header-icon">🚀</span>
             <div>
                 <div class="mario-header-title-flex">
-                    <h1 class="mario-header-h1">Super Mario Bros & Chat Trực Tuyến</h1>
+                    <h1 class="mario-header-h1">Flappy Cat: Cuộc Phiêu Lưu Trên Không</h1>
                     <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
-                <p class="mario-header-subtitle">Vừa thưởng thức game Mario 2D retro cổ điển, vừa trò chuyện tương tác trực tiếp!</p>
+                <p class="mario-header-subtitle">Điều khiển chú mèo mô tô siêu ngầu vượt qua các cột ống nước retro Flappy Bird!</p>
             </div>
         </div>
 
         <div class="mario-header-tools">
-            <button id="btn-toggle-skin" type="button" class="tool-btn btn-mario-skin">
-                <span id="skin-icon">🟩</span> <span id="skin-text">Chế độ: Minecraft Edition</span>
-            </button>
             <button id="btn-toggle-sound" type="button" class="tool-btn btn-mario-sound">
                 <span id="sound-icon">🔊</span> <span id="sound-text">Âm thanh: Bật</span>
             </button>
@@ -31,24 +28,21 @@
         </div>
     </div>
 
-    <!-- Khung chính 2 cột: Trò chơi Mario (Trái) & Phòng Chat (Phải) -->
+    <!-- Khung chính 2 cột: Trò chơi Flappy Cat (Trái) & Phòng Chat (Phải) -->
     <div class="mario-grid-container">
 
-        <!-- CỘT 1: KHUNG GAME MARIO -->
+        <!-- CỘT 1: KHUNG GAME FLAPPY CAT -->
         <div class="game-column">
             <div id="mario-game-container" class="game-card">
                 <!-- Fullscreen Top Header Bar -->
                 <div class="mario-fs-header">
                     <div class="mario-fs-title-box">
-                        <span class="mario-fs-icon">🎮</span>
-                        <span class="mario-fs-text-title">Super Mario Bros & Minecraft</span>
+                        <span class="mario-fs-icon">🚀</span>
+                        <span class="mario-fs-text-title">Flappy Bird - Mèo Mô Tô</span>
                         <span class="mario-fps-badge mario-fs-fps-badge">⚡ 120 FPS</span>
-                        <span class="mario-fs-guide-text">(Di chuyển: A/D/← → | Nhảy: Space/W)</span>
+                        <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
                     </div>
                     <div class="mario-fs-actions">
-                        <button type="button" id="fs-skin-btn" class="fs-skin-btn" onclick="document.getElementById('btn-toggle-skin').click()">
-                            <span id="fs-skin-icon">🟩</span> <span id="fs-skin-text">Đổi Skin</span>
-                        </button>
                         <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="document.getElementById('btn-toggle-sound').click()">
                             🔊
                         </button>
@@ -61,39 +55,25 @@
                     </div>
                 </div>
 
-                <!-- Canvas Game Mario -->
+                <!-- Canvas Game Flappy Bird -->
                 <canvas id="mario-canvas" class="game-canvas" tabindex="0"></canvas>
 
                 <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
-                <div class="mario-touch-hud">
-                    <div class="mario-hud-group">
-                        <button type="button" id="hud-vkey-left" class="hud-key hud-key-nav">◀</button>
-                        <button type="button" id="hud-vkey-right" class="hud-key hud-key-nav">▶</button>
-                    </div>
-                    <div class="mario-hud-group">
-                        <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump">▲ NHẢY</button>
-                    </div>
+                <div class="mario-touch-hud" style="justify-content: center; gap: 12px;">
+                    <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4);" onmousedown="if(window.marioInstance) window.marioInstance.flap();" ontouchstart="if(window.marioInstance) window.marioInstance.flap(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
+                    <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="if(window.marioInstance) window.marioInstance.restart();">🔄</button>
                 </div>
             </div>
 
-            <!-- Bàn phím điều khiển ảo (Gamepad 2 tay cho Di động & Máy tính) -->
-            <div class="controls-card">
-                <!-- Cụm tay trái (D-Pad di chuyển) -->
-                <div class="gamepad-dpad-left">
-                    <button type="button" class="virtual-key" id="vkey-left" title="Chạy sang trái (A / ←)">◀</button>
-                    <button type="button" class="virtual-key" id="vkey-right" title="Chạy sang phải (D / →)">▶</button>
-                </div>
-
-                <!-- Hướng dẫn điều khiển -->
-                <div class="controls-guide-text">
-                    <span class="controls-guide-highlight">📱 Chơi trên điện thoại:</span> 
-                    <span>Ngón trái bấm <b>◀ ▶</b> | Ngón phải bấm <b>▲ Nhảy</b> (hoặc chạm trực tiếp lên màn hình game)</span>
-                </div>
-
-                <!-- Cụm tay phải (Nút Nhảy Action) -->
-                <div class="gamepad-action-right">
-                    <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" title="Nhảy lên (Space / W)">▲ Nhảy (Space)</button>
-                </div>
+            <!-- Bàn phím điều khiển ảo cho Di động & Máy tính -->
+            <div class="controls-card" style="display: flex; gap: 12px; align-items: center; justify-content: space-between;">
+                <!-- Nút bay to bản -->
+                <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 14px; font-size: 15px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3);" onmousedown="if(window.marioInstance) window.marioInstance.flap();" ontouchstart="if(window.marioInstance) window.marioInstance.flap(); event.preventDefault();" title="Bấm để bay lên (Space / Chạm)">
+                    🚀 BAY LÊN (Space / Chuột / Chạm)
+                </button>
+                <button type="button" class="virtual-key" style="padding: 14px 20px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer;" onclick="if(window.marioInstance) window.marioInstance.restart();" title="Chơi lại">
+                    🔄 Chơi lại
+                </button>
             </div>
         </div>
 
@@ -104,12 +84,12 @@
                 <!-- Chat Header -->
                 <div class="mario-chat-header">
                     <div class="mario-chat-header-info">
-                        <div id="chat-hero-avatar" class="mario-chat-hero-avatar">
-                            ⛏️
+                        <div id="chat-hero-avatar" class="mario-chat-hero-avatar" style="padding: 0; overflow: hidden; border: 2px solid #38bdf8; background: #e0f2fe;">
+                            <img src="/images/flappy-cat.png" alt="Mèo Mô Tô" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                         </div>
                         <div>
-                            <h2 id="chat-hero-name" class="mario-chat-hero-name">Steve (Minecraft)</h2>
-                            <span class="mario-chat-status">● Đang online trong game</span>
+                            <h2 id="chat-hero-name" class="mario-chat-hero-name">Mèo Phi Công (Flappy Cat)</h2>
+                            <span class="mario-chat-status">● Đang bay lượn trong game</span>
                         </div>
                     </div>
                     <span class="mario-chat-tag">
@@ -123,9 +103,9 @@
                     <!-- Lời chào đầu tiên từ Hero -->
                     <div class="message bot mario-welcome-bot-msg">
                         <b id="chat-welcome-bot-title" class="chat-welcome-bot-title">
-                            <span>⛏️</span> Steve (Minecraft Edition):
+                            <span>🐱</span> Mèo Phi Công (Flappy Cat):
                         </b>
-                        <span id="chat-welcome-bot-msg">Xin chào! Tôi là Steve trong thế giới Mario x Minecraft! Hãy nhấp vào màn hình để điều khiển tôi vung Kiếm Kim Cương 🗡️, vượt qua Cổng Nether và hạ gục Creeper 💥! Bạn có thể vừa chơi vừa chat cùng tôi nhé! ⭐</span>
+                        <span id="chat-welcome-bot-msg">Meo meo! Tôi là Mèo Phi Công lái xe mô tô đây! Hãy chạm vào màn hình hoặc bấm phím Space để giúp tôi nẹt pô bay qua các cột ống nước retro nhé! Bạn có thể vừa chơi vừa chat cùng tôi nha! 🚀🐾</span>
                     </div>
 
                 </div>
@@ -133,24 +113,24 @@
                 <!-- Gợi ý câu hỏi nhanh -->
                 <div id="mario-quick-questions" class="mario-quick-questions">
                     <div class="mario-quick-title">💡 Gợi ý hỏi đáp:</div>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Có những bản Mario x Minecraft nào chơi được và đẹp nhất?')">
-                        ⛏️ Có những bản Mario x Minecraft nào chơi được & đẹp nhất?
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm sao để bay qua được nhiều ống nước nhất?')">
+                        🚀 Làm sao để bay qua được nhiều ống nước nhất?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Steve nhảy và chém Creeper?')">
-                        💥 Làm thế nào để điều khiển Steve nhảy chém Creeper?
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Xe mô tô của bạn chạy bằng gì thế?')">
+                        🐱 Xe mô tô của bạn chạy bằng gì thế?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để đào Kim Cương Diamond?')">
-                        💎 Làm thế nào để đào được Kim Cương Diamond?
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Kỷ lục bay cao nhất của bạn là bao nhiêu điểm?')">
+                        🏆 Kỷ lục bay cao nhất của bạn là bao nhiêu điểm?
                     </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm thế nào để điều khiển Mario nhảy cao?')">
-                        🍄 Làm thế nào để điều khiển Mario nhảy cao?
+                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Cho tôi lời khuyên để không bị đụng ống nước nào!')">
+                        💨 Cho tôi lời khuyên để không bị đụng ống nước!
                     </button>
                 </div>
 
                 <!-- Input nhắn tin trực tiếp -->
                 <div class="mario-chat-input-bar">
                     <form id="mario-chat-form" class="mario-chat-form" onsubmit="handleSendChat(event)">
-                        <input type="text" id="mario-chat-input" class="mario-chat-input" placeholder="Nhập tin nhắn để chat với Mario..." autocomplete="off" />
+                        <input type="text" id="mario-chat-input" class="mario-chat-input" placeholder="Nhập tin nhắn để chat với Mèo Phi Công..." autocomplete="off" />
                         <button type="submit" class="mario-chat-send-btn">
                             Gửi
                         </button>

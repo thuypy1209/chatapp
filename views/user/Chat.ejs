@@ -24,19 +24,16 @@
     <!-- VÙNG CHỨA BỐ CỤC CHAT (Có thể mở rộng khi bật Mario Game) -->
     <div id="chat-layout-wrapper" class="chat-layout-wrapper">
         
-        <!-- BẢNG GAME MARIO SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
+        <!-- BẢNG GAME FLAPPY BIRD SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
         <div id="mario-side-panel" class="mario-side-panel">
             <!-- Header bar của panel -->
             <div class="mario-panel-header">
                 <div class="mario-panel-title-group">
-                    <span>🎮</span>
-                    <span class="mario-panel-game-title">Super Mario Bros</span>
+                    <span>🚀</span>
+                    <span class="mario-panel-game-title">Flappy Bird (Flappy Cat)</span>
                     <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
                 <div class="mario-panel-actions">
-                    <button type="button" id="side-skin-btn" onclick="toggleSideSkin()" title="Đổi giao diện Minecraft / Mario" class="side-skin-btn">
-                        🟩 Minecraft
-                    </button>
                     <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" class="side-audio-btn">
                         🔊
                     </button>
@@ -49,16 +46,15 @@
                 </div>
             </div>
 
-            <!-- Canvas Game Mario -->
+            <!-- Canvas Game Flappy Bird -->
             <canvas id="mario-side-canvas" class="mario-panel-canvas" tabindex="0"></canvas>
 
             <!-- Footer điều khiển & phím ảo cho Side Panel -->
             <div class="mario-panel-footer">
-                <span>Phím: <b>A/D/← →</b> | Nhảy: <b>Space/W</b></span>
-                <div class="mario-side-vkeys">
-                    <button type="button" class="side-vkey-btn" onmousedown="triggerSideKey('ArrowLeft', true)" onmouseup="triggerSideKey('ArrowLeft', false)" ontouchstart="triggerSideKey('ArrowLeft', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowLeft', false); event.preventDefault();">◀</button>
-                    <button type="button" class="side-vkey-btn" onmousedown="triggerSideKey('ArrowRight', true)" onmouseup="triggerSideKey('ArrowRight', false)" ontouchstart="triggerSideKey('ArrowRight', true); event.preventDefault();" ontouchend="triggerSideKey('ArrowRight', false); event.preventDefault();">▶</button>
-                    <button type="button" class="side-vkey-jump" onmousedown="triggerSideKey(' ', true)" onmouseup="triggerSideKey(' ', false)" ontouchstart="triggerSideKey(' ', true); event.preventDefault();" ontouchend="triggerSideKey(' ', false); event.preventDefault();">▲ Nhảy (Space)</button>
+                <span>Điều khiển: <b>Chạm màn hình</b> hoặc phím <b>Space / W / ↑</b></span>
+                <div class="mario-side-vkeys" style="display: flex; gap: 8px; width: 100%;">
+                    <button type="button" class="side-vkey-jump" style="flex: 1;" onmousedown="if(window.marioSideGameInstance) window.marioSideGameInstance.flap();" ontouchstart="if(window.marioSideGameInstance) window.marioSideGameInstance.flap(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
+                    <button type="button" class="side-vkey-btn" onclick="restartSideMario()" title="Chơi lại">🔄</button>
                 </div>
             </div>
         </div>
@@ -101,9 +97,9 @@
                         🔊
                     </button>
 
-                    <!-- Nút bật màn hình Mario song song -->
+                    <!-- Nút bật màn hình Flappy Bird song song -->
                     <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" class="chat-toggle-mario-btn">
-                        🎮 Bật Mario Game
+                        🚀 Bật Flappy Bird
                     </button>
                 </div>
             </div>
