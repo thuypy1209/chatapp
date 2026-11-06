@@ -222,8 +222,7 @@ header.nav-collapsed, .navbar.nav-collapsed {
     gap: 12px;
 }
 
-.btn-toggle-nav-mobile,
-.nav-collapse-li {
+.btn-toggle-nav-mobile {
     display: none;
 }
 
@@ -376,22 +375,6 @@ header.nav-collapsed, .navbar.nav-collapsed {
     .nav-item {
         padding: 6px 10px !important;
         font-size: 12px !important;
-    }
-    .nav-collapse-li {
-        display: inline-block !important;
-    }
-    .btn-collapse-nav-pill {
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 5px 12px !important;
-        border-radius: 12px !important;
-        background: #fff1f2 !important;
-        border: 1.5px solid #fecdd3 !important;
-        color: #e11d48 !important;
-        font-size: 11.5px !important;
-        font-weight: 700 !important;
-        cursor: pointer !important;
     }
 }
 
