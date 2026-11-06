@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 var chatRouter = require('./routers/chat');
 var adminRouter = require('./routers/admin');
 var indexRouter = require('./routers/index');
+var flappyRouter = require('./routers/flappy');
 var marioRouter = require('./routers/mario');
 var authRouter = require('./routers/auth');
 var authUtils = require('./utils/auth');
@@ -83,7 +84,8 @@ app.use('/auth', authRouter); // Đăng nhập / Kiểm tra tên
 app.use('/', indexRouter); // Trang chính 
 app.use('/chat', chatRouter); // Chat 
 app.use('/admin', adminRouter); // Trang quản trị CRUD
-app.use('/mario', marioRouter); // Chơi Mario & Chat
+app.use('/flappy', flappyRouter); // Chơi Flappy Bird & Chat
+app.use('/mario', flappyRouter); // Đường dẫn tương thích ngược cũ
 
 // Bắt lỗi 404 và chuyển đến trang lỗi
 app.use(function(req, res, next) {

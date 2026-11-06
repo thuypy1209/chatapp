@@ -1072,8 +1072,9 @@
         }
     }
 
-    // Export toàn cục (tương thích cả MarioGame & FlappyBirdGame)
-    window.MarioGame = FlappyGame;
+    // Export toàn cục (tương thích cả FlappyBirdGame & MarioGame)
+    window.FlappyGame = FlappyGame;
     window.FlappyBirdGame = FlappyGame;
+    window.MarioGame = FlappyGame;
     window.RetroAudio = RetroAudio;
 })();

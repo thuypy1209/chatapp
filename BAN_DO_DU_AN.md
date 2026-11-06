@@ -464,7 +464,8 @@ PORT=3000                            # Port (Render tự inject)
 
 | Commit | Nội dung |
 |--------|----------|
-| `HEAD` | Thay thế game Mario bằng Flappy Bird Mèo Mô Tô (Flappy Cat) & Bỏ con Skeleton chạy bên dưới màn hình |
+| `HEAD` | Đổi tên mario.js và các file liên quan sang flappy.js, flappy router, FlappyChat view, hỗ trợ route /flappy song song /mario |
+| `6459e8f` | Sửa lỗi cú pháp trong routers/mario.js giúp Render build và khởi động thành công |
 | `20a76fc` | Custom Modal Chỉnh sửa & Xóa câu thiệp động viên: Thay thế window.prompt/confirm bằng giao diện Pastel Glassmorphism, hỗ trợ textarea nhiều dòng, đếm ký tự và chèn nhanh emoji |
 | `d256df9` | Click vào thiệp mở modal to & Click bên ngoài để chơi lại ngay lập tức |
 | `0e03be8` | Tắt gửi tin nhắn game vào phòng chat (/chat): Giữ nguyên vẹn toàn bộ đoạn hội thoại với nhân vật bot khi chơi side game Mario |
