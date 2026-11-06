@@ -690,8 +690,10 @@
             // 6. Mặt đất cỏ và sọc caro retro
             this.drawGround(ctx);
 
-            // 7. Hiệu ứng khói pô và tia sao
-            this.drawParticles(ctx);
+            // 7. Hiệu ứng khói pô và tia sao (bỏ trên mobile để tiết kiệm GPU)
+            if (!this.isMobile) {
+                this.drawParticles(ctx);
+            }
 
             // 8. Chú Mèo Mô Tô (Flappy Cat)
             this.drawCat(ctx);
@@ -1264,7 +1266,9 @@
         var isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 
         if (!isFs && !elem.classList.contains('is-mario-fullscreen')) {
-            // Vào Fullscreen
+            // Vào Fullscreen — tự động thu gọn navbar để không đè lên game
+            if (window.toggleMainNavbar) window.toggleMainNavbar(false);
+
             if (elem.requestFullscreen) {
                 elem.requestFullscreen().catch(function() {
                     elem.classList.add('is-mario-fullscreen');

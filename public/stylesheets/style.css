@@ -882,6 +882,15 @@ h1 {
 /* ========================================================
    FULLSCREEN MARIO ENGINE STYLES
    ======================================================== */
+
+/* Ẩn Navbar + floating reopen button khi đang ở chế độ toàn màn hình */
+body.in-mario-fullscreen-mode #main-navbar,
+body.in-mario-fullscreen-mode .nav-reopen-pill,
+body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
+    display: none !important;
+    pointer-events: none !important;
+}
+
 /* Standard Fullscreen Container */
 #mario-side-panel:fullscreen,
 #mario-game-container:fullscreen,
