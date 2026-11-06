@@ -65,49 +65,51 @@ router.get('/', async function(req, res) {
         }
 
         res.render('user/FlappyChat', {
-            title: 'Flappy Cat: Cuộc Phiêu Lưu Trên Không 🚀',
+            title: 'Flappy Bangboo: Cuộc Phiêu Lưu Trên Không 🚀',
             character: mario,
             questions: questions
         });
     } catch (err) {
         console.error('Lỗi tải trang Flappy:', err);
         res.render('user/FlappyChat', {
-            title: 'Flappy Cat: Cuộc Phiêu Lưu Trên Không 🚀',
-            character: { name: 'Mèo Mô Tô', icon: '🚀' },
+            title: 'Flappy Bangboo: Cuộc Phiêu Lưu Trên Không 🚀',
+            character: { name: 'Bangboo (ZZZ)', icon: '🚀' },
             questions: []
         });
     }
 });
 
-// POST /mario/message: Xử lý tin nhắn văn bản tự do người dùng gửi cho Mèo Phi Công Flappy Cat
+// POST /flappy/message (hoặc /mario/message): Xử lý tin nhắn văn bản tự do người dùng gửi cho Bangboo (Zenless Zone Zero)
 router.post('/message', function(req, res) {
-    trackUserActivity(req, 'Chat Flappy Cat');
+    trackUserActivity(req, 'Chat Bangboo ZZZ');
     var message = (req.body.message || '').trim().toLowerCase();
 
     var reply = '';
 
     if (!message) {
-        reply = 'Meo meo! Bạn hãy nói gì đó với Mèo Phi Công nào! 🚀🐾';
+        reply = 'Eh-nah! Bạn hãy gửi tin nhắn trò chuyện với Bangboo nào! 🚀🤖';
     } else if (message.includes('chào') || message.includes('hello') || message.includes('hi')) {
-        reply = 'Meo meo! Xin chào bạn nha! Bạn đã sẵn sàng điều khiển chiếc xe mô tô cùng tôi nẹt pô bay qua các cột ống nước xanh retro chưa? Nhấn Space hoặc chạm màn hình để bay nhé! 🚀🐱';
-    } else if (message.includes('bay') || message.includes('chơi') || message.includes('cách') || message.includes('điều khiển')) {
-        reply = 'Mẹo bay đỉnh cao: Mỗi lần bạn chạm màn hình hoặc bấm phím Space, xe mô tô sẽ nẹt pô bay vút lên! Đừng bấm quá liên tục kẻo đụng trần, hãy nhấp nhả nhịp nhàng theo hình sin để lách chuẩn qua khe hở giữa hai ống nước nha! 💨⭐';
+        reply = 'Eh-nah! Xin chào bạn nha! Tôi là chú Bangboo lái xe mô tô cực ngầu từ New Eridu trong Zenless Zone Zero đây! Bạn đã sẵn sàng cùng tôi bay lượn qua các cột ống nước chưa? 🚀🕶️✨';
+    } else if (message.includes('bangboo') || message.includes('zzz') || message.includes('zenless') || message.includes('loại nào')) {
+        reply = 'Eh-nah! Trong Zenless Zone Zero có rất nhiều Bangboo dễ thương như Eous, Amillion, Safety, Avocaboo... Còn tôi là Bangboo Phi Công chuyên lái xe mô tô phân khối lớn, đội kính bảo hộ và đeo khăn choàng lụa xanh siêu tốc độ! 🏍️💨';
+    } else if (message.includes('bay') || message.includes('rơi') || message.includes('chơi') || message.includes('cách') || message.includes('điều khiển')) {
+        reply = 'Mẹo bay chuẩn ZZZ: Trọng lực đã được điều chỉnh cực kỳ êm ái, bồng bềnh! Bạn chỉ cần nhấp nhẹ chuột hoặc phím Space với nhịp độ thư thái, Bangboo sẽ lướt mượt mà qua giữa các khe ống nước rộng rãi! Đừng bấm quá vội vàng nha! 🌟🎈';
     } else if (message.includes('ống') || message.includes('ống nước') || message.includes('pipe') || message.includes('khe')) {
-        reply = 'Các cột ống nước xanh Flappy Bird có độ cao ngẫu nhiên! Khi bạn bay qua được 1 cặp ống, hệ thống sẽ phát âm thanh "ting" và bạn nhận được ngay +1 điểm! Vượt qua càng nhiều ống điểm càng cao! 🏆✨';
-    } else if (message.includes('mèo') || message.includes('xe') || message.includes('mô tô') || message.includes('kính') || message.includes('khăn')) {
-        reply = 'Chiếc xe mô tô phân khối lớn của tôi được trang bị kính phi công chống gió và khăn choàng lụa xanh bay phần phật trong gió! Mỗi lần vút lên đều có khói pô trắng xả ra cực ngầu luôn đó! 🏍️🕶️✨';
+        reply = 'Khe hở giữa các cột ống nước đã được nới rộng lên 155px rất thoáng! Mỗi lần bạn đưa Bangboo bay qua một cặp ống an toàn, sẽ có tiếng "ting" vui tai và bạn ghi được +1 điểm! 🏆✨';
+    } else if (message.includes('new eridu') || message.includes('hollow') || message.includes('proxy')) {
+        reply = 'New Eridu là ốc đảo văn minh cuối cùng sau thảm họa Hollows! Là Bangboo, chúng tôi luôn đồng hành cùng các Proxy tài ba để giải cứu thế giới và khám phá những điều kỳ diệu! 🏙️⚡';
     } else if (message.includes('kỷ lục') || message.includes('điểm cao') || message.includes('score')) {
-        reply = 'Kỷ lục Flappy Cat được lưu tự động trên máy của bạn! Cố gắng bay qua từ 10 đến 20 ống nước là bạn đã lọt top phi công siêu đẳng rồi đó! Cố lên nha! 🥇🌟';
+        reply = 'Kỷ lục bay của Bangboo được lưu tự động trên máy bạn! Với độ rơi êm ái mới này, bạn hoàn toàn có thể chinh phục mốc 20–30 điểm một cách dễ dàng! Cố lên nhé! 🥇🎉';
     } else if (message.includes('thua') || message.includes('chết') || message.includes('đụng') || message.includes('ngã')) {
-        reply = 'Đừng buồn khi một lần dừng bước nhé! Ngay cả phi công cừ khôi nhất cũng phải va ống nước hàng chục lần mới thành tài cơ mà! Bấm ra ngoài thiệp hoặc bấm phím [R] là chúng mình vào ngay lượt bay mới! 🌸💖';
+        reply = 'Eh-nah! Đừng nản lòng nhé! Va chạm một lần chỉ là tai nạn giao thông nhỏ thôi mà! Bấm ra ngoài tấm thiệp hoặc nhấn phím [R] là Bangboo lại nổ máy vít ga vào đường đua mới ngay! 🌸💖';
     } else {
-        reply = 'Meo meo! Tôi đang tập trung giữ tay lái mô tô nè! Cố gắng nhấp nhả Space đều tay để chúng ta cùng nhau phá kỷ lục điểm số hôm nay nhé! Cố lên bạn ơi! 🚀🐾✨';
+        reply = 'Eh-nah! Tôi đang tập trung quan sát đường bay phía trước nè! Nhịp chân ga Space thật đều đặn để chúng mình lập kỷ lục mới hôm nay nhé! 🚀🤖✨';
     }
 
     res.json({
         success: true,
         reply: reply,
-        hero: 'Mèo Mô Tô'
+        hero: 'Bangboo (Zenless Zone Zero)'
     });
 });
 

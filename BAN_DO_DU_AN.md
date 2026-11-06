@@ -464,7 +464,8 @@ PORT=3000                            # Port (Render tự inject)
 
 | Commit | Nội dung |
 |--------|----------|
-| `HEAD` | Đổi tên mario.js và các file liên quan sang flappy.js, flappy router, FlappyChat view, hỗ trợ route /flappy song song /mario |
+| `HEAD` | Giảm tốc độ rơi êm ái chuẩn Flappy, nới rộng khe ống 155px & Đổi danh tính nhân vật thành Zenless Zone Zero Bangboo lái mô tô |
+| `52dc694` | Đổi tên mario.js và các file liên quan sang flappy.js, flappy router, FlappyChat view, hỗ trợ route /flappy song song /mario |
 | `6459e8f` | Sửa lỗi cú pháp trong routers/mario.js giúp Render build và khởi động thành công |
 | `20a76fc` | Custom Modal Chỉnh sửa & Xóa câu thiệp động viên: Thay thế window.prompt/confirm bằng giao diện Pastel Glassmorphism, hỗ trợ textarea nhiều dòng, đếm ký tự và chèn nhanh emoji |
 | `d256df9` | Click vào thiệp mở modal to & Click bên ngoài để chơi lại ngay lập tức |

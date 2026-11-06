@@ -137,16 +137,16 @@
             this.particles = [];
             this.floatingTexts = [];
 
-            // Tải ảnh chú mèo phi công lái xe mô tô
+            // Tải ảnh chú Bangboo phi công lái xe mô tô (Zenless Zone Zero)
             this.catImg = new Image();
-            this.catImg.src = '/images/flappy-cat.png';
+            this.catImg.src = '/images/flappy-bangboo.png';
             this.catImgLoaded = false;
             this.catImg.onload = () => {
                 this.catImgLoaded = true;
             };
             this.catImg.onerror = () => {
                 // Thử load ảnh dự phòng
-                this.catImg.src = '/images/cat-avatar.png';
+                this.catImg.src = '/images/flappy-cat.png';
             };
 
             // Khởi tạo thực thể & màn chơi
@@ -159,28 +159,29 @@
         }
 
         initGame() {
-            // Chú Mèo Mô Tô (Flappy Cat)
+            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Vật lý êm ái, bồng bềnh chuẩn Flappy
             this.cat = {
                 x: 130,
                 y: (this.height - this.groundH) / 2 - 20,
                 w: 48,
                 h: 48,
                 vy: 0,
-                gravity: 0.28,
-                jumpForce: -5.8,
+                gravity: 0.16,      // Giảm độ rơi từ 0.28 xuống 0.16 để rơi êm, nhẹ nhàng
+                jumpForce: -4.5,    // Lực nảy vừa tầm, không vọt quá cao
+                maxFallSpeed: 5.2,  // Giới hạn tốc độ rơi tối đa, không bị rơi cắm đầu quá nhanh
                 rotation: 0,
                 targetRotation: 0,
                 dead: false,
                 floatTimer: 0
             };
 
-            // Ống nước (Pipes)
+            // Ống nước (Pipes) - Khe hở rộng rãi, dễ chơi
             this.pipes = [];
             this.pipeSpawnTimer = 0;
-            this.pipeGap = 138;       // Khoảng cách khe hở giữa 2 ống
+            this.pipeGap = 155;       // Tăng khe hở từ 138 lên 155px để bay qua dễ dàng
             this.pipeWidth = 64;     // Bề rộng thân ống
-            this.pipeSpeed = 2.4;    // Tốc độ ống trôi về bên trái
-            this.pipeInterval = 120; // Số frame giữa mỗi lần sinh ống (~220px)
+            this.pipeSpeed = 1.9;    // Tốc độ ống trôi êm ái (giảm từ 2.4 xuống 1.9)
+            this.pipeInterval = 135; // Khoảng cách giữa các cột ống nước thoải mái (~255px)
 
             // Điểm số
             this.score = 0;
@@ -469,18 +470,18 @@
                 this.cityX = (this.cityX - this.pipeSpeed * 0.3) % 800;
                 this.treesX = (this.treesX - this.pipeSpeed * 0.55) % 800;
 
-                // Vật lý chú mèo
+                // Vật lý chú Bangboo (rơi êm ái, bồng bềnh)
                 this.cat.vy += this.cat.gravity;
-                if (this.cat.vy > 9.5) this.cat.vy = 9.5;
+                if (this.cat.vy > this.cat.maxFallSpeed) this.cat.vy = this.cat.maxFallSpeed;
                 this.cat.y += this.cat.vy;
 
-                // Góc nghiêng xe máy: ngửa lên khi bay, chúc xuống khi rơi
+                // Góc nghiêng xe máy: ngửa lên khi bay, chúc xuống vừa phải khi rơi
                 if (this.cat.vy < 0) {
-                    this.cat.targetRotation = -0.38; // ~ -22 độ
+                    this.cat.targetRotation = -0.32; // ~ -18 độ
                 } else {
-                    this.cat.targetRotation = Math.min(1.25, this.cat.vy * 0.12); // Chúc xuống tới ~70 độ
+                    this.cat.targetRotation = Math.min(0.85, this.cat.vy * 0.16); // Chúc xuống tối đa ~48 độ
                 }
-                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.18;
+                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.16;
 
                 // Kiểm tra va chạm trần nhà
                 if (this.cat.y < 0) {
@@ -920,7 +921,7 @@
             const alpha = 0.6 + Math.sin(Date.now() * 0.006) * 0.4;
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.font = 'bold 15px "Quicksand", sans-serif';
-            ctx.fillText('Chạm màn hình hoặc nhấn [Space] để Mèo nẹt pô bay lên!', this.width / 2, 290);
+            ctx.fillText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
 
             // Huy hiệu kỷ lục
             if (this.bestScore > 0) {
