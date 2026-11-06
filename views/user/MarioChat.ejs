@@ -1,15 +1,14 @@
 <%- include('../partials/header') %>
 
-<div class="mario-play-chat-wrapper">
+<div class="mario-play-chat-wrapper" style="max-width: 960px; margin: 15px auto 40px auto; padding: 0 15px;">
 
     <!-- Thanh tiêu đề & Công cụ điều khiển nhanh -->
-    <div class="mario-header-bar">
+    <div class="mario-header-bar" style="max-width: 100%;">
         <div class="mario-header-title-box">
             <span class="mario-header-icon">🚀</span>
             <div>
                 <div class="mario-header-title-flex">
                     <h1 class="mario-header-h1">Flappy Bangboo: Cuộc Phiêu Lưu Trên Không</h1>
-                    <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
                 <p class="mario-header-subtitle">Điều khiển chú Bangboo cưỡi mô tô (Zenless Zone Zero) vượt qua các cột ống nước retro!</p>
             </div>
@@ -28,118 +27,50 @@
         </div>
     </div>
 
-    <!-- Khung chính 2 cột: Trò chơi Flappy Bangboo (Trái) & Phòng Chat (Phải) -->
-    <div class="mario-grid-container">
-
-        <!-- CỘT 1: KHUNG GAME FLAPPY BANGBOO -->
-        <div class="game-column">
-            <div id="mario-game-container" class="game-card">
-                <!-- Fullscreen Top Header Bar -->
-                <div class="mario-fs-header">
-                    <div class="mario-fs-title-box">
-                        <span class="mario-fs-icon">🚀</span>
-                        <span class="mario-fs-text-title">Flappy Bangboo (Zenless Zone Zero)</span>
-                        <span class="mario-fps-badge mario-fs-fps-badge">⚡ 120 FPS</span>
-                        <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
-                    </div>
-                    <div class="mario-fs-actions">
-                        <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh">
-                            🔊
-                        </button>
-                        <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame()" title="Chơi lại">
-                            🔄 Chơi lại
-                        </button>
-                        <button type="button" class="btn-exit-fullscreen" onclick="window.exitFullscreenMario('mario-game-container')" title="Thoát toàn màn hình (ESC)">
-                            ✕ Thoát (ESC)
-                        </button>
-                    </div>
+    <!-- KHUNG CHÍNH: DUY NHẤT TRÒ CHƠI FLAPPY BANGBOO (CĂN GIỮA MÀN HÌNH) -->
+    <div class="game-column" style="width: 100%; max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px;">
+        <div id="mario-game-container" class="game-card" style="width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);">
+            <!-- Fullscreen Top Header Bar -->
+            <div class="mario-fs-header">
+                <div class="mario-fs-title-box">
+                    <span class="mario-fs-icon">🚀</span>
+                    <span class="mario-fs-text-title">Flappy Bangboo (Zenless Zone Zero)</span>
+                    <span class="mario-fps-badge mario-fs-fps-badge">⚡ 120 FPS</span>
+                    <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
                 </div>
-
-                <!-- Canvas Game Flappy Bird -->
-                <canvas id="mario-canvas" class="game-canvas" tabindex="0"></canvas>
-
-                <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
-                <div class="mario-touch-hud" style="justify-content: center; gap: 12px;">
-                    <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4);" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
-                    <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="window.restartFlappyGame()" title="Chơi lại">🔄</button>
+                <div class="mario-fs-actions">
+                    <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh">
+                        🔊
+                    </button>
+                    <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame()" title="Chơi lại">
+                        🔄 Chơi lại
+                    </button>
+                    <button type="button" class="btn-exit-fullscreen" onclick="window.exitFullscreenMario('mario-game-container')" title="Thoát toàn màn hình (ESC)">
+                        ✕ Thoát (ESC)
+                    </button>
                 </div>
             </div>
 
-            <!-- Bàn phím điều khiển ảo cho Di động & Máy tính -->
-            <div class="controls-card" style="display: flex; gap: 12px; align-items: center; justify-content: space-between;">
-                <!-- Nút bay to bản -->
-                <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 14px; font-size: 15px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3);" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();" title="Bấm để bay lên (Space / Chạm)">
-                    🚀 BAY LÊN (Space / Chuột / Chạm)
-                </button>
-                <button type="button" class="virtual-key" style="padding: 14px 20px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer;" onclick="window.restartFlappyGame()" title="Chơi lại">
-                    🔄 Chơi lại
-                </button>
+            <!-- Canvas Game Flappy Bird -->
+            <canvas id="mario-canvas" class="game-canvas" tabindex="0"></canvas>
+
+            <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
+            <div class="mario-touch-hud" style="justify-content: center; gap: 12px;">
+                <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4);" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
+                <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="window.restartFlappyGame()" title="Chơi lại">🔄</button>
             </div>
         </div>
 
-        <!-- CỘT 2: KHUNG CHAT MARIO -->
-        <div class="chat-column">
-            <div class="chat-card mario-chat-card">
-                
-                <!-- Chat Header -->
-                <div class="mario-chat-header">
-                    <div class="mario-chat-header-info">
-                        <div id="chat-hero-avatar" class="mario-chat-hero-avatar" style="padding: 0; overflow: hidden; border: 2px solid #38bdf8; background: #e0f2fe;">
-                            <img src="/images/flappy-bangboo.png" alt="Bangboo ZZZ" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                        </div>
-                        <div>
-                            <h2 id="chat-hero-name" class="mario-chat-hero-name">Bangboo (Zenless Zone Zero)</h2>
-                            <span class="mario-chat-status">● Đang kết nối từ New Eridu (ZZZ)</span>
-                        </div>
-                    </div>
-                    <span class="mario-chat-tag">
-                        Interactive Live Chat
-                    </span>
-                </div>
-
-                <!-- Chat Messages Scroll Area -->
-                <div id="mario-message-box" class="mario-message-box">
-                    
-                    <!-- Lời chào đầu tiên từ Hero -->
-                    <div class="message bot mario-welcome-bot-msg">
-                        <b id="chat-welcome-bot-title" class="chat-welcome-bot-title">
-                            <span>🤖</span> Bangboo (Zenless Zone Zero):
-                        </b>
-                        <span id="chat-welcome-bot-msg">Eh-nah! Tôi là Bangboo từ New Eridu trong thế giới Zenless Zone Zero (ZZZ) đây! Hãy chạm vào màn hình hoặc bấm phím Space để giúp tôi nẹt pô xe mô tô bay qua các cột ống nước retro nhé! Bạn có thể vừa chơi vừa chat cùng tôi nha! 🚀🤖✨</span>
-                    </div>
-
-                </div>
-
-                <!-- Gợi ý câu hỏi nhanh -->
-                <div id="mario-quick-questions" class="mario-quick-questions">
-                    <div class="mario-quick-title">💡 Gợi ý hỏi đáp:</div>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Làm sao để điều khiển Bangboo bay qua được nhiều ống nước nhất?')">
-                        🚀 Làm sao để điều khiển Bangboo bay qua được nhiều ống nước nhất?
-                    </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Bạn là loại Bangboo nào trong Zenless Zone Zero thế?')">
-                        🤖 Bạn là loại Bangboo nào trong Zenless Zone Zero thế?
-                    </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Kỷ lục bay cao nhất của Bangboo là bao nhiêu điểm?')">
-                        🏆 Kỷ lục bay cao nhất của Bangboo là bao nhiêu điểm?
-                    </button>
-                    <button type="button" class="quick-btn" onclick="sendQuickMessage('Kể cho tôi nghe về New Eridu và thế giới ZZZ đi!')">
-                        🏙️ Kể cho tôi nghe về New Eridu và thế giới ZZZ!
-                    </button>
-                </div>
-
-                <!-- Input nhắn tin trực tiếp -->
-                <div class="mario-chat-input-bar">
-                    <form id="mario-chat-form" class="mario-chat-form" onsubmit="handleSendChat(event)">
-                        <input type="text" id="mario-chat-input" class="mario-chat-input" placeholder="Nhập tin nhắn để chat với Bangboo (ZZZ)..." autocomplete="off" />
-                        <button type="submit" class="mario-chat-send-btn">
-                            Gửi
-                        </button>
-                    </form>
-                </div>
-
-            </div>
+        <!-- Bàn phím điều khiển ảo cho Di động & Máy tính -->
+        <div class="controls-card" style="display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 14px 20px;">
+            <!-- Nút bay to bản -->
+            <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 15px; font-size: 16px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3); transition: transform 0.1s ease;" onmousedown="window.flapGameHero();" ontouchstart="window.flapGameHero(); event.preventDefault();" title="Bấm để bay lên (Space / Chạm)">
+                🚀 BAY LÊN (Phím Space / Chuột / Chạm màn hình)
+            </button>
+            <button type="button" class="virtual-key" style="padding: 15px 24px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06);" onclick="window.restartFlappyGame()" title="Chơi lại ván mới">
+                🔄 Chơi lại
+            </button>
         </div>
-
     </div>
 </div>
 
@@ -147,353 +78,27 @@
 <script>
 function initMarioApp() {
     if (window.marioInstance) return;
-    // 1. Khởi tạo Game Mario
+    // Khởi tạo Game Flappy Bangboo
     var game = new window.MarioGame('mario-canvas');
     window.marioInstance = game;
+    window.flappyInstance = game;
 
-    // 2. Chuyển đổi Giao diện (Skin: Minecraft Edition / Mario Cổ Điển)
-    var btnSkin = document.getElementById('btn-toggle-skin');
-    var skinIcon = document.getElementById('skin-icon');
-    var skinText = document.getElementById('skin-text');
-
-    function updateSkinUI(currentSkin) {
-        var avatarBox = document.getElementById('chat-hero-avatar');
-        var nameBox = document.getElementById('chat-hero-name');
-        var welcomeTitle = document.getElementById('chat-welcome-bot-title');
-        var welcomeMsg = document.getElementById('chat-welcome-bot-msg');
-        var fsSkinIcon = document.getElementById('fs-skin-icon');
-        var fsSkinText = document.getElementById('fs-skin-text');
-        var fsSkinBtn = document.getElementById('fs-skin-btn');
-
-        if (currentSkin === 'minecraft') {
-            if (skinIcon) skinIcon.innerText = '🟩';
-            if (skinText) skinText.innerText = 'Chế độ: Minecraft Edition';
-            if (fsSkinIcon) fsSkinIcon.innerText = '🟩';
-            if (fsSkinText) fsSkinText.innerText = 'Đổi Skin: Mario';
-            if (fsSkinBtn) {
-                fsSkinBtn.style.background = '#065f46';
-                fsSkinBtn.style.borderColor = '#10b981';
-                fsSkinBtn.style.color = '#a7f3d0';
-            }
-            if (btnSkin) {
-                btnSkin.style.background = '#ecfdf5';
-                btnSkin.style.borderColor = '#10b981';
-                btnSkin.style.color = '#047857';
-            }
-            if (avatarBox) {
-                avatarBox.innerText = '⛏️';
-                avatarBox.style.background = '#dbeafe';
-                avatarBox.style.borderColor = '#38bdf8';
-            }
-            if (nameBox) nameBox.innerText = 'Steve (Minecraft)';
-            if (welcomeTitle) welcomeTitle.innerHTML = '<span>⛏️</span> Steve (Minecraft Edition):';
-            if (welcomeMsg) welcomeMsg.innerText = 'Xin chào! Tôi là Steve trong thế giới Mario x Minecraft! Hãy nhấp vào màn hình để điều khiển tôi vung Kiếm Kim Cương 🗡️, vượt qua Cổng Nether và hạ gục Creeper 💥! Bạn có thể vừa chơi vừa chat cùng tôi nhé! ⭐';
-        } else {
-            if (skinIcon) skinIcon.innerText = '🍄';
-            if (skinText) skinText.innerText = 'Chế độ: Mario Cổ Điển';
-            if (fsSkinIcon) fsSkinIcon.innerText = '🍄';
-            if (fsSkinText) fsSkinText.innerText = 'Đổi Skin: Minecraft';
-            if (fsSkinBtn) {
-                fsSkinBtn.style.background = '#991b1b';
-                fsSkinBtn.style.borderColor = '#f87171';
-                fsSkinBtn.style.color = '#fecaca';
-            }
-            if (btnSkin) {
-                btnSkin.style.background = '#fef2f2';
-                btnSkin.style.borderColor = '#f87171';
-                btnSkin.style.color = '#dc2626';
-            }
-            if (avatarBox) {
-                avatarBox.innerText = '🍄';
-                avatarBox.style.background = '#fee2e2';
-                avatarBox.style.borderColor = '#f87171';
-            }
-            if (nameBox) nameBox.innerText = 'Super Mario';
-            if (welcomeTitle) welcomeTitle.innerHTML = '<span>🍄</span> Super Mario:';
-            if (welcomeMsg) welcomeMsg.innerText = 'Yahoo! Chào mừng bạn đến với Vương quốc Nấm! Hãy nhấp vào màn hình bên trái để điều khiển tôi vượt chướng ngại vật nhé. Bạn có thể vừa chơi vừa nhắn tin hoặc hỏi đáp cùng tôi bất cứ lúc nào! ⭐';
-        }
-    }
-
-    if (btnSkin && game) {
-        updateSkinUI(game.skin);
-        btnSkin.addEventListener('click', function() {
-            var nextSkin = game.toggleSkin();
-            updateSkinUI(nextSkin);
-            var heroName = nextSkin === 'minecraft' ? 'Steve Minecraft' : 'Super Mario';
-            window.marioChatBridge('skin', '🎨 Đã đổi giao diện game sang: <b>' + heroName + '</b>! Chúc bạn chơi game thật vui vẻ!');
-            var canvas = document.getElementById('mario-canvas');
-            if (canvas) canvas.focus();
-        });
-    }
-
-    // 3. Nút Bật/Tắt Âm Thanh
-    var btnSound = document.getElementById('btn-toggle-sound');
-    var soundIcon = document.getElementById('sound-icon');
-    var soundText = document.getElementById('sound-text');
-    var fsSoundBtn = document.getElementById('fs-sound-btn');
-    var soundMuted = false;
-
-    if (btnSound) {
-        btnSound.addEventListener('click', function() {
-            soundMuted = !soundMuted;
-            if (window.MarioAudio) {
-                window.MarioAudio.muted = soundMuted;
-            }
-            if (fsSoundBtn) {
-                fsSoundBtn.innerHTML = soundMuted ? '🔇' : '🔊';
-            }
-            if (soundMuted) {
-                soundIcon.innerText = '🔇';
-                soundText.innerText = 'Âm thanh: Tắt';
-                btnSound.style.background = '#f1f5f9';
-                btnSound.style.borderColor = '#cbd5e1';
-                btnSound.style.color = '#64748b';
-            } else {
-                soundIcon.innerText = '🔊';
-                soundText.innerText = 'Âm thanh: Bật';
-                btnSound.style.background = '#fdf2f8';
-                btnSound.style.borderColor = '#f472b6';
-                btnSound.style.color = '#db2777';
-            }
-        });
-    }
-
-    // 4. Nút Chơi Lại
-    var btnRestart = document.getElementById('btn-restart-game');
-    if (btnRestart && game) {
-        btnRestart.addEventListener('click', function() {
-            game.restart();
-            var canvas = document.getElementById('mario-canvas');
-            if (canvas) canvas.focus();
-        });
-    }
-
-    // 5. Bàn phím ảo trên giao diện & Touch Control cho điện thoại
-    function setupVirtualKey(id, keyName, keyCode) {
-        var el = document.getElementById(id);
-        if (!el || !game) return;
-        var triggerDown = function(e) {
+    // Gán sự kiện cho nút bay
+    var btnJump = document.getElementById('vkey-jump');
+    if (btnJump) {
+        var triggerJump = function(e) {
             e.preventDefault();
-            game.keys[keyName] = true;
-            game.keys[keyCode] = true;
-            if (window.MarioAudio) window.MarioAudio.init();
-            if (game.gameState === 'READY') game.gameState = 'PLAYING';
+            window.flapGameHero();
         };
-        var triggerUp = function(e) {
-            e.preventDefault();
-            game.keys[keyName] = false;
-            game.keys[keyCode] = false;
-        };
-
-        el.addEventListener('mousedown', triggerDown);
-        el.addEventListener('mouseup', triggerUp);
-        el.addEventListener('mouseleave', triggerUp);
-        el.addEventListener('touchstart', triggerDown, { passive: false });
-        el.addEventListener('touchend', triggerUp, { passive: false });
-        el.addEventListener('touchcancel', triggerUp, { passive: false });
+        btnJump.addEventListener('mousedown', triggerJump);
+        btnJump.addEventListener('touchstart', triggerJump, { passive: false });
     }
-
-    // Gán phím D-pad thanh điều khiển
-    setupVirtualKey('vkey-left', 'ArrowLeft', 'ArrowLeft');
-    setupVirtualKey('vkey-right', 'ArrowRight', 'ArrowRight');
-    setupVirtualKey('vkey-jump', ' ', 'Space');
-
-    // Gán phím ảo nổi khi chơi Fullscreen
-    setupVirtualKey('hud-vkey-left', 'ArrowLeft', 'ArrowLeft');
-    setupVirtualKey('hud-vkey-right', 'ArrowRight', 'ArrowRight');
-    setupVirtualKey('hud-vkey-jump', ' ', 'Space');
-
-    // Hỗ trợ chạm trực tiếp lên màn hình Game (Touch on Canvas)
-    var mCanvas = document.getElementById('mario-canvas');
-    if (mCanvas) {
-        var handleCanvasTouch = function(e) {
-            if (!game) return;
-            e.preventDefault();
-            if (window.MarioAudio) window.MarioAudio.init();
-            if (game.gameState === 'READY') game.gameState = 'PLAYING';
-
-            var rect = mCanvas.getBoundingClientRect();
-            var moveLeft = false;
-            var moveRight = false;
-            var shouldJump = false;
-
-            for (var i = 0; i < e.touches.length; i++) {
-                var touch = e.touches[i];
-                var touchX = (touch.clientX - rect.left) / rect.width;
-                var touchY = (touch.clientY - rect.top) / rect.height;
-
-                if (touchY < 0.35) {
-                    // Chạm nửa trên màn hình = Nhảy
-                    shouldJump = true;
-                } else if (touchX < 0.45) {
-                    // Chạm nửa trái màn hình = Chạy sang trái
-                    moveLeft = true;
-                } else if (touchX > 0.55) {
-                    // Chạm nửa phải màn hình = Chạy sang phải
-                    moveRight = true;
-                } else {
-                    // Chạm giữa = Nhảy
-                    shouldJump = true;
-                }
-            }
-
-            game.keys['ArrowLeft'] = moveLeft;
-            game.keys['ArrowRight'] = moveRight;
-            game.keys[' '] = shouldJump;
-            game.keys['Space'] = shouldJump;
-        };
-
-        var handleCanvasTouchEnd = function(e) {
-            if (!game) return;
-            e.preventDefault();
-            if (e.touches.length === 0) {
-                game.keys['ArrowLeft'] = false;
-                game.keys['ArrowRight'] = false;
-                game.keys[' '] = false;
-                game.keys['Space'] = false;
-            } else {
-                handleCanvasTouch(e);
-            }
-        };
-
-        mCanvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
-        mCanvas.addEventListener('touchmove', handleCanvasTouch, { passive: false });
-        mCanvas.addEventListener('touchend', handleCanvasTouchEnd, { passive: false });
-        mCanvas.addEventListener('touchcancel', handleCanvasTouchEnd, { passive: false });
-    }
-
-    // 6. Cầu nối Game sang Khung Chat (Event Reaction)
-    window.marioChatBridge = function(type, message) {
-        var msgBox = document.getElementById('mario-message-box');
-        if (!msgBox) return;
-
-        var colorBorder = '#fbcfe8';
-        var badgeBg = '#fdf2f8';
-        var icon = '🍄';
-
-        if (type === 'skin') {
-            colorBorder = '#86efac';
-            badgeBg = '#f0fdf4';
-            icon = '🎨';
-        } else if (type === 'stomp') {
-            colorBorder = '#86efac';
-            badgeBg = '#f0fdf4';
-            icon = (game && game.skin === 'minecraft') ? '💥' : '👞';
-        } else if (type === 'coin') {
-            colorBorder = '#38bdf8';
-            badgeBg = '#f0f9ff';
-            icon = (game && game.skin === 'minecraft') ? '💎' : '🪙';
-        } else if (type === 'die' || type === 'gameover') {
-            colorBorder = '#fca5a5';
-            badgeBg = '#fef2f2';
-            icon = '💔';
-        } else if (type === 'win') {
-            colorBorder = '#4ade80';
-            badgeBg = '#dcfce7';
-            icon = '🎉';
-        } else if (type === 'start' || type === 'restart') {
-            colorBorder = '#93c5fd';
-            badgeBg = '#eff6ff';
-            icon = (game && game.skin === 'minecraft') ? '⛏️' : '🍄';
-        }
-
-        var senderName = (game && game.skin === 'minecraft') ? 'Steve Minecraft' : 'Super Mario';
-        var headerColor = (game && game.skin === 'minecraft') ? '#0284c7' : '#db2777';
-
-        var liveMsgHtml = `
-            <div class="message bot live-event" style="background: ${badgeBg}; border: 1px solid ${colorBorder}; border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #1e293b; line-height: 1.4; animation: fadeIn 0.2s ease;">
-                <b style="color: ${headerColor}; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                    <span>${icon}</span> ${senderName}:
-                </b>
-                ${message}
-            </div>
-        `;
-        msgBox.insertAdjacentHTML('beforeend', liveMsgHtml);
-        msgBox.scrollTop = msgBox.scrollHeight;
-    };
 }
 
 if (document.readyState === 'loading') {
     document.addEventListener("DOMContentLoaded", initMarioApp);
 } else {
     initMarioApp();
-}
-
-// Xử lý gửi tin nhắn Chat cho Mario / Steve
-function handleSendChat(event) {
-    if (event) event.preventDefault();
-    var input = document.getElementById('mario-chat-input');
-    if (!input) return;
-    var text = input.value.trim();
-    if (!text) return;
-
-    input.value = '';
-    sendChatMessageToMario(text);
-}
-
-function sendQuickMessage(text) {
-    sendChatMessageToMario(text);
-}
-
-function sendChatMessageToMario(text) {
-    var msgBox = document.getElementById('mario-message-box');
-    if (!msgBox) return;
-
-    // 1. Chèn tin nhắn của Người dùng
-    var displayName = document.getElementById('nav-username-display') ? document.getElementById('nav-username-display').innerText.trim() : '<%= (typeof currentUser !== "undefined" && currentUser) ? currentUser : "Bạn" %>';
-    var userEmoji = (window.getEmojiForName && displayName) ? window.getEmojiForName(displayName) : '🐱';
-    var userHtml = `
-        <div class="message user" style="align-self: flex-end; background: #db2777; color: #ffffff; border-radius: 14px 14px 4px 14px; padding: 10px 14px; font-size: 14px; max-width: 85%; box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);">
-            <img src="/images/cat-avatar.png" alt="Avatar" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 5px; border: 1px solid rgba(255,255,255,0.7); display: inline-block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span style="display: none; margin-right: 5px;">${userEmoji}</span><b>${displayName}:</b> ${text}
-        </div>
-    `;
-    msgBox.insertAdjacentHTML('beforeend', userHtml);
-    msgBox.scrollTop = msgBox.scrollHeight;
-
-    // 2. Chèn trạng thái Đang gõ
-    var botIcon = '🤖';
-    var botName = 'Bangboo (Zenless Zone Zero)';
-
-    var typingId = 'typing-' + Date.now();
-    var typingHtml = `
-        <div id="${typingId}" class="message bot" style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 14px 14px 14px 4px; padding: 8px 12px; font-size: 13px; color: #94a3b8; max-width: 80%;">
-            ${botIcon} ${botName} đang suy nghĩ...
-        </div>
-    `;
-    msgBox.insertAdjacentHTML('beforeend', typingHtml);
-    msgBox.scrollTop = msgBox.scrollHeight;
-
-    // 3. Gửi tới Server
-    fetch('/flappy/message', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: text })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-        var typingElem = document.getElementById(typingId);
-        if (typingElem) typingElem.remove();
-
-        var botReply = (data && data.reply) ? data.reply : 'Eh-nah! Tôi đang tập trung nẹt pô xe mô tô bay qua các cột ống nước nè! 🚀🤖';
-        var headerColor = '#0284c7';
-        var botHtml = `
-            <div class="message bot" style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 14px 14px 14px 4px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 14px; color: #1e293b; line-height: 1.5; max-width: 90%;">
-                <b style="color: ${headerColor}; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
-                    <span>${botIcon}</span> ${botName}:
-                </b>
-                ${botReply}
-            </div>
-        `;
-        msgBox.insertAdjacentHTML('beforeend', botHtml);
-        msgBox.scrollTop = msgBox.scrollHeight;
-    })
-    .catch(function(err) {
-        var typingElem = document.getElementById(typingId);
-        if (typingElem) typingElem.remove();
-        console.error('Lỗi gửi chat Mario:', err);
-    });
 }
 </script>
 
