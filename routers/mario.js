@@ -110,32 +110,5 @@ router.post('/message', function(req, res) {
         hero: 'Mèo Mô Tô'
     });
 });
-    } else if (message.includes('nhảy') || message.includes('phím') || message.includes('điều khiển') || message.includes('chơi')) {
-        reply = 'Rất dễ thôi! Dùng phím A/D hoặc Mũi tên Trái/Phải để chạy, Phím Cách (Space) hoặc W để nhảy! Nhấn Shift để phi nước đại nhé!';
-    } else if (message.includes('goomba') || message.includes('quái') || message.includes('nấm nâu')) {
-        reply = 'Cẩn thận mấy con nấm Goomba (hoặc Creeper ở bản Minecraft) nhé! Bạn chỉ cần căn chuẩn cú nhảy và giẫm bẹp lên đầu nó là được thưởng 200 điểm liền! 👞💥';
-    } else if (message.includes('xu') || message.includes('tiền') || message.includes('coin') || message.includes('điểm')) {
-        reply = 'Ting ting! Hãy đập đầu vào các khối hộp vàng [?] hoặc Lucky Block để mở khóa thật nhiều Kim Cương / xu vàng và tăng điểm số vù vù nhé!';
-    } else if (message.includes('công chúa') || message.includes('peach') || message.includes('lâu đài') || message.includes('beacon')) {
-        reply = 'Pháo đài đá và Cột Đèn Hiệu Beacon ánh sáng đang nằm ở cuối chặng đường bên phải! Vượt qua các vực thẳm là bạn sẽ đến đích an toàn! 🏰🚩';
-    } else if (message.includes('giỏi') || message.includes('hay') || message.includes('đẹp')) {
-        reply = 'Cảm ơn bạn rất nhiều! Đồ họa pixel kết hợp giữa thế giới Super Mario và khối vuông Minecraft nhìn bắt mắt đúng không? Chúc bạn có những phút giây thư giãn tuyệt vời! 🎉';
-    } else if (message.includes('thua') || message.includes('chết') || message.includes('khó')) {
-        reply = 'Đừng nản lòng bạn ơi! Thất bại là mẹ thành công! Nhấn nút [Chơi lại] hoặc phím R để làm lại một màn thật hoành tráng nhé! 💪';
-    } else {
-        var randomReplies = [
-            'Thật thú vị! Hãy cùng Steve & Mario phiêu lưu tiếp nào! 🍄⛏️',
-            'Tôi nghe rõ bạn nói rồi! Vừa chơi game pixel vừa trò chuyện vui thật đấy! ⭐',
-            'Tuyệt vời! Đừng quên chú ý né vực sâu và các chướng ngại vật phía trước nha! 🏃‍♂️💨',
-            'Haha, đúng là như vậy! Bạn đã thu thập được bao nhiêu viên Kim Cương / xu vàng rồi? 💎🪙'
-        ];
-        reply = randomReplies[Math.floor(Math.random() * randomReplies.length)];
-    }
-
-    res.json({
-        success: true,
-        reply: reply
-    });
-});
 
 module.exports = router;
