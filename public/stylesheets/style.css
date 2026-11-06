@@ -150,6 +150,48 @@ body::before {
 }
 
 
+/* Nút Bật Lại Navbar Nổi Xinh Xắn (Floating Pill Button khi Navbar thu gọn) */
+.nav-reopen-pill {
+    position: fixed;
+    top: 10px;
+    right: 14px;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid #fbcfe8 !important;
+    box-shadow: 0 4px 18px rgba(219, 39, 119, 0.2) !important;
+    color: #db2777 !important;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.nav-reopen-pill.show {
+    display: inline-flex !important;
+    animation: pillBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-reopen-pill:hover {
+    background: #fdf2f8 !important;
+    transform: translateY(1px);
+    border-color: #f472b6 !important;
+}
+.nav-reopen-pill:active {
+    transform: scale(0.92);
+}
+
+@keyframes pillBounce {
+    0% { transform: translateY(-25px) scale(0.8); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
 /* Header Navbar Super Mario & Retro Pastel - Đồng bộ trong suốt mờ ảo (Glassmorphism) cùng Background */
 header, .navbar {
     display: flex;
@@ -164,7 +206,25 @@ header, .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: all 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Trạng thái thu gọn Navbar */
+header.nav-collapsed, .navbar.nav-collapsed {
+    transform: translateY(-100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.navbar-header-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-toggle-nav-mobile,
+.nav-collapse-li {
+    display: none;
 }
 
 .navbar-brand {
@@ -280,18 +340,58 @@ header, .navbar {
 
 @media (max-width: 768px) {
     header, .navbar {
-        padding: 10px 16px;
-        flex-direction: column;
-        gap: 10px;
+        padding: 8px 14px !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .navbar-header-line {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    .btn-toggle-nav-mobile {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 5px 11px !important;
+        border-radius: 12px !important;
+        background: rgba(253, 242, 248, 0.95) !important;
+        border: 1.5px solid #fbcfe8 !important;
+        color: #db2777 !important;
+        font-size: 11.5px !important;
+        font-weight: 800 !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 6px rgba(219, 39, 119, 0.1) !important;
+    }
+    .btn-toggle-nav-mobile:active {
+        transform: scale(0.94);
     }
     .navbar-nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        width: 100% !important;
     }
     .nav-item {
-        padding: 6px 12px;
-        font-size: 13px;
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+    .nav-collapse-li {
+        display: inline-block !important;
+    }
+    .btn-collapse-nav-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 5px 12px !important;
+        border-radius: 12px !important;
+        background: #fff1f2 !important;
+        border: 1.5px solid #fecdd3 !important;
+        color: #e11d48 !important;
+        font-size: 11.5px !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
     }
 }
 
@@ -374,19 +474,43 @@ h1 {
     line-height: 1.5;
 }
 
-/* Khung chọn Options nằm nối tiếp bên trong luồng Chat */
+/* Khung chọn Options nằm nối tiếp bên trong luồng Chat - Thiết kế Pastel Pill cao cấp */
 .options-in-chat {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    background: #ffffff;
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px dashed #fbcfe8;
+    gap: 9px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(253, 242, 248, 0.9) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 13px 15px;
+    border-radius: 18px;
+    border: 1.5px solid rgba(244, 114, 182, 0.3) !important;
+    box-shadow: 0 4px 18px rgba(219, 39, 119, 0.06);
     box-sizing: border-box;
     width: 100%;
+}
+
+.options-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    padding: 0 2px;
+}
+.options-title-badge {
+    font-size: 13px;
+    font-weight: 800;
+    color: #db2777;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.options-title-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
 }
 
 /* Legacy Support / Chat Wrapper cũ */
@@ -417,27 +541,74 @@ h1 {
     padding-right: 5px;
 }
 
+/* Nút Câu hỏi gợi ý thiết kế mới: Sang trọng, mềm mại, dễ đọc, không chói */
 .question-btn {
-    background: #fef9c3 !important;
-    border: 2px solid #f472b6 !important;
-    padding: 10px 14px;
-    border-radius: 4px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #fbcfe8 !important;
+    padding: 11px 14px !important;
+    border-radius: 14px !important;
     cursor: pointer;
     font-weight: 700 !important;
-    font-weight: 500;
-    color: #be185d !important;
+    color: #1e293b !important;
     text-align: left;
     width: 100%;
-    transition: all 0.1s ease-in-out;
-    box-shadow: 3px 3px 0px #f472b6 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.05) !important;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.question-btn .q-icon-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.question-btn .q-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: #334155;
+    font-weight: 700;
+}
+
+.question-btn .q-arrow {
+    color: #f472b6;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, color 0.15s ease;
 }
 
 .question-btn:hover {
-    background: #fbcfe8 !important;
-    color: #ffffff;
-    border-color: #f472b6;
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px #db2777 !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%) !important;
+    border-color: #f472b6 !important;
+    transform: translateY(-2px) scale(1.006) !important;
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.14) !important;
+}
+.question-btn:hover .q-text {
+    color: #db2777 !important;
+}
+.question-btn:hover .q-arrow {
+    color: #db2777 !important;
+    transform: translateX(3px);
+}
+.question-btn:active {
+    transform: scale(0.985) !important;
+    background: #fce7f3 !important;
+    border-color: #ec4899 !important;
 }
 
 /* Cột phải: Phản hồi từ Bot */
@@ -1589,25 +1760,6 @@ h1 {
     color: #db2777;
     margin-bottom: 2px;
 }
-.question-btn {
-    width: 100%;
-    text-align: left;
-    background: #fdf2f8;
-    border: 1px solid #fbcfe8;
-    padding: 10px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    color: #db2777;
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 2px;
-    transition: transform 0.1s ease;
-}
-.question-btn:hover {
-    background: #fce7f3;
-    border-color: #f472b6;
-}
-
 /* Chat Finished & Voice helpers */
 .char-switcher-icon {
     font-size: 15px;
@@ -3387,5 +3539,29 @@ select:focus,
     .game-card-quote {
         font-size: 13px !important;
         line-height: 1.5 !important;
+    }
+
+    /* 5. Khung câu hỏi gợi ý tối ưu trên Mobile */
+    .options-in-chat {
+        padding: 11px 12px !important;
+        gap: 8px !important;
+        border-radius: 16px !important;
+    }
+    .question-btn {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        gap: 8px !important;
+    }
+    .question-btn .q-icon-pill {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 14px !important;
+    }
+    .question-btn .q-text {
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+    }
+    .question-btn .q-arrow {
+        font-size: 12px !important;
     }
 }

@@ -12,12 +12,27 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="/" class="navbar-brand">
-            <span class="brand-icon">🍄</span>
-            <span class="brand-text">Phổi bạn không phải tôi</span>
-        </a>
-        <ul class="navbar-nav">
+    <!-- Nút Bật Lại Navbar khi đã thu gọn (Floating Pill Button trên Mobile & Desktop) -->
+    <button type="button" id="btn-reopen-nav" class="nav-reopen-pill" onclick="window.toggleMainNavbar(true)" title="Mở thanh điều hướng">
+        <span class="nav-reopen-icon">🍄</span>
+        <span class="nav-reopen-text">Menu</span>
+        <span class="nav-reopen-arrow">▼</span>
+    </button>
+
+    <nav class="navbar" id="main-navbar">
+        <div class="navbar-header-line">
+            <a href="/" class="navbar-brand">
+                <span class="brand-icon">🍄</span>
+                <span class="brand-text">Phổi bạn không phải tôi</span>
+            </a>
+            
+            <!-- Nút điều khiển thu gọn Navbar trên Mobile -->
+            <button type="button" id="btn-toggle-nav-mobile" class="btn-toggle-nav-mobile" onclick="window.toggleMainNavbar()" title="Thu gọn / Mở Menu">
+                <span id="nav-toggle-icon">▲ Thu gọn</span>
+            </button>
+        </div>
+
+        <ul class="navbar-nav" id="navbar-nav-list">
             <li><a href="/" class="nav-item">🏠 Trang chủ</a></li>
             <li><a href="/chat" class="nav-item">💬 Phòng Chat</a></li>
             <li><a href="/flappy" class="nav-item nav-mario">🚀 Flappy Bird & Chat</a></li>
@@ -51,8 +66,76 @@
                     </button>
                 </li>
             <% } %>
+
+            <!-- Nút thu gọn dạng Pill trong danh sách menu -->
+            <li class="nav-collapse-li">
+                <button type="button" class="btn-collapse-nav-pill" onclick="window.toggleMainNavbar(false)" title="Thu gọn thanh điều hướng">
+                    ▲ Thu gọn
+                </button>
+            </li>
         </ul>
     </nav>
+
+    <!-- Script Tự Động Thu Gọn Navbar khi cuộn & Nút Bật Lại -->
+    <script>
+    (function() {
+        var navbar = document.getElementById('main-navbar');
+        var reopenBtn = document.getElementById('btn-reopen-nav');
+        var toggleIcon = document.getElementById('nav-toggle-icon');
+        var isCollapsed = false;
+
+        window.toggleMainNavbar = function(forceOpen) {
+            if (!navbar) return;
+            if (forceOpen === true) {
+                isCollapsed = false;
+            } else if (forceOpen === false) {
+                isCollapsed = true;
+            } else {
+                isCollapsed = !isCollapsed;
+            }
+
+            if (isCollapsed) {
+                navbar.classList.add('nav-collapsed');
+                if (reopenBtn) reopenBtn.classList.add('show');
+                if (toggleIcon) toggleIcon.innerText = '▼ Menu';
+            } else {
+                navbar.classList.remove('nav-collapsed');
+                if (reopenBtn) reopenBtn.classList.remove('show');
+                if (toggleIcon) toggleIcon.innerText = '▲ Thu gọn';
+            }
+        };
+
+        // Tự động thu gọn khi người dùng cuộn xuống trên Mobile
+        var lastScrollY = window.scrollY;
+        var ticking = false;
+
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    var currentScrollY = window.scrollY;
+                    var isMobile = window.innerWidth <= 768;
+
+                    // Khi cuộn xuống hơn 60px trên điện thoại -> tự động thu gọn nav để giải phóng màn hình
+                    if (isMobile && currentScrollY > 60 && currentScrollY > lastScrollY + 8) {
+                        if (!isCollapsed) {
+                            window.toggleMainNavbar(false);
+                        }
+                    } 
+                    // Khi cuộn lên gần đỉnh trang -> tự động mở lại
+                    else if (currentScrollY < 15) {
+                        if (isCollapsed) {
+                            window.toggleMainNavbar(true);
+                        }
+                    }
+
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    })();
+    </script>
     <div class="cloud-retro cloud-1"></div>
     <div class="cloud-retro cloud-2"></div>
     <div class="cloud-retro cloud-3"></div>

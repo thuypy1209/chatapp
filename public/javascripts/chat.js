@@ -359,30 +359,34 @@
         });
     };
 
-    // Render danh sách lựa chọn tiếp theo
+    // Render danh sách lựa chọn tiếp theo (Đồng bộ thiết kế Pastel Pill)
     function renderNextOptions(nextQuestions, charIcon) {
         var optionsContainer = document.getElementById('options-container');
         if (!optionsContainer) return;
 
         if (nextQuestions && nextQuestions.length > 0) {
-            var html = '<div style="font-size: 12px; font-weight: 700; color: #db2777; margin-bottom: 4px;">💡 Chọn câu hỏi tiếp theo:</div>';
+            var html = `
+                <div class="options-title">
+                    <span class="options-title-badge">💡 Gợi ý câu hỏi</span>
+                    <span class="options-title-sub">Chạm để hỏi nhanh</span>
+                </div>
+            `;
             nextQuestions.forEach(function(q) {
                 var qText = q.questionText || q.text || 'Câu hỏi tiếp theo';
                 html += `
-                    <button type="button" class="question-btn" onclick="sendQuestion('${q._id}', '${escapeQuotes(qText)}')" 
-                        style="width: 100%; text-align: left; background: #fdf2f8; border: 1px solid #fbcfe8; padding: 10px 14px; border-radius: 10px; cursor: pointer; color: #db2777; font-weight: 600; font-size: 13px; margin-bottom: 4px; transition: transform 0.1s ease;"
-                        onmouseover="this.style.background='#fce7f3'; this.style.transform='translateY(-1px)';"
-                        onmouseout="this.style.background='#fdf2f8'; this.style.transform='none';">
-                        ${charIcon || '💬'} ${escapeHtml(qText)}
+                    <button type="button" class="question-btn" onclick="sendQuestion('${q._id}', '${escapeQuotes(qText)}')">
+                        <span class="q-icon-pill">${charIcon || '🩺'}</span>
+                        <span class="q-text">${escapeHtml(qText)}</span>
+                        <span class="q-arrow">➔</span>
                     </button>
                 `;
             });
             optionsContainer.innerHTML = html;
         } else {
             optionsContainer.innerHTML = `
-                <div style="text-align: center; padding: 6px;">
-                    <p style="font-size: 13px; color: #64748b; margin: 0 0 8px 0;">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
-                    <button type="button" onclick="restartCurrentChat()" style="background: #22c55e; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(34,197,94,0.25);">
+                <div style="text-align: center; padding: 10px 6px;">
+                    <p style="font-size: 13.5px; font-weight: 700; color: #64748b; margin: 0 0 10px 0;">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
+                    <button type="button" onclick="restartCurrentChat()" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px 22px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 14px rgba(16,185,129,0.3); transition: transform 0.15s ease;">
                         🔄 Bắt đầu lại cuộc trò chuyện
                     </button>
                 </div>

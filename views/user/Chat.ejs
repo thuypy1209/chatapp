@@ -154,13 +154,18 @@
             <input type="hidden" id="character-icon" value="<%= character && character.icon ? character.icon : '🤖' %>">
             <input type="hidden" id="character-name" value="<%= character ? character.name : 'Bot' %>">
 
-            <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN -->
+            <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN (THIẾT KẾ PASTEL PILL SANG TRỌNG) -->
             <div id="options-container" class="options-in-chat">
-                <div class="options-title">💡 Chọn câu hỏi tiếp theo:</div>
+                <div class="options-title">
+                    <span class="options-title-badge">💡 Gợi ý câu hỏi</span>
+                    <span class="options-title-sub">Chạm để hỏi nhanh</span>
+                </div>
                 <% if (typeof questions !== 'undefined' && questions && questions.length > 0) { %>
                     <% questions.forEach(function(q) { %>
                         <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
-                            <%= character && character.icon ? character.icon : '💬' %> <%= q.questionText %>
+                            <span class="q-icon-pill"><%= character && character.icon ? character.icon : '🩺' %></span>
+                            <span class="q-text"><%= q.questionText %></span>
+                            <span class="q-arrow">➔</span>
                         </button>
                     <% }); %>
                 <% } else { %>
