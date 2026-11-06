@@ -714,22 +714,38 @@
         drawTrees(ctx) {
             ctx.save();
             const baseY = this.height - this.groundH;
-            ctx.fillStyle = '#4ea452'; // Xanh lá cây
-
-            const treeWidth = 42;
-            const totalW = 800;
             const startX = this.treesX;
+            const patternW = 800;
 
-            for (let offset = -totalW; offset < this.width + totalW; offset += totalW) {
-                for (let i = 0; i < 20; i++) {
-                    const tx = startX + offset + i * treeWidth;
-                    if (tx + treeWidth >= 0 && tx <= this.width) {
+            // Màu bụi cây: Xanh lá cây tự nhiên đặc trưng Flappy Bird
+            ctx.fillStyle = '#4ea452';
+
+            // 1. Dải thân cây liền mạch bên dưới, cắm sâu vào mặt cỏ (tuyệt đối không bị tách rời khỏi mặt đất)
+            ctx.fillRect(0, baseY - 16, this.width, 18);
+
+            // 2. Các chùm vòm cây nhấp nhô liên tiếp gối đầu lên nhau, tạo thành hàng rào cây xanh mướt liền khối
+            const bushStep = 26;
+            const numBushes = Math.ceil(this.width / bushStep) + 6;
+
+            for (let offset = -patternW; offset < this.width + patternW; offset += patternW) {
+                for (let i = 0; i < numBushes; i++) {
+                    const bx = startX + offset + i * bushStep;
+                    if (bx >= -40 && bx <= this.width + 40) {
+                        // Vòm cây to nhỏ đan xen nhấp nhô sống động
+                        const r = (i % 3 === 0) ? 22 : ((i % 3 === 1) ? 18 : 20);
+                        const cy = baseY - 14;
+
                         ctx.beginPath();
-                        ctx.arc(tx + treeWidth / 2, baseY - 12, 18, Math.PI, 0, false);
+                        ctx.arc(bx, cy, r, Math.PI, 0, false);
                         ctx.fill();
                     }
                 }
             }
+
+            // 3. Viền chân cỏ tiếp giáp mặt đất để kết nối mượt mà
+            ctx.fillStyle = '#3d8641';
+            ctx.fillRect(0, baseY - 1, this.width, 2);
+
             ctx.restore();
         }
 
@@ -931,18 +947,6 @@
         drawReadyScreen(ctx) {
             ctx.save();
 
-            // Hiển thị kỷ lục ở góc trên bên phải đồng bộ với màn hình chơi
-            if (this.bestScore > 0) {
-                ctx.font = 'bold 16px "Quicksand", sans-serif';
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'top';
-                ctx.strokeStyle = '#1e293b';
-                ctx.lineWidth = 3;
-                ctx.strokeText('🏆 Kỷ lục: ' + this.bestScore, this.width - 20, 24);
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText('🏆 Kỷ lục: ' + this.bestScore, this.width - 20, 24);
-            }
-
             // Dòng chữ GET READY!
             ctx.font = '900 38px "Quicksand", sans-serif';
             ctx.textAlign = 'center';
@@ -954,14 +958,20 @@
             ctx.fillStyle = '#facc15';
             ctx.fillText('GET READY! 🚀', this.width / 2, 130);
 
-            // Hướng dẫn tương tác nhấp nháy mượt mà có viền bóng đổ, không vẽ hộp trắng che nền
-            const alpha = 0.75 + Math.sin(Date.now() * 0.006) * 0.25;
+            // Hướng dẫn tương tác nhấp nháy
+            const alpha = 0.6 + Math.sin(Date.now() * 0.006) * 0.4;
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.font = 'bold 15px "Quicksand", sans-serif';
-            ctx.strokeStyle = 'rgba(15, 23, 42, 0.7)';
-            ctx.lineWidth = 3;
-            ctx.strokeText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
             ctx.fillText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
+
+            // Hộp nền màu trắng kỷ lục điểm
+            if (this.bestScore > 0) {
+                ctx.fillStyle = '#ffffff';
+                this.roundRect(ctx, this.width / 2 - 90, 320, 180, 28, 14, true, false);
+                ctx.fillStyle = '#db2777';
+                ctx.font = 'bold 13px "Quicksand", sans-serif';
+                ctx.fillText('🏆 Kỷ lục điểm: ' + this.bestScore, this.width / 2, 335);
+            }
 
             ctx.restore();
         }
