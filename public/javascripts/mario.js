@@ -170,12 +170,12 @@
         }
 
         initGame() {
-            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Vật lý êm ái, bồng bềnh chuẩn Flappy
+            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Sprite trong suốt tự do, vật lý êm ái
             this.cat = {
                 x: 130,
                 y: (this.height - this.groundH) / 2 - 20,
                 w: 48,
-                h: 48,
+                h: 54,
                 vy: 0,
                 gravity: 0.16,      // Giảm độ rơi từ 0.28 xuống 0.16 để rơi êm, nhẹ nhàng
                 jumpForce: -4.5,    // Lực nảy vừa tầm, không vọt quá cao
@@ -584,12 +584,39 @@
             }
         }
 
+        // Tự động đồng bộ kích thước Drawing Buffer của Canvas theo độ phân giải màn hình thực tế (Retina / Full HD)
+        resizeBuffer() {
+            if (!this.canvas) return;
+            const rect = this.canvas.getBoundingClientRect();
+            // Lấy DPR (Device Pixel Ratio) của màn hình, giới hạn max 2.5x để đảm bảo hiệu năng 120 FPS
+            const dpr = Math.min(2.5, Math.max(1, window.devicePixelRatio || 1));
+            const dispW = rect.width > 0 ? rect.width : this.width;
+            const dispH = rect.height > 0 ? rect.height : this.height;
+            const targetW = Math.round(dispW * dpr);
+            const targetH = Math.round(dispH * dpr);
+
+            if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
+                this.canvas.width = targetW;
+                this.canvas.height = targetH;
+            }
+        }
+
         // --- Render Đồ Họa ---
         draw() {
+            // Tự động nâng độ phân giải buffer sắc nét 1080p/2K khi ở chế độ Fullscreen hoặc màn hình lớn
+            this.resizeBuffer();
+
             const ctx = this.ctx;
+            ctx.save();
+
+            // Scale toàn bộ tọa độ logic (800 x 450) lên độ phân giải thực của Canvas
+            const scaleX = this.canvas.width / this.width;
+            const scaleY = this.canvas.height / this.height;
+            ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
 
             // Xử lý rung màn hình
-            ctx.save();
             if (this.shakeTimer > 0) {
                 const dx = (Math.random() - 0.5) * this.shakeIntensity;
                 const dy = (Math.random() - 0.5) * this.shakeIntensity;
@@ -845,24 +872,11 @@
             ctx.translate(cat.x + cat.w / 2, cat.y + cat.h / 2);
             ctx.rotate(cat.rotation);
 
-            // Vẽ hình ảnh chú mèo mô tô
+            // Vẽ hình ảnh chú Bangboo mô tô dạng sprite tự do trên nền trời (không bọc trong hình tròn!)
             if (this.catImgLoaded && this.catImg.naturalWidth > 0) {
-                // Bo tròn chú mèo thành huy hiệu phi công siêu ngầu
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(0, 0, cat.w / 2 - 1, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.clip();
-
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(this.catImg, -cat.w / 2, -cat.h / 2, cat.w, cat.h);
-                ctx.restore();
-
-                // Viền phát sáng bảo vệ tròn
-                ctx.beginPath();
-                ctx.arc(0, 0, cat.w / 2 - 1, 0, Math.PI * 2);
-                ctx.strokeStyle = '#38bdf8';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
             } else {
                 // Fallback nếu ảnh chưa tải xong: Vẽ chú mèo retro
                 ctx.fillStyle = '#475569';

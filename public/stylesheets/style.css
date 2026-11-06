@@ -835,8 +835,8 @@ h1 {
     margin: auto !important;
     border-radius: 0 !important;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.95) !important;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: auto !important;
+    image-rendering: -webkit-optimize-contrast !important;
 }
 
 #mario-side-panel:-webkit-full-screen canvas,
@@ -850,8 +850,8 @@ h1 {
     margin: auto !important;
     border-radius: 0 !important;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.95) !important;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: auto !important;
+    image-rendering: -webkit-optimize-contrast !important;
 }
 
 /* Ẩn footer khi fullscreen */
