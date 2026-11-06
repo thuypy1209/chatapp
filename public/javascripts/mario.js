@@ -191,8 +191,8 @@
             this.pipeSpawnTimer = 0;
             this.pipeGap = 155;       // Tăng khe hở từ 138 lên 155px để bay qua dễ dàng
             this.pipeWidth = 64;     // Bề rộng thân ống
-            this.pipeSpeed = 1.9;    // Tốc độ ống trôi êm ái (giảm từ 2.4 xuống 1.9)
-            this.pipeInterval = 135; // Khoảng cách giữa các cột ống nước thoải mái (~255px)
+            this.pipeSpeed = 2.4;    // Tốc độ ống trôi êm ái ( 1.9- 2.6 x)
+            this.pipeInterval = 160; // Khoảng cách giữa các cột ống nước thoải mái (130 - 255)
 
             // Điểm số
             this.score = 0;
