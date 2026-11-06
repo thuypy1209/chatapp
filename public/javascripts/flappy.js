@@ -132,14 +132,6 @@
             this.cityX = 0;
             this.treesX = 0;
 
-            // Mây bay parallax
-            this.clouds = [
-                { x: 60, y: 50, scale: 1.1, speed: 0.4 },
-                { x: 260, y: 90, scale: 0.85, speed: 0.35 },
-                { x: 480, y: 40, scale: 1.2, speed: 0.45 },
-                { x: 690, y: 75, scale: 0.9, speed: 0.38 }
-            ];
-
             // Rung màn hình khi va chạm
             this.shakeTimer = 0;
             this.shakeIntensity = 0;
@@ -163,6 +155,17 @@
             // Nhận diện thiết bị Mobile để tối ưu hóa đồ họa & hiệu năng 60-120 FPS
             this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
             this.isTabHidden = false;
+
+            // Mây bay parallax — Mobile chỉ dùng 2 đám mây để giảm vẽ
+            this.clouds = this.isMobile ? [
+                { x: 100, y: 55, scale: 1.0, speed: 0.35 },
+                { x: 500, y: 80, scale: 0.9, speed: 0.38 }
+            ] : [
+                { x: 60,  y: 50, scale: 1.1,  speed: 0.4  },
+                { x: 260, y: 90, scale: 0.85, speed: 0.35 },
+                { x: 480, y: 40, scale: 1.2,  speed: 0.45 },
+                { x: 690, y: 75, scale: 0.9,  speed: 0.38 }
+            ];
 
             // Khởi tạo thực thể & màn chơi
             this.initGame();
@@ -627,8 +630,9 @@
         resizeBuffer() {
             if (!this.canvas) return;
             const rect = this.canvas.getBoundingClientRect();
-            // Lấy DPR của màn hình: Trên Mobile giới hạn max 1.5x để chống quá tải GPU, Desktop max 2.2x
-            const maxDpr = this.isMobile ? 1.5 : 2.2;
+            // Mobile: DPR = 1.0 để render ít pixel nhất, tăng FPS tối đa
+            // Desktop: DPR tối đa 2.0 cho màn hình Retina sắc nét
+            const maxDpr = this.isMobile ? 1.0 : 2.0;
             const dpr = Math.min(maxDpr, Math.max(1, window.devicePixelRatio || 1));
             const dispW = rect.width > 0 ? rect.width : this.width;
             const dispH = rect.height > 0 ? rect.height : this.height;
@@ -672,8 +676,10 @@
             // 2. Mây trắng bồng bềnh
             this.drawClouds(ctx);
 
-            // 3. Dãy thành phố (Skyline) phía xa
-            this.drawCitySkyline(ctx);
+            // 3. Dãy thành phố (Skyline) phía xa — bỏ qua trên Mobile để tiết kiệm CPU
+            if (!this.isMobile) {
+                this.drawCitySkyline(ctx);
+            }
 
             // 4. Hàng cây xanh chân thành phố
             this.drawTrees(ctx);
@@ -816,7 +822,25 @@
             const bodyY = isTop ? y : y + capH;
             const bodyH = Math.max(0, h - capH);
 
-            // Gradient thân ống xanh Flappy Bird
+            // Mobile: màu đặc để tránh tạo gradient tốn CPU mỗi frame
+            if (this.isMobile) {
+                ctx.fillStyle = '#73bf2e';
+                ctx.fillRect(x, bodyY, w, bodyH);
+                ctx.strokeStyle = '#2b3d17';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, bodyY, w, bodyH);
+
+                const capX = x - capOverhang;
+                const capW = w + capOverhang * 2;
+                const capY = isTop ? y + h - capH : y;
+                ctx.fillStyle = '#5a9e22';
+                ctx.fillRect(capX, capY, capW, capH);
+                ctx.strokeRect(capX, capY, capW, capH);
+                ctx.restore();
+                return;
+            }
+
+            // Gradient thân ống xanh Flappy Bird (Desktop)
             const bodyGrad = ctx.createLinearGradient(x, 0, x + w, 0);
             bodyGrad.addColorStop(0, '#558022');   // Bóng tối cạnh trái
             bodyGrad.addColorStop(0.18, '#73bf2e'); // Xanh chính

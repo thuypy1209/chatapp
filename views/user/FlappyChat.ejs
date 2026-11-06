@@ -78,6 +78,13 @@
 <script>
 function initMarioApp() {
     if (window.marioInstance) return;
+
+    // Trên Mobile: tắt hoàn toàn hiệu ứng mưa tiền để giải phóng GPU cho game
+    var isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+    if (isMobileDevice && window.moneyRainInstance) {
+        window.moneyRainInstance.toggle(false);
+    }
+
     // Khởi tạo Game Flappy Bangboo
     var game = new window.MarioGame('mario-canvas');
     window.marioInstance = game;

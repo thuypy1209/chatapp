@@ -568,12 +568,22 @@
                 this.canvas.style.display = this.isRunning ? 'block' : 'none';
             }
             if (this.isRunning && !this.animId) {
+                // Restart RAF khi bật lại (vì loop tự dừng khi isRunning=false)
                 this.animId = requestAnimationFrame(this.loop);
+            } else if (!this.isRunning && this.animId) {
+                cancelAnimationFrame(this.animId);
+                this.animId = null;
             }
             return this.isRunning;
         }
 
         loop() {
+            // Dừng hoàn toàn RAF khi không chạy, không waste CPU/GPU trên mobile
+            if (!this.isRunning) {
+                this.animId = null;
+                return;
+            }
+
             if (this.isRunning) {
                 this.ctx.clearRect(0, 0, this.width, this.height);
 
