@@ -71,6 +71,7 @@
     let volumeLevel = 75; // 0 - 100
     let isPlayerReady = false;
     let hasUserInteracted = false;
+    let pendingPlay = false; // Chờ player ready rồi phát (khi người dùng click trước khi player load xong)
     let localAudio = null;
 
     // --- 1. Tạo Giao diện Music Player Widget nổi ---
@@ -776,6 +777,18 @@
                         // Nếu có cài đặt custom audio thì không chạy youtube
                         if (activeCustomAudioUrl) {
                             applyMusicSetting({ customAudioUrl: activeCustomAudioUrl });
+                            return;
+                        }
+
+                        // Tự phát nhạc nếu:
+                        // (1) người dùng đã tương tác (click/touch) TRƯỚC khi player ready → pendingPlay=true
+                        // (2) người dùng đã tương tác và chưa tự bấm Dừng → hasUserInteracted & !isUserPaused
+                        if ((pendingPlay || (hasUserInteracted && !isUserPaused))) {
+                            pendingPlay = false;
+                            try {
+                                event.target.playVideo();
+                                updateUIState(true);
+                            } catch(e) {}
                         }
                     },
                     onStateChange: (event) => {
@@ -815,6 +828,8 @@
             ytPlayer.playVideo();
             updateUIState(true);
         } else {
+            // Player chưa ready → đánh dấu chờ, khi onReady sẽ tự phát
+            pendingPlay = true;
             isPlaying = true;
             updateUIState(true);
         }
