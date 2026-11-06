@@ -160,9 +160,37 @@
                 this.catImg.src = '/images/flappy-cat.png';
             };
 
+            // Nhận diện thiết bị Mobile để tối ưu hóa đồ họa & hiệu năng 60-120 FPS
+            this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
+            this.isTabHidden = false;
+
             // Khởi tạo thực thể & màn chơi
             this.initGame();
             this.bindEvents();
+
+            // Khởi tạo kích thước Drawing Buffer ngay khi load
+            this.resizeBuffer();
+
+            // Lắng nghe resize & xoay màn hình (orientation) trên mobile
+            window.addEventListener('resize', () => {
+                this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
+                this.resizeBuffer();
+            }, { passive: true });
+
+            // Lắng nghe sự kiện toàn màn hình để đồng bộ độ phân giải Canvas
+            document.addEventListener('fullscreenchange', () => this.resizeBuffer());
+            document.addEventListener('webkitfullscreenchange', () => this.resizeBuffer());
+
+            // Tự động tạm dừng khi chuyển tab/app trên điện thoại để tiết kiệm pin
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    this.isTabHidden = true;
+                } else {
+                    this.isTabHidden = false;
+                    this.lastTime = performance.now();
+                    this.resizeBuffer();
+                }
+            });
 
             // Vòng lặp game
             this.lastTime = performance.now();
@@ -241,19 +269,21 @@
         }
 
         spawnSmokeParticles() {
-            // Sinh vệt khói pô xe máy xả ra phía sau đuôi
+            // Giới hạn số lượng hạt trên Mobile để tối ưu FPS tối đa
+            if (this.particles.length > (this.isMobile ? 12 : 28)) return;
+            const count = this.isMobile ? 1 : 2;
             const tailX = this.cat.x + 6;
             const tailY = this.cat.y + this.cat.h - 10;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < count; i++) {
                 this.particles.push({
                     x: tailX + (Math.random() * 4 - 2),
                     y: tailY + (Math.random() * 4 - 2),
                     vx: -(1.5 + Math.random() * 1.5),
                     vy: (Math.random() - 0.5) * 1.2,
-                    radius: 3 + Math.random() * 4,
+                    radius: 3 + Math.random() * 3,
                     color: 'rgba(255, 255, 255, 0.75)',
                     alpha: 0.8,
-                    decay: 0.035 + Math.random() * 0.02
+                    decay: this.isMobile ? 0.05 : 0.035
                 });
             }
         }
@@ -588,8 +618,9 @@
         resizeBuffer() {
             if (!this.canvas) return;
             const rect = this.canvas.getBoundingClientRect();
-            // Lấy DPR (Device Pixel Ratio) của màn hình, giới hạn max 2.5x để đảm bảo hiệu năng 120 FPS
-            const dpr = Math.min(2.5, Math.max(1, window.devicePixelRatio || 1));
+            // Lấy DPR của màn hình: Trên Mobile giới hạn max 1.5x để chống quá tải GPU, Desktop max 2.2x
+            const maxDpr = this.isMobile ? 1.5 : 2.2;
+            const dpr = Math.min(maxDpr, Math.max(1, window.devicePixelRatio || 1));
             const dispW = rect.width > 0 ? rect.width : this.width;
             const dispH = rect.height > 0 ? rect.height : this.height;
             const targetW = Math.round(dispW * dpr);
@@ -603,9 +634,7 @@
 
         // --- Render Đồ Họa ---
         draw() {
-            // Tự động nâng độ phân giải buffer sắc nét 1080p/2K khi ở chế độ Fullscreen hoặc màn hình lớn
-            this.resizeBuffer();
-
+            // Không gọi resizeBuffer ở mỗi frame để triệt tiêu hoàn toàn Layout Thrashing trên Mobile!
             const ctx = this.ctx;
             ctx.save();
 
@@ -614,7 +643,7 @@
             const scaleY = this.canvas.height / this.height;
             ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
             ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+            ctx.imageSmoothingQuality = this.isMobile ? 'medium' : 'high';
 
             // Xử lý rung màn hình
             if (this.shakeTimer > 0) {
@@ -1104,6 +1133,10 @@
 
         // --- Game Loop ---
         loop(timestamp) {
+            if (this.isTabHidden) {
+                requestAnimationFrame(this.loop.bind(this));
+                return;
+            }
             const dt = (timestamp - this.lastTime) / 1000;
             this.lastTime = timestamp;
 

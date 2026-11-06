@@ -329,21 +329,37 @@
     // --- Quản lý Canvas Toàn màn hình & Vòng lặp Animation ---
     class MoneyRainEngine {
         constructor() {
+            this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
+            this.isGamePage = window.location.pathname.includes('/flappy') || 
+                              window.location.pathname.includes('/mario') ||
+                              !!document.getElementById('mario-game-container') ||
+                              !!document.getElementById('mario-canvas');
+
             this.canvas = null;
             this.ctx = null;
             this.width = window.innerWidth;
             this.height = window.innerHeight;
             this.particles = [];
             this.burstParticles = [];
-            this.isRunning = true;
-            this.density = 24; // Số lượng hạt rơi tự nhiên tối ưu mượt mà (12 xu, 12 tiền giấy)
-            this.maxBurstParticles = 50; // Giới hạn trần cứng số hạt bùng nổ trên màn hình để chống giật lag
+            this.isRunning = !this.isGamePage; // Tự động tắt 100% trên trang chơi game để dành toàn bộ CPU/GPU cho trò chơi
+
+            // Tối ưu mật độ hạt: Trên mobile chỉ giữ 6 hạt siêu nhẹ để chống giật lag & không che chữ
+            this.density = this.isMobile ? 6 : 22;
+            this.maxBurstParticles = this.isMobile ? 16 : 40;
             this.animId = null;
+            this.cachedExcludedRects = [];
+            this.lastRectUpdateTime = 0;
 
             this.init();
         }
 
         init() {
+            // Nếu là trang game thì không cần khởi tạo render canvas mưa tiền
+            if (this.isGamePage) {
+                this.isRunning = false;
+                return;
+            }
+
             // Tạo Canvas toàn màn hình
             this.canvas = document.createElement('canvas');
             this.canvas.id = 'money-rain-canvas';
@@ -355,10 +371,35 @@
             this.canvas.style.zIndex = '99'; // Nằm dưới navbar & popup modal
             document.body.appendChild(this.canvas);
 
-            this.ctx = this.canvas.getContext('2d');
+            this.ctx = this.canvas.getContext('2d', { alpha: true });
             this.handleResize();
+            this.updateExcludedRects();
 
-            window.addEventListener('resize', () => this.handleResize());
+            window.addEventListener('resize', () => {
+                this.handleResize();
+                this.updateExcludedRects();
+            }, { passive: true });
+
+            window.addEventListener('scroll', () => {
+                const now = performance.now();
+                if (now - this.lastRectUpdateTime > 250) {
+                    this.lastRectUpdateTime = now;
+                    this.updateExcludedRects();
+                }
+            }, { passive: true });
+
+            // Cập nhật vùng an toàn định kỳ 1 giây/lần thay vì đo đạc ở mỗi frame
+            setInterval(() => this.updateExcludedRects(), 1000);
+
+            // Tự động tạm dừng animation khi người dùng ẩn trình duyệt / đổi app
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (this.animId) cancelAnimationFrame(this.animId);
+                    this.animId = null;
+                } else if (this.isRunning && !this.animId) {
+                    this.animId = requestAnimationFrame(this.loop);
+                }
+            });
 
             // Tạo các hạt ban đầu
             this.createAmbientParticles();
@@ -370,6 +411,7 @@
             // Bắt sự kiện click vào trang web để tạo hiệu ứng bùng nổ tiền (nếu click vào nền)
             let lastBgBurstTime = 0;
             document.addEventListener('pointerdown', (e) => {
+                if (!this.isRunning) return;
                 // Tuyệt đối không kích hoạt nổ tiền khi click vào khung game, thanh điều khiển, nút bấm, input...
                 if (this.isElementInsideGame(e.target) || this.isPointInsideGame(e.clientX, e.clientY, 15)) {
                     return;
@@ -377,8 +419,38 @@
                 const now = Date.now();
                 if (now - lastBgBurstTime < 500) return; // Giới hạn tần suất click nền tối thiểu 500ms
                 lastBgBurstTime = now;
-                this.burstAt(e.clientX, e.clientY, 10);
+                this.burstAt(e.clientX, e.clientY, this.isMobile ? 6 : 10);
             });
+        }
+
+        // Cập nhật tọa độ các vùng cần che chắn (Cache lại thay vì đo đạc liên tục mỗi frame)
+        updateExcludedRects() {
+            const excludedRects = [];
+            const candidateSelectors = [
+                '#mario-game-container',
+                '#mario-canvas',
+                '.game-card',
+                '.controls-card',
+                '#mario-side-panel',
+                '#mario-side-canvas',
+                '.mario-touch-hud',
+                '.game-card-modal-overlay',
+                '#chatflex-music-widget'
+            ];
+
+            for (let s = 0; s < candidateSelectors.length; s++) {
+                const el = document.querySelector(candidateSelectors[s]);
+                if (el && el.offsetWidth > 0 && el.offsetHeight > 0) {
+                    const r = el.getBoundingClientRect();
+                    excludedRects.push({
+                        left: r.left - 14,
+                        right: r.right + 14,
+                        top: r.top - 14,
+                        bottom: r.bottom + 14
+                    });
+                }
+            }
+            this.cachedExcludedRects = excludedRects;
         }
 
         // Kiểm tra xem phần tử HTML có thuộc vùng cấm nổ tiền hay không
@@ -423,13 +495,19 @@
         }
 
         handleResize() {
-            const dpr = window.devicePixelRatio || 1;
+            if (!this.canvas) return;
+            // Tối ưu DPR: Trên Mobile giới hạn tối đa 1.25x để chống quá tải RAM/GPU
+            const maxDpr = this.isMobile ? 1.25 : 2.0;
+            const dpr = Math.min(maxDpr, Math.max(1, window.devicePixelRatio || 1));
             this.width = window.innerWidth;
             this.height = window.innerHeight;
-            this.canvas.width = this.width * dpr;
-            this.canvas.height = this.height * dpr;
+            this.canvas.width = Math.round(this.width * dpr);
+            this.canvas.height = Math.round(this.height * dpr);
             this.ctx.resetTransform ? this.ctx.resetTransform() : this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(dpr, dpr);
+            if (this.ctx.imageSmoothingQuality) {
+                this.ctx.imageSmoothingQuality = this.isMobile ? 'low' : 'medium';
+            }
         }
 
         createAmbientParticles() {
@@ -438,16 +516,22 @@
             for (let i = 0; i < half; i++) {
                 const c = new CoinParticle(this.width, this.height);
                 c.y = Math.random() * this.height; // Phân bố đều khắp chiều cao khi khởi tạo
+                if (this.isMobile) c.radius *= 0.8; // Thu nhỏ nhẹ hạt trên mobile để không che chữ
                 this.particles.push(c);
             }
             for (let i = 0; i < half; i++) {
                 const b = new BillParticle(this.width, this.height);
                 b.y = Math.random() * this.height;
+                if (this.isMobile) {
+                    b.width *= 0.8;
+                    b.height *= 0.8;
+                }
                 this.particles.push(b);
             }
         }
 
         burstAt(x, y, count = 20) {
+            if (!this.isRunning) return;
             // Không kích hoạt nổ tiền nếu tọa độ nằm trong khung trò chơi
             if (this.isPointInsideGame(x, y, 15)) return;
 
@@ -459,9 +543,16 @@
             coinAudio.playCoin();
             for (let i = 0; i < spawnCount; i++) {
                 if (Math.random() > 0.45) {
-                    this.burstParticles.push(new CoinParticle(this.width, this.height, true, x, y));
+                    const c = new CoinParticle(this.width, this.height, true, x, y);
+                    if (this.isMobile) c.radius *= 0.8;
+                    this.burstParticles.push(c);
                 } else {
-                    this.burstParticles.push(new BillParticle(this.width, this.height, true, x, y));
+                    const b = new BillParticle(this.width, this.height, true, x, y);
+                    if (this.isMobile) {
+                        b.width *= 0.8;
+                        b.height *= 0.8;
+                    }
+                    this.burstParticles.push(b);
                 }
             }
         }
@@ -476,6 +567,9 @@
             if (this.canvas) {
                 this.canvas.style.display = this.isRunning ? 'block' : 'none';
             }
+            if (this.isRunning && !this.animId) {
+                this.animId = requestAnimationFrame(this.loop);
+            }
             return this.isRunning;
         }
 
@@ -483,34 +577,12 @@
             if (this.isRunning) {
                 this.ctx.clearRect(0, 0, this.width, this.height);
 
-                // Lấy tọa độ các khung trò chơi và widget để hoàn toàn không vẽ tiền đè lên game
-                const excludedRects = [];
-                const candidateSelectors = [
-                    '#mario-game-container',
-                    '#mario-canvas',
-                    '.game-card',
-                    '.controls-card',
-                    '#mario-side-panel',
-                    '#mario-side-canvas',
-                    '.mario-touch-hud',
-                    '.game-card-modal-overlay'
-                ];
-
-                for (let s = 0; s < candidateSelectors.length; s++) {
-                    const el = document.querySelector(candidateSelectors[s]);
-                    if (el && el.offsetWidth > 0 && el.offsetHeight > 0) {
-                        const r = el.getBoundingClientRect();
-                        // Thêm padding 14px để mép của tờ tiền hoặc đồng xu không bị lẹm vào khung game
-                        excludedRects.push({
-                            left: r.left - 14,
-                            right: r.right + 14,
-                            top: r.top - 14,
-                            bottom: r.bottom + 14
-                        });
-                    }
-                }
+                // Sử dụng danh sách hình chữ nhật loại trừ ĐÃ CACHE SẴN (Không gọi DOM getBoundingClientRect mỗi frame)
+                const excludedRects = this.cachedExcludedRects;
+                const hasExcluded = excludedRects && excludedRects.length > 0;
 
                 const isInsideGameArea = (x, y) => {
+                    if (!hasExcluded) return false;
                     for (let j = 0; j < excludedRects.length; j++) {
                         const r = excludedRects[j];
                         if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {

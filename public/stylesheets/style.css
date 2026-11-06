@@ -3298,3 +3298,94 @@ select:focus,
         transform: translateY(-8px) rotate(8deg);
     }
 }
+
+/* ========================================================
+   TỐI ƯU HÓA HIỆU NĂNG & GIAO DIỆN DI ĐỘNG (MOBILE OPTIMIZATION)
+   ======================================================== */
+@media (max-width: 680px) {
+    /* 1. Header Toàn màn hình trên Mobile: Tinh gọn, không tràn dòng, không đè nút */
+    #mario-side-panel:fullscreen .mario-panel-header,
+    #mario-game-container:fullscreen .mario-fs-header,
+    .is-mario-fullscreen .mario-panel-header,
+    .is-mario-fullscreen .mario-fs-header,
+    #mario-side-panel:-webkit-full-screen .mario-panel-header,
+    #mario-game-container:-webkit-full-screen .mario-fs-header {
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 10px !important;
+    }
+
+    .mario-fs-guide-text,
+    .mario-fs-fps-badge,
+    .fs-extra-title,
+    .fs-btn-label {
+        display: none !important;
+    }
+
+    .mario-fs-title-box {
+        gap: 6px !important;
+        min-width: 0 !important;
+    }
+
+    .mario-fs-text-title {
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        max-width: 130px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mario-fs-actions {
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .mario-fs-actions button {
+        padding: 5px 9px !important;
+        font-size: 13px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        line-height: 1 !important;
+        border-radius: 8px !important;
+    }
+
+    /* 2. Đĩa nhạc góc phải: Nâng cao lên khỏi nút BAY LÊN trên mobile */
+    #chatflex-music-widget {
+        bottom: 95px !important;
+        right: 12px !important;
+        z-index: 106 !important;
+    }
+
+    #music-min-disc {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    /* 3. Tối ưu phản hồi cảm ứng cho nút bay và Canvas */
+    .virtual-key-jump,
+    .hud-key-jump {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+    }
+
+    .game-canvas {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* 4. Tấm thiệp động viên Game Over trên màn hình nhỏ */
+    .game-card-wrapper {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        padding: 18px 14px !important;
+        margin: 10px auto !important;
+    }
+
+    .game-card-quote {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+    }
+}
