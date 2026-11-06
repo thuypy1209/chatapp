@@ -3443,6 +3443,12 @@ select:focus,
     }
 }
 
+/* Nút gợi ý bật nhạc trên Mobile */
+@keyframes pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 4px 16px rgba(244,63,94,0.5); }
+    50% { transform: translateX(-50%) scale(1.06); box-shadow: 0 6px 24px rgba(244,63,94,0.75); }
+}
+
 /* ========================================================
    TỐI ƯU HÓA HIỆU NĂNG & GIAO DIỆN DI ĐỘNG (MOBILE OPTIMIZATION)
    ======================================================== */

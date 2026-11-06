@@ -171,6 +171,13 @@
             this.initGame();
             this.bindEvents();
 
+            // Pre-render nền tĩnh vào offscreen canvas (Mobile: tiết kiệm CPU mỗi frame)
+            this.bgCanvas = document.createElement('canvas');
+            this.bgCanvas.width = this.width;
+            this.bgCanvas.height = this.height;
+            this.bgCtx = this.bgCanvas.getContext('2d');
+            this.renderStaticBg();
+
             // Khởi tạo kích thước Drawing Buffer ngay khi load
             this.resizeBuffer();
 
@@ -645,6 +652,43 @@
             }
         }
 
+        // Pre-render nền tĩnh (trời + cây) vào offscreen canvas 1 lần duy nhất
+        renderStaticBg() {
+            const ctx = this.bgCtx;
+            const w = this.width;
+            const h = this.height;
+            const groundH = this.groundH;
+
+            // Bầu trời
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, h - groundH);
+            skyGrad.addColorStop(0, '#4ec0ca');
+            skyGrad.addColorStop(0.7, '#70c5ce');
+            skyGrad.addColorStop(1, '#b0e5eb');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Dãy thành phố (chỉ render 1 lần trên desktop)
+            if (!this.isMobile) {
+                const baseY = h - groundH;
+                ctx.fillStyle = '#83ccd3';
+                const buildingWidth = 36;
+                const heights = [70, 110, 85, 130, 95, 140, 75, 120, 100, 150, 90, 65];
+                const totalCycle = heights.length * buildingWidth;
+                for (let offset = 0; offset < w + totalCycle; offset += totalCycle) {
+                    heights.forEach((bh, idx) => {
+                        const bx = offset + idx * buildingWidth;
+                        ctx.fillRect(bx, baseY - bh, buildingWidth - 2, bh);
+                        ctx.fillStyle = '#9ee0e6';
+                        for (let wy = baseY - bh + 10; wy < baseY - 10; wy += 14) {
+                            ctx.fillRect(bx + 6, wy, 6, 8);
+                            ctx.fillRect(bx + buildingWidth - 14, wy, 6, 8);
+                        }
+                        ctx.fillStyle = '#83ccd3';
+                    });
+                }
+            }
+        }
+
         // --- Render Đồ Họa ---
         draw() {
             // Không gọi resizeBuffer ở mỗi frame để triệt tiêu hoàn toàn Layout Thrashing trên Mobile!
@@ -655,8 +699,8 @@
             const scaleX = this.canvas.width / this.width;
             const scaleY = this.canvas.height / this.height;
             ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = this.isMobile ? 'medium' : 'high';
+            ctx.imageSmoothingEnabled = !this.isMobile; // Mobile: tắt smoothing để nhanh hơn
+            ctx.imageSmoothingQuality = this.isMobile ? 'low' : 'high';
 
             // Xử lý rung màn hình
             if (this.shakeTimer > 0) {
@@ -665,32 +709,28 @@
                 ctx.translate(dx, dy);
             }
 
-            // 1. Bầu trời xanh Flappy Bird
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, this.height - this.groundH);
-            skyGrad.addColorStop(0, '#4ec0ca');
-            skyGrad.addColorStop(0.7, '#70c5ce');
-            skyGrad.addColorStop(1, '#b0e5eb');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, this.width, this.height);
+            // 1. Vẽ nền tĩnh từ offscreen canvas (1 lần drawImage thay vì hàng chục lệnh vẽ)
+            if (this.bgCanvas) {
+                ctx.drawImage(this.bgCanvas, 0, 0, this.width, this.height);
+            } else {
+                // Fallback: vẽ trời màu đặc
+                ctx.fillStyle = '#70c5ce';
+                ctx.fillRect(0, 0, this.width, this.height);
+            }
 
             // 2. Mây trắng bồng bềnh
             this.drawClouds(ctx);
 
-            // 3. Dãy thành phố (Skyline) phía xa — bỏ qua trên Mobile để tiết kiệm CPU
-            if (!this.isMobile) {
-                this.drawCitySkyline(ctx);
-            }
-
-            // 4. Hàng cây xanh chân thành phố
+            // 3. Hàng cây xanh chân thành phố
             this.drawTrees(ctx);
 
-            // 5. Ống nước xanh retro
+            // 4. Ống nước xanh retro
             this.drawPipes(ctx);
 
-            // 6. Mặt đất cỏ và sọc caro retro
+            // 5. Mặt đất cỏ và sọc caro retro
             this.drawGround(ctx);
 
-            // 7. Hiệu ứng khói pô và tia sao (bỏ trên mobile để tiết kiệm GPU)
+            // 6. Hiệu ứng khói pô và tia sao (bỏ trên mobile để tiết kiệm GPU)
             if (!this.isMobile) {
                 this.drawParticles(ctx);
             }

@@ -515,7 +515,7 @@
             }, cooldownTime);
         });
 
-        // Tự động phát khi người dùng nhấp chuột lần đầu vào trang web
+        // Tự động phát khi người dùng tương tác lần đầu (click / touch / keydown)
         const handleFirstInteraction = (e) => {
             // Nếu người dùng nhấp vào widget nhạc thì không tự ý bật nhạc đè lên thao tác của họ
             if (e && e.target && e.target.closest && e.target.closest('#chatflex-music-widget')) {
@@ -531,6 +531,32 @@
         };
         document.addEventListener('click', handleFirstInteraction, { once: true });
         document.addEventListener('keydown', handleFirstInteraction, { once: true });
+        // Mobile: lắng nghe touchstart để bắt lần chạm đầu tiên
+        document.addEventListener('touchstart', handleFirstInteraction, { once: true, passive: true });
+
+        // Mobile: hiển thị nút "Bật nhạc" nổi nếu sau 3s vẫn chưa tương tác
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobileUA) {
+            setTimeout(() => {
+                if (!hasUserInteracted && !isPlaying) {
+                    const hint = document.createElement('div');
+                    hint.id = 'music-mobile-hint';
+                    hint.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#f43f5e;color:#fff;padding:10px 22px;border-radius:999px;font-size:14px;font-weight:800;z-index:9999;box-shadow:0 4px 16px rgba(244,63,94,0.5);cursor:pointer;animation:pulse 1.2s infinite;';
+                    hint.innerHTML = '🎵 Chạm để bật nhạc';
+                    hint.addEventListener('click', () => {
+                        handleFirstInteraction(null);
+                        hint.remove();
+                    });
+                    hint.addEventListener('touchstart', () => {
+                        handleFirstInteraction(null);
+                        hint.remove();
+                    }, { passive: true });
+                    document.body.appendChild(hint);
+                    // Tự ẩn sau 8s
+                    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 8000);
+                }
+            }, 3000);
+        }
 
         // Khởi động chu kỳ đồng bộ thời gian thực cho tất cả người dùng
         startRealtimeSync();
