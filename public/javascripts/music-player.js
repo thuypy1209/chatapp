@@ -669,26 +669,55 @@
             }, cooldownTime);
         });
 
-        // Tự động phát khi người dùng tương tác lần đầu (click / touch / keydown)
-        const handleFirstInteraction = (e) => {
-            // Nếu người dùng nhấp vào widget nhạc thì không tự ý bật nhạc đè lên thao tác của họ
-            if (e && e.target && e.target.closest && e.target.closest('#chatflex-music-widget')) {
-                hasUserInteracted = true;
-                return;
+        // Bắt đầu mở tiếng và phát ngay khi có bất kỳ tương tác nào (Chạm, lướt, bấm phím)
+        let unlocked = false;
+        const unlockAndPlay = () => {
+            if (isUserPaused) return;
+            hasUserInteracted = true;
+            if (ytPlayer && isPlayerReady) {
+                try {
+                    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+                    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(volumeLevel > 0 ? volumeLevel : 75);
+                    if (typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
+                    updateUIState(true);
+                    unlocked = true;
+                } catch(_) {}
             }
-            if (!hasUserInteracted) {
-                hasUserInteracted = true;
-                if (!isPlaying && !isUserPaused) {
-                    playMusic();
+            if (activeCustomAudioUrl && localAudio) {
+                try {
+                    localAudio.muted = false;
+                    localAudio.play().then(() => {
+                        updateUIState(true);
+                        unlocked = true;
+                    }).catch(() => {});
+                } catch(_) {}
+            }
+
+            // Mở khóa Web Audio context cho các hiệu ứng âm thanh
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    if (!window._globalAudioCtx) window._globalAudioCtx = new AudioCtx();
+                    if (window._globalAudioCtx.state === 'suspended') {
+                        window._globalAudioCtx.resume();
+                    }
                 }
-            }
+            } catch (_) {}
+
+            // Xóa nút hint nếu đang hiển thị
+            const hint = document.getElementById('music-mobile-hint');
+            if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
         };
-        document.addEventListener('click', handleFirstInteraction, { once: true });
-        document.addEventListener('keydown', handleFirstInteraction, { once: true });
-        // Mobile & WebKit: lắng nghe cả touchstart, touchend, pointerup để đảm bảo nhận diện tương tác người dùng
-        document.addEventListener('touchstart', handleFirstInteraction, { once: true, passive: true });
-        document.addEventListener('touchend', handleFirstInteraction, { once: true });
-        document.addEventListener('pointerup', handleFirstInteraction, { once: true });
+
+        // Lắng nghe ở mức window với capture để bắt ngay thao tác đầu tiên bất kể chạm vào đâu
+        ['click', 'touchstart', 'touchend', 'pointerup', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                if (!unlocked || !isPlaying) unlockAndPlay();
+            }, { capture: true, passive: true });
+        });
+        document.addEventListener('keydown', () => {
+            if (!unlocked || !isPlaying) unlockAndPlay();
+        }, { capture: true });
 
         // Phát hiện nếu đang mở trong Messenger / Facebook In-App Browser hoặc Mobile
         const isFBInApp = /FBAN|FBAV|Messenger|Instagram|Line/i.test(navigator.userAgent);
@@ -696,17 +725,14 @@
 
         if (isMobileUA || isFBInApp) {
             setTimeout(() => {
-                if (!hasUserInteracted && !isPlaying) {
+                if (!unlocked && !isPlaying) {
                     const hint = document.createElement('div');
                     hint.id = 'music-mobile-hint';
-                    hint.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#db2777;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;box-shadow:0 4px 18px rgba(219,39,119,0.5);cursor:pointer;animation:pulse 1.2s infinite;display:flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;';
-                    hint.innerHTML = isFBInApp 
-                        ? '🎵 Chạm đây để bật âm thanh (hoặc mở bằng Safari/Chrome)' 
-                        : '🎵 Chạm vào đây để bật nhạc';
+                    hint.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#db2777;color:#fff;padding:10px 22px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;box-shadow:0 4px 18px rgba(219,39,119,0.5);cursor:pointer;animation:pulse 1.2s infinite;display:flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;';
+                    hint.innerHTML = '🎵 Chạm vào màn hình để bật âm thanh';
                     const triggerHintPlay = (ev) => {
                         if (ev && ev.stopPropagation) ev.stopPropagation();
-                        hasUserInteracted = true;
-                        playMusic();
+                        unlockAndPlay();
                         if (hint.parentNode) hint.parentNode.removeChild(hint);
                     };
                     hint.addEventListener('click', triggerHintPlay);
@@ -715,7 +741,7 @@
                     // Tự ẩn sau 10s
                     setTimeout(() => { if (hint.parentNode) hint.remove(); }, 10000);
                 }
-            }, 2500);
+            }, 2000);
         }
 
         // Khởi động chu kỳ đồng bộ thời gian thực cho tất cả người dùng
@@ -919,7 +945,7 @@
                 width: '200',
                 videoId: defaultVideoId,
                 playerVars: {
-                    autoplay: 0,
+                    autoplay: 1,
                     controls: 0,
                     loop: 1,
                     playlist: defaultVideoId,
@@ -934,8 +960,8 @@
                         isPlayerReady = true;
                         try {
                             if (typeof event.target.unMute === 'function') event.target.unMute();
-                            event.target.setVolume(volumeLevel);
-                            event.target.setPlaybackRate(currentSpeed);
+                            event.target.setVolume(volumeLevel > 0 ? volumeLevel : 75);
+                            event.target.setPlaybackRate(currentSpeed || 1.0);
                         } catch(_) {}
                         
                         // Nếu có cài đặt custom audio thì không chạy youtube
@@ -944,16 +970,19 @@
                             return;
                         }
 
-                        // Tự phát nhạc nếu:
-                        // (1) người dùng đã tương tác (click/touch) TRƯỚC khi player ready → pendingPlay=true
-                        // (2) người dùng đã tương tác và chưa tự bấm Dừng → hasUserInteracted & !isUserPaused
-                        if ((pendingPlay || (hasUserInteracted && !isUserPaused))) {
-                            pendingPlay = false;
+                        // Tự động phát ngay lập tức trên cả Messenger WebView & Safari
+                        if (!isUserPaused) {
                             try {
                                 if (typeof event.target.unMute === 'function') event.target.unMute();
                                 event.target.playVideo();
                                 updateUIState(true);
-                            } catch(e) {}
+                            } catch(e) {
+                                // Nếu WebView chặn phát có tiếng lúc mở đầu, phát muted trước để sẵn sàng
+                                try {
+                                    if (typeof event.target.mute === 'function') event.target.mute();
+                                    event.target.playVideo();
+                                } catch(_) {}
+                            }
                         }
                     },
                     onStateChange: (event) => {
