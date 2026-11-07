@@ -359,17 +359,31 @@
         });
     };
 
+    // Bật/Tắt thu gọn danh sách câu hỏi gợi ý để mở rộng diện tích khung chat
+    window.toggleChatSuggestions = function() {
+        var container = document.getElementById('options-container');
+        var hint = document.getElementById('options-toggle-hint');
+        if (!container) return;
+        var isCollapsed = container.classList.toggle('is-collapsed');
+        if (hint) {
+            hint.innerHTML = isCollapsed ? 'Mở rộng ▴' : 'Thu gọn ▾';
+        }
+    };
+
     // Render danh sách lựa chọn tiếp theo (Đồng bộ thiết kế Pastel Pill)
     function renderNextOptions(nextQuestions, charIcon) {
         var optionsContainer = document.getElementById('options-container');
         if (!optionsContainer) return;
 
         if (nextQuestions && nextQuestions.length > 0) {
+            var isCollapsed = optionsContainer.classList.contains('is-collapsed');
+            var hintText = isCollapsed ? 'Mở rộng ▴' : 'Thu gọn ▾';
             var html = `
-                <div class="options-title">
-                    <span class="options-title-badge">💡 Gợi ý câu hỏi</span>
-                    <span class="options-title-sub">Chạm để hỏi nhanh</span>
+                <div class="options-title" onclick="toggleChatSuggestions()" style="cursor: pointer; user-select: none;" title="Bấm để thu gọn/mở rộng gợi ý">
+                    <span class="options-title-badge">💡 Gợi ý câu hỏi (${nextQuestions.length})</span>
+                    <span class="options-title-sub" id="options-toggle-hint">${hintText}</span>
                 </div>
+                <div id="options-buttons-list" class="options-buttons-list">
             `;
             nextQuestions.forEach(function(q) {
                 var qText = q.questionText || q.text || 'Câu hỏi tiếp theo';
@@ -381,12 +395,14 @@
                     </button>
                 `;
             });
+            html += `</div>`;
             optionsContainer.innerHTML = html;
         } else {
+            optionsContainer.classList.remove('is-collapsed');
             optionsContainer.innerHTML = `
-                <div style="text-align: center; padding: 10px 6px;">
-                    <p style="font-size: 13.5px; font-weight: 700; color: #64748b; margin: 0 0 10px 0;">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
-                    <button type="button" onclick="restartCurrentChat()" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px 22px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 14px rgba(16,185,129,0.3); transition: transform 0.15s ease;">
+                <div class="chat-finished-box">
+                    <p class="chat-finished-text">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
+                    <button type="button" onclick="restartCurrentChat()" class="btn-chat-restart">
                         🔄 Bắt đầu lại cuộc trò chuyện
                     </button>
                 </div>
@@ -457,10 +473,12 @@
                 chatLayoutWrapper.style.alignItems = 'start'; // Không kéo giãn khoảng đen bên dưới
             }
             if (btnToggle) {
-                btnToggle.innerHTML = '✖ Đóng Mario Game';
+                btnToggle.innerHTML = '<span class="chat-game-btn-icon">✕</span> <span class="chat-game-btn-text">Đóng Game</span>';
                 btnToggle.style.background = '#fee2e2';
                 btnToggle.style.color = '#dc2626';
                 btnToggle.style.borderColor = '#fca5a5';
+                btnToggle.style.boxShadow = '0 2px 5px rgba(220, 38, 38, 0.2)';
+                btnToggle.setAttribute('title', 'Đóng mini game');
             }
 
             // Khởi tạo Game Mario nếu chưa khởi tạo (không gắn marioChatBridge để không làm mất đoạn hội thoại trong phòng chat)
@@ -491,6 +509,13 @@
             if (sideCanvas) {
                 setTimeout(function() { sideCanvas.focus(); }, 50);
             }
+
+            // Trên di động, tự động cuộn nhẹ xuống khung game vừa mở
+            if (window.innerWidth < 900) {
+                setTimeout(function() {
+                    sidePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 120);
+            }
         } else {
             sidePanel.style.display = 'none';
             if (chatLayoutWrapper) {
@@ -500,10 +525,12 @@
                 chatLayoutWrapper.style.gridTemplateColumns = '';
             }
             if (btnToggle) {
-                btnToggle.innerHTML = '🎮 Bật Mario Game';
+                btnToggle.innerHTML = '<span class="chat-game-btn-icon">🎮</span> <span class="chat-game-btn-text">Chơi Game</span>';
                 btnToggle.style.background = '#fef08a';
                 btnToggle.style.color = '#854d0e';
                 btnToggle.style.borderColor = '#facc15';
+                btnToggle.style.boxShadow = '0 2px 5px rgba(234, 179, 8, 0.25)';
+                btnToggle.setAttribute('title', 'Chơi mini game Flappy Bangboo');
             }
         }
     };

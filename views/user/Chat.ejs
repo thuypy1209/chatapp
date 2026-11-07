@@ -24,13 +24,13 @@
     <!-- VÙNG CHỨA BỐ CỤC CHAT (Có thể mở rộng khi bật Mario Game) -->
     <div id="chat-layout-wrapper" class="chat-layout-wrapper">
         
-        <!-- BẢNG GAME FLAPPY BIRD SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
+        <!-- BẢNG GAME FLAPPY BANGBOO SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
         <div id="mario-side-panel" class="mario-side-panel">
             <!-- Header bar của panel -->
             <div class="mario-panel-header">
                 <div class="mario-panel-title-group">
                     <span>🚀</span>
-                    <span class="mario-panel-game-title">Flappy Bird (Flappy Cat)</span>
+                    <span class="mario-panel-game-title">Flappy Bangboo (Mini Game)</span>
                 </div>
                 <div class="mario-panel-actions">
                     <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" class="side-audio-btn">
@@ -41,6 +41,9 @@
                     </button>
                     <button type="button" id="side-fs-btn" class="btn-mario-fullscreen-toggle side-fs-btn" onclick="toggleFullscreenMario('mario-side-panel')" title="Phóng to toàn màn hình để chơi">
                         <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
+                    </button>
+                    <button type="button" onclick="toggleMarioSidePanel()" title="Đóng bảng game" class="side-close-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 4px 8px; font-weight: 700; cursor: pointer; font-size: 13px; line-height: 1;">
+                        ✕
                     </button>
                 </div>
             </div>
@@ -85,9 +88,9 @@
 
                 <!-- Các công cụ nhanh trên header -->
                 <div class="chat-header-tools">
-                    <!-- Nút bật màn hình Flappy Bird song song -->
-                    <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" class="chat-toggle-mario-btn">
-                        🚀 Bật Flappy Bird
+                    <!-- Nút bật màn hình Game Flappy Bangboo song song -->
+                    <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" class="chat-toggle-mario-btn" title="Chơi mini game Flappy Bangboo">
+                        <span class="chat-game-btn-icon">🎮</span> <span class="chat-game-btn-text">Chơi Game</span>
                     </button>
                 </div>
             </div>
@@ -142,20 +145,23 @@
             <input type="hidden" id="character-icon" value="<%= character && character.icon ? character.icon : '🤖' %>">
             <input type="hidden" id="character-name" value="<%= character ? character.name : 'Bot' %>">
 
-            <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN (THIẾT KẾ PASTEL PILL SANG TRỌNG) -->
+            <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN (THIẾT KẾ PASTEL PILL GỌN GÀNG) -->
             <div id="options-container" class="options-in-chat">
-                <div class="options-title">
-                    <span class="options-title-badge">💡 Gợi ý câu hỏi</span>
-                    <span class="options-title-sub">Chạm để hỏi nhanh</span>
-                </div>
-                <% if (typeof questions !== 'undefined' && questions && questions.length > 0) { %>
-                    <% questions.forEach(function(q) { %>
-                        <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
-                            <span class="q-icon-pill"><%= character && character.icon ? character.icon : '🩺' %></span>
-                            <span class="q-text"><%= q.questionText %></span>
-                            <span class="q-arrow">➔</span>
-                        </button>
-                    <% }); %>
+                <% var totalQ = (typeof questions !== 'undefined' && questions) ? questions.length : 0; %>
+                <% if (totalQ > 0) { %>
+                    <div class="options-title" onclick="toggleChatSuggestions()" style="cursor: pointer; user-select: none;" title="Bấm để thu gọn/mở rộng gợi ý">
+                        <span class="options-title-badge">💡 Gợi ý câu hỏi (<%= totalQ %>)</span>
+                        <span class="options-title-sub" id="options-toggle-hint">Thu gọn ▾</span>
+                    </div>
+                    <div id="options-buttons-list" class="options-buttons-list">
+                        <% questions.forEach(function(q) { %>
+                            <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
+                                <span class="q-icon-pill"><%= character && character.icon ? character.icon : '🩺' %></span>
+                                <span class="q-text"><%= q.questionText %></span>
+                                <span class="q-arrow">➔</span>
+                            </button>
+                        <% }); %>
+                    </div>
                 <% } else { %>
                     <div class="chat-finished-box">
                         <p class="chat-finished-text">🎉 Đã hoàn thành bản hội thoại này!</p>

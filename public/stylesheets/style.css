@@ -1737,19 +1737,21 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 }
 .chat-header-bar {
     background: #fff;
-    padding: 12px 18px;
+    padding: 10px 16px;
     border-bottom: 2px solid #fdf2f8;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
 }
 .chat-header-info {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
 }
 .chat-avatar-img {
     width: 42px;
@@ -1757,6 +1759,7 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #fbcfe8;
+    flex-shrink: 0;
 }
 .chat-avatar-placeholder {
     width: 42px;
@@ -1768,17 +1771,22 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     align-items: center;
     justify-content: center;
     font-size: 22px;
+    flex-shrink: 0;
 }
 .chat-title-group {
     display: flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
 }
 .chat-character-title {
     font-size: 16px;
     margin: 0;
     color: #1e293b;
     font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .chat-voice-btn {
     background: #fdf2f8;
@@ -1792,16 +1800,19 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     display: inline-flex;
     align-items: center;
     gap: 3px;
+    flex-shrink: 0;
 }
 .chat-online-badge {
     font-size: 11px;
     color: #22c55e;
     font-weight: 600;
+    display: block;
 }
 .chat-header-tools {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
 }
 .chat-tool-btn {
     background: #f1f5f9;
@@ -1820,15 +1831,35 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     background: #fef08a;
     border: 1.5px solid #facc15;
     color: #854d0e;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    box-shadow: 0 2px 0 #eab308;
+    gap: 5px;
+    box-shadow: 0 2px 5px rgba(234, 179, 8, 0.25);
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+.chat-toggle-mario-btn:hover {
+    background: #fde047;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(234, 179, 8, 0.35);
+}
+.chat-toggle-mario-btn:active {
+    transform: translateY(1px);
+}
+.chat-game-btn-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+.chat-game-btn-text {
+    font-size: inherit;
+    font-weight: 700;
 }
 
 /* Chat Message Box */
@@ -1922,15 +1953,42 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     background: #ffffff;
     padding: 10px 16px;
     border-top: 1px dashed #fbcfe8;
-    max-height: 160px;
+    max-height: 150px;
     overflow-y: auto;
     z-index: 5;
+    transition: all 0.2s ease;
+}
+.options-in-chat.is-collapsed {
+    padding: 8px 16px !important;
+    gap: 0 !important;
+}
+.options-in-chat.is-collapsed .options-buttons-list {
+    display: none !important;
+}
+.options-buttons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
 }
 .options-title {
     font-size: 12px;
     font-weight: 700;
     color: #db2777;
     margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.options-title-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.options-title-sub {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
 }
 /* Chat Finished & Voice helpers */
 .char-switcher-icon {
@@ -3503,10 +3561,10 @@ body.is-playing .game-hud-toolbar:hover {
         padding: 11px 18px !important;
     }
 
-    /* 7. Khung Chat chính (Chat.ejs) */
+    /* 7. Khung Chat chính (Chat.ejs) - Tối ưu toàn diện để hiển thị tối đa vùng đọc tin nhắn trên điện thoại */
     .chat-outer-wrapper {
-        margin: 8px auto 25px auto !important;
-        padding: 0 8px !important;
+        margin: 4px auto 14px auto !important;
+        padding: 0 6px !important;
     }
     .char-switcher-bar {
         gap: 6px !important;
@@ -3514,43 +3572,128 @@ body.is-playing .game-hud-toolbar:hover {
         -webkit-overflow-scrolling: touch !important;
     }
     .char-switcher-bar a {
-        padding: 5px 12px !important;
-        font-size: 12px !important;
+        padding: 4px 10px !important;
+        font-size: 11px !important;
         flex-shrink: 0 !important;
     }
     #chat-main-card {
-        height: calc(100vh - 120px) !important;
-        height: calc(100dvh - 120px) !important;
+        height: calc(100vh - 75px) !important;
+        height: calc(100dvh - 75px) !important;
         border-radius: 16px !important;
         border-width: 2px !important;
     }
+    .chat-header-bar {
+        padding: 6px 10px !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        justify-content: space-between !important;
+    }
+    .chat-header-info {
+        gap: 8px !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+    .chat-avatar-img,
+    .chat-avatar-placeholder {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 18px !important;
+        flex-shrink: 0 !important;
+    }
+    .chat-character-title {
+        font-size: 14px !important;
+        line-height: 1.2 !important;
+        max-width: 135px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .chat-voice-btn {
+        padding: 2px 6px !important;
+        font-size: 10px !important;
+        flex-shrink: 0 !important;
+    }
+    .chat-online-badge {
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+        display: block !important;
+    }
+    .chat-header-tools {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+    }
+    .chat-toggle-mario-btn {
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        border-radius: 20px !important;
+        white-space: nowrap !important;
+        gap: 4px !important;
+        box-shadow: 0 2px 4px rgba(234, 179, 8, 0.25) !important;
+    }
+    .chat-game-btn-icon {
+        font-size: 12px !important;
+    }
+    .chat-game-btn-text {
+        font-size: 11px !important;
+    }
     .message-box {
-        padding: 12px 10px !important;
-        gap: 10px !important;
+        flex: 1 1 auto !important;
+        min-height: 220px !important;
+        padding: 10px 8px !important;
+        gap: 8px !important;
     }
     .message.user, .message.bot {
         max-width: 92% !important;
-        padding: 10px 12px !important;
-        font-size: 14px !important;
+        padding: 8px 12px !important;
+        font-size: 13.5px !important;
         border-radius: 14px !important;
+        line-height: 1.4 !important;
     }
     .options-in-chat {
-        max-height: 175px !important;
-        padding: 8px 12px !important;
+        max-height: 110px !important;
+        padding: 6px 10px !important;
+        gap: 4px !important;
+    }
+    .options-in-chat.is-collapsed {
+        max-height: 36px !important;
+        padding: 6px 10px !important;
+    }
+    .options-title {
+        font-size: 11px !important;
+        margin-bottom: 2px !important;
+    }
+    .options-buttons-list {
+        gap: 4px !important;
+        max-height: 80px !important;
     }
     .question-btn {
-        padding: 9px 12px !important;
-        font-size: 13px !important;
-        min-height: 38px !important;
-        line-height: 1.35 !important;
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        min-height: 30px !important;
+        line-height: 1.25 !important;
+        border-radius: 12px !important;
+        gap: 6px !important;
+    }
+    .question-btn .q-icon-pill {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 12px !important;
+    }
+    .question-btn .q-text {
+        font-size: 12px !important;
+        line-height: 1.25 !important;
+    }
+    .question-btn .q-arrow {
+        font-size: 11px !important;
     }
     #chat-free-form input {
         font-size: 16px !important;
-        padding: 10px 14px !important;
+        padding: 8px 12px !important;
     }
     #chat-free-form button {
-        padding: 10px 16px !important;
-        font-size: 13px !important;
+        padding: 8px 14px !important;
+        font-size: 12.5px !important;
     }
 
     /* 8. Trang Mario & Chat (MarioChat.ejs / FlappyChat.ejs) */
@@ -4315,28 +4458,41 @@ select:focus,
         line-height: 1.5 !important;
     }
 
-    /* 5. Khung câu hỏi gợi ý tối ưu trên Mobile */
+    /* 5. Khung câu hỏi gợi ý tối ưu trên Mobile - Gọn gàng để tối đa hóa vùng đọc tin nhắn */
     .options-in-chat {
-        padding: 11px 12px !important;
-        gap: 8px !important;
-        border-radius: 16px !important;
+        padding: 6px 10px !important;
+        gap: 4px !important;
+        max-height: 110px !important;
+    }
+    .options-in-chat.is-collapsed {
+        max-height: 36px !important;
+        padding: 6px 10px !important;
+    }
+    .options-title {
+        font-size: 11px !important;
+        margin-bottom: 2px !important;
+    }
+    .options-buttons-list {
+        gap: 4px !important;
+        max-height: 80px !important;
     }
     .question-btn {
-        padding: 10px 12px !important;
+        padding: 6px 10px !important;
         border-radius: 12px !important;
-        gap: 8px !important;
+        gap: 6px !important;
+        min-height: 30px !important;
     }
     .question-btn .q-icon-pill {
-        width: 26px !important;
-        height: 26px !important;
-        font-size: 14px !important;
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 12px !important;
     }
     .question-btn .q-text {
-        font-size: 13px !important;
-        line-height: 1.35 !important;
+        font-size: 12px !important;
+        line-height: 1.25 !important;
     }
     .question-btn .q-arrow {
-        font-size: 12px !important;
+        font-size: 11px !important;
     }
 }
 
