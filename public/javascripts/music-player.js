@@ -93,15 +93,17 @@
 
     // Khởi tạo đối tượng HTML5 Audio (chạy độc lập, tương thích 100% với Messenger In-App Browser)
     function initNativeAudio(src) {
-        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
-        const audioSrc = src || activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
+        const currentVer = (MUSIC_VERSIONS && MUSIC_VERSIONS[currentVersionIndex]) ? MUSIC_VERSIONS[currentVersionIndex] : null;
+        const audioSrc = src || (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
         if (!localAudio) {
             localAudio = new Audio(audioSrc);
             localAudio.loop = true;
+            localAudio.preload = 'auto';
             localAudio.volume = volumeLevel / 100;
             localAudio.playbackRate = currentSpeed;
         } else if (localAudio.src !== audioSrc && !localAudio.src.endsWith(audioSrc)) {
             localAudio.src = audioSrc;
+            localAudio.playbackRate = currentSpeed;
         }
         return localAudio;
     }
@@ -719,23 +721,32 @@
         const unlockAndPlay = () => {
             if (isUserPaused) return;
             hasUserInteracted = true;
-            if (ytPlayer && isPlayerReady) {
+            unlocked = true;
+
+            const currentVer = (MUSIC_VERSIONS && MUSIC_VERSIONS[currentVersionIndex]) ? MUSIC_VERSIONS[currentVersionIndex] : null;
+            const targetSrc = (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+
+            // Kích hoạt ngay lập tức HTML5 Audio nếu trên Messenger hoặc Mobile hoặc bài có MP3
+            if (isFBInApp || isNativeAudioActive || Boolean(currentVer && currentVer.audioUrl) || activeCustomAudioUrl) {
+                const audio = initNativeAudio(targetSrc);
+                audio.muted = false;
+                audio.volume = volumeLevel / 100;
+                audio.play().then(() => {
+                    updateUIState(true);
+                    isPlaying = true;
+                }).catch((e) => {
+                    console.warn('[MusicPlayer] Lỗi unlock localAudio:', e);
+                });
+            } else if (ytPlayer && isPlayerReady) {
                 try {
                     if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
                     if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(volumeLevel > 0 ? volumeLevel : 75);
                     if (typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
                     updateUIState(true);
-                    unlocked = true;
+                    isPlaying = true;
                 } catch(_) {}
-            }
-            if (activeCustomAudioUrl && localAudio) {
-                try {
-                    localAudio.muted = false;
-                    localAudio.play().then(() => {
-                        updateUIState(true);
-                        unlocked = true;
-                    }).catch(() => {});
-                } catch(_) {}
+            } else {
+                playMusic();
             }
 
             // Mở khóa Web Audio context cho các hiệu ứng âm thanh
@@ -1186,7 +1197,9 @@
         createPlayerUI();
         if (isFBInApp || isNativeAudioActive) {
             isNativeAudioActive = true;
-            initNativeAudio();
+            const currentVer = (MUSIC_VERSIONS && MUSIC_VERSIONS[currentVersionIndex]) ? MUSIC_VERSIONS[currentVersionIndex] : null;
+            const targetSrc = (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+            initNativeAudio(targetSrc);
             if (!isUserPaused) {
                 localAudio.play().then(() => updateUIState(true)).catch(() => {});
             }
