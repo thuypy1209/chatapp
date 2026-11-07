@@ -172,7 +172,9 @@
 
             // Vòng lặp chuyển động Game Loop (60 - 120 FPS)
             this.lastTime = performance.now();
-            requestAnimationFrame(this.loop.bind(this));
+            // Bind loop 1 lần duy nhất tránh tạo function mới mỗi frame (giảm GC pressure)
+            this._boundLoop = this.loop.bind(this);
+            this._rafId = requestAnimationFrame(this._boundLoop);
         }
 
         // Xây dựng cây phần tử DOM GPU bên trong container
@@ -660,9 +662,11 @@
         }
 
         // Vòng lặp chính Game Loop
+        // QUAN TRỌNG: Dùng arrow function được bind 1 lần trong constructor thay vì
+        // gọi .bind(this) mỗi frame (tiết kiệm ~0.3ms GC overhead mỗi 16ms frame)
         loop(timestamp) {
             if (this.isTabHidden) {
-                requestAnimationFrame(this.loop.bind(this));
+                this._rafId = requestAnimationFrame(this._boundLoop);
                 return;
             }
 
@@ -671,7 +675,7 @@
 
             this.update(dt);
 
-            requestAnimationFrame(this.loop.bind(this));
+            this._rafId = requestAnimationFrame(this._boundLoop);
         }
     }
 

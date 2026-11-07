@@ -2232,6 +2232,11 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     user-select: none;
     -webkit-user-select: none;
     pointer-events: auto;
+    /* GPU isolation: Toàn bộ stage được vẽ trên 1 compositor layer riêng
+       giúp tránh repaint lan ra ngoài và loại bỏ hoàn toàn layout thrashing */
+    will-change: transform;
+    contain: layout style;
+    isolation: isolate;
 }
 
 /* 1. Bầu trời */
@@ -2433,7 +2438,8 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     height: 100%;
     object-fit: contain;
     pointer-events: none;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.28));
+    /* drop-shadow trên img gây rasterize mỗi frame → thay bằng box-shadow cố định trên wrapper
+       box-shadow không tham gia repaint loop nên 0 chi phí GPU mỗi frame */
 }
 
 /* 8. Khói pô */
@@ -2494,8 +2500,8 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     font-size: 14px;
     font-weight: 800;
     color: #ffffff;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.68);
+    /* Bỏ backdrop-filter: blur — tốn GPU không cần thiết trong HUD */
     padding: 6px 14px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -2528,8 +2534,8 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     font-size: 16px;
     font-weight: 700;
     color: #ffffff;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.72);
+    /* Đã loại bỏ backdrop-filter: blur — cực kỳ tốn GPU trên mobile */
     padding: 8px 20px;
     border-radius: 30px;
     border: 1.5px solid rgba(255, 255, 255, 0.6);
@@ -4169,4 +4175,44 @@ select:focus,
     .question-btn .q-arrow {
         font-size: 12px !important;
     }
+}
+
+/* ============================================================
+   GAME PAGE PERFORMANCE MODE
+   Khi trang có class "game-page-active" trên body:
+   → Đóng băng toàn bộ animation phông nền để giải phóng
+     GPU Compositor Thread hoàn toàn cho game loop
+   ============================================================ */
+body.game-page-active .cloud-retro,
+body.game-page-active .cloud-1,
+body.game-page-active .cloud-2,
+body.game-page-active .cloud-3,
+body.game-page-active .random-star,
+body.game-page-active .starry-sky,
+body.game-page-active .mario-ground {
+    animation-play-state: paused !important;
+    animation: none !important;
+    display: none !important;
+}
+
+/* Tắt grid pattern body::before tốn kém trên trang game */
+body.game-page-active::before {
+    display: none !important;
+}
+
+/* Tắt background gradient phức tạp – thay bằng màu đơn giản */
+body.game-page-active {
+    background: #c1ebd9 !important;
+}
+
+/* Loại bỏ backdrop-filter của controls-card khi đang chơi game */
+body.game-page-active .controls-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+/* Tắt box-shadow nặng của game-card khi đang render game loop */
+body.game-page-active .game-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }

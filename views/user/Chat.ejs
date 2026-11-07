@@ -31,7 +31,6 @@
                 <div class="mario-panel-title-group">
                     <span>🚀</span>
                     <span class="mario-panel-game-title">Flappy Bird (Flappy Cat)</span>
-                    <span class="mario-fps-badge">⚡ 120 FPS</span>
                 </div>
                 <div class="mario-panel-actions">
                     <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" class="side-audio-btn">
@@ -54,7 +53,6 @@
                 <span>Điều khiển: <b>Chạm màn hình</b> hoặc phím <b>Space / W / ↑</b></span>
                 <div class="mario-side-vkeys" style="display: flex; gap: 8px; width: 100%;">
                     <button type="button" class="side-vkey-jump" style="flex: 1;" onmousedown="if(window.marioSideGameInstance) window.marioSideGameInstance.flap();" ontouchstart="if(window.marioSideGameInstance) window.marioSideGameInstance.flap(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
-                    <button type="button" class="side-vkey-btn" onclick="restartSideMario()" title="Chơi lại">🔄</button>
                 </div>
             </div>
         </div>
@@ -69,7 +67,7 @@
                         <img src="<%= character.avatarUrl %>" class="chat-avatar-img" alt="<%= character.name %>" onerror="this.style.display='none'">
                     <% } else { %>
                         <div class="chat-avatar-placeholder">
-                            <%= character && character.icon ? character.icon : '🤖' %>
+                            <%= character && character.icon ? character.icon : '' %>
                         </div>
                     <% } %>
                     <div>
@@ -87,16 +85,6 @@
 
                 <!-- Các công cụ nhanh trên header -->
                 <div class="chat-header-tools">
-                    <!-- Nút reset cuộc trò chuyện -->
-                    <button type="button" onclick="restartCurrentChat()" title="Làm mới cuộc trò chuyện" class="chat-tool-btn">
-                        🔄 Làm mới
-                    </button>
-
-                    <!-- Nút bật/tắt âm thanh -->
-                    <button type="button" id="btn-toggle-chat-sound" onclick="window.chatAudio.muted = !window.chatAudio.muted; this.innerText = window.chatAudio.muted ? '🔇' : '🔊';" title="Bật/Tắt âm thanh thông báo" class="chat-tool-btn">
-                        🔊
-                    </button>
-
                     <!-- Nút bật màn hình Flappy Bird song song -->
                     <button type="button" id="btn-toggle-mario-side" onclick="toggleMarioSidePanel()" class="chat-toggle-mario-btn">
                         🚀 Bật Flappy Bird
@@ -170,7 +158,7 @@
                     <% }); %>
                 <% } else { %>
                     <div class="chat-finished-box">
-                        <p class="chat-finished-text">🎉 Đã hoàn thành kịch bản hội thoại này!</p>
+                        <p class="chat-finished-text">🎉 Đã hoàn thành bản hội thoại này!</p>
                         <button type="button" onclick="restartCurrentChat()" class="btn-chat-restart">
                             🔄 Bắt đầu lại cuộc trò chuyện
                         </button>

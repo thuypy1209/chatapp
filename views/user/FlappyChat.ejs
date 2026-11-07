@@ -79,9 +79,12 @@
 function initMarioApp() {
     if (window.marioInstance) return;
 
-    // Trên Mobile: tắt hoàn toàn hiệu ứng mưa tiền để giải phóng GPU cho game
-    var isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-    if (isMobileDevice && window.moneyRainInstance) {
+    // ⚡ GAME PERFORMANCE MODE: Thêm class vào body để CSS đóng băng
+    // toàn bộ animation phông nền (mây, sao, lưới), giải phóng GPU hoàn toàn cho game
+    document.body.classList.add('game-page-active');
+
+    // Tắt hoàn toàn hiệu ứng mưa tiền để giải phóng GPU cho game (mọi thiết bị)
+    if (window.moneyRainInstance) {
         window.moneyRainInstance.toggle(false);
     }
 
