@@ -217,8 +217,11 @@
                         <b style="color: #db2777; display: flex; align-items: center; gap: 6px;">
                             <span>${charIcon}</span> ${botName}:
                         </b>
+                        <button type="button" class="btn-msg-speak" onclick="speakText(this.closest('.message').querySelector('.bot-content-text').innerText, this)" title="Bấm để nghe đọc tin nhắn này" style="background: rgba(219,39,119,0.08); border: 1px solid rgba(219,39,119,0.25); color: #db2777; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s ease;">
+                            🔊 Nghe
+                        </button>
                     </div>
-                    <div id="${botMsgId}"></div>
+                    <div id="${botMsgId}" class="bot-content-text"></div>
             `;
 
             if (data.imageUrl) {
@@ -332,8 +335,11 @@
                         <b style="color: #db2777; display: flex; align-items: center; gap: 6px;">
                             <span>${charIcon}</span> ${botName}:
                         </b>
+                        <button type="button" class="btn-msg-speak" onclick="speakText(this.closest('.message').querySelector('.bot-content-text').innerText, this)" title="Bấm để nghe đọc tin nhắn này" style="background: rgba(219,39,119,0.08); border: 1px solid rgba(219,39,119,0.25); color: #db2777; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s ease;">
+                            🔊 Nghe
+                        </button>
                     </div>
-                    <div id="${botMsgId}"></div>
+                    <div id="${botMsgId}" class="bot-content-text"></div>
             `;
 
             if (data.imageUrl) {
@@ -438,8 +444,11 @@
                             <b style="color: #db2777; display: flex; align-items: center; gap: 6px;">
                                 <span>${charIcon}</span> ${botName}:
                             </b>
+                            <button type="button" class="btn-msg-speak" onclick="speakText(this.closest('.message').querySelector('.bot-content-text').innerText, this)" title="Bấm để nghe đọc tin nhắn này" style="background: rgba(219,39,119,0.08); border: 1px solid rgba(219,39,119,0.25); color: #db2777; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s ease;">
+                                🔊 Nghe
+                            </button>
                         </div>
-                        <div>${data.initialBotMessage}</div>
+                        <div class="bot-content-text">${data.initialBotMessage}</div>
                     </div>
                 `;
             }

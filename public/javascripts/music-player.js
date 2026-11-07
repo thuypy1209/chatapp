@@ -323,8 +323,8 @@
                 </div>
             </div>
 
-            <!-- Khung nhúng YouTube ẩn để phát nhạc -->
-            <div id="yt-hidden-container" style="position: fixed; bottom: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+            <!-- Khung nhúng YouTube ẩn để phát nhạc (Tối ưu cho cả Facebook Messenger & Safari iOS) -->
+            <div id="yt-hidden-container" style="position: fixed; bottom: 0; right: 0; width: 200px; height: 200px; opacity: 0.001; pointer-events: none; z-index: -10; overflow: hidden;">
                 <div id="yt-player-element"></div>
             </div>
         `;
@@ -685,31 +685,37 @@
         };
         document.addEventListener('click', handleFirstInteraction, { once: true });
         document.addEventListener('keydown', handleFirstInteraction, { once: true });
-        // Mobile: lắng nghe touchstart để bắt lần chạm đầu tiên
+        // Mobile & WebKit: lắng nghe cả touchstart, touchend, pointerup để đảm bảo nhận diện tương tác người dùng
         document.addEventListener('touchstart', handleFirstInteraction, { once: true, passive: true });
+        document.addEventListener('touchend', handleFirstInteraction, { once: true });
+        document.addEventListener('pointerup', handleFirstInteraction, { once: true });
 
-        // Mobile: hiển thị nút "Bật nhạc" nổi nếu sau 3s vẫn chưa tương tác
+        // Phát hiện nếu đang mở trong Messenger / Facebook In-App Browser hoặc Mobile
+        const isFBInApp = /FBAN|FBAV|Messenger|Instagram|Line/i.test(navigator.userAgent);
         const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobileUA) {
+
+        if (isMobileUA || isFBInApp) {
             setTimeout(() => {
                 if (!hasUserInteracted && !isPlaying) {
                     const hint = document.createElement('div');
                     hint.id = 'music-mobile-hint';
-                    hint.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#f43f5e;color:#fff;padding:10px 22px;border-radius:999px;font-size:14px;font-weight:800;z-index:9999;box-shadow:0 4px 16px rgba(244,63,94,0.5);cursor:pointer;animation:pulse 1.2s infinite;';
-                    hint.innerHTML = '🎵 Chạm để bật nhạc';
-                    hint.addEventListener('click', () => {
-                        handleFirstInteraction(null);
-                        hint.remove();
-                    });
-                    hint.addEventListener('touchstart', () => {
-                        handleFirstInteraction(null);
-                        hint.remove();
-                    }, { passive: true });
+                    hint.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#db2777;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;box-shadow:0 4px 18px rgba(219,39,119,0.5);cursor:pointer;animation:pulse 1.2s infinite;display:flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;';
+                    hint.innerHTML = isFBInApp 
+                        ? '🎵 Chạm đây để bật âm thanh (hoặc mở bằng Safari/Chrome)' 
+                        : '🎵 Chạm vào đây để bật nhạc';
+                    const triggerHintPlay = (ev) => {
+                        if (ev && ev.stopPropagation) ev.stopPropagation();
+                        hasUserInteracted = true;
+                        playMusic();
+                        if (hint.parentNode) hint.parentNode.removeChild(hint);
+                    };
+                    hint.addEventListener('click', triggerHintPlay);
+                    hint.addEventListener('touchend', triggerHintPlay);
                     document.body.appendChild(hint);
-                    // Tự ẩn sau 8s
-                    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 8000);
+                    // Tự ẩn sau 10s
+                    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 10000);
                 }
-            }, 3000);
+            }, 2500);
         }
 
         // Khởi động chu kỳ đồng bộ thời gian thực cho tất cả người dùng
@@ -909,8 +915,8 @@
         try {
             const defaultVideoId = MUSIC_VERSIONS[currentVersionIndex].id;
             ytPlayer = new window.YT.Player('yt-player-element', {
-                height: '180',
-                width: '320',
+                height: '200',
+                width: '200',
                 videoId: defaultVideoId,
                 playerVars: {
                     autoplay: 0,
@@ -919,13 +925,18 @@
                     playlist: defaultVideoId,
                     modestbranding: 1,
                     rel: 0,
-                    origin: window.location.origin
+                    origin: window.location.origin,
+                    playsinline: 1,
+                    enablejsapi: 1
                 },
                 events: {
                     onReady: (event) => {
                         isPlayerReady = true;
-                        event.target.setVolume(volumeLevel);
-                        event.target.setPlaybackRate(currentSpeed);
+                        try {
+                            if (typeof event.target.unMute === 'function') event.target.unMute();
+                            event.target.setVolume(volumeLevel);
+                            event.target.setPlaybackRate(currentSpeed);
+                        } catch(_) {}
                         
                         // Nếu có cài đặt custom audio thì không chạy youtube
                         if (activeCustomAudioUrl) {
@@ -939,6 +950,7 @@
                         if ((pendingPlay || (hasUserInteracted && !isUserPaused))) {
                             pendingPlay = false;
                             try {
+                                if (typeof event.target.unMute === 'function') event.target.unMute();
                                 event.target.playVideo();
                                 updateUIState(true);
                             } catch(e) {}
@@ -973,13 +985,21 @@
     function playMusic() {
         isUserPaused = false;
         if (activeCustomAudioUrl && localAudio) {
-            localAudio.play().then(() => updateUIState(true)).catch(() => {});
+            localAudio.play().then(() => updateUIState(true)).catch((e) => {
+                console.warn('Lỗi phát localAudio:', e);
+            });
             return;
         }
 
         if (ytPlayer && isPlayerReady && typeof ytPlayer.playVideo === 'function') {
-            ytPlayer.playVideo();
-            updateUIState(true);
+            try {
+                if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+                if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(volumeLevel > 0 ? volumeLevel : 75);
+                ytPlayer.playVideo();
+                updateUIState(true);
+            } catch(e) {
+                console.warn('Lỗi playVideo:', e);
+            }
         } else {
             // Player chưa ready → đánh dấu chờ, khi onReady sẽ tự phát
             pendingPlay = true;

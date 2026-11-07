@@ -103,14 +103,17 @@
                 <% if (typeof initialBotMessage !== 'undefined' && initialBotMessage) { %>
                     <% var botMsgText = initialBotMessage.answerId ? initialBotMessage.answerId.answerText : "Xin chào! Rất vui được gặp bạn!"; %>
                     <div class="message bot">  
-                        <div class="message-author-bot">
-                            <b>
+                        <div class="message-author-bot" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                            <b style="display: flex; align-items: center; gap: 6px;">
                                 <span><%= character && character.icon ? character.icon : '🤖' %></span>
                                 <%= character ? character.name : 'Bot' %>:
                             </b>
+                            <button type="button" class="btn-msg-speak" onclick="speakText(this.closest('.message').querySelector('.bot-content-text').innerText, this)" title="Bấm để nghe đọc tin nhắn này" style="background: rgba(219,39,119,0.08); border: 1px solid rgba(219,39,119,0.25); color: #db2777; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s ease;">
+                                🔊 Nghe
+                            </button>
                         </div>
                         
-                        <div><%= botMsgText %></div>
+                        <div class="bot-content-text"><%= botMsgText %></div>
                         
                         <% if (initialBotMessage.imageId) { %>
                             <div class="media-box">
