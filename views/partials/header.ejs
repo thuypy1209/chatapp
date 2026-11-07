@@ -12,12 +12,13 @@
 </head>
 <%
     // Nhận diện nếu trang hiện tại là Phòng Chat hoặc Game (Flappy / Mario)
-    var isAutoCollapsedPage = false;
-    var isGamePage = false;
-    if (typeof title !== 'undefined') {
-        if (/Phòng Chat|Flappy|Mario|Cuộc Phiêu Lưu/i.test(title)) isAutoCollapsedPage = true;
-        if (/Flappy|Mario|Cuộc Phiêu Lưu/i.test(title)) isGamePage = true;
-    }
+    var currentTitle = typeof title !== 'undefined' ? title : '';
+    var isAdminActive = /Quản trị/i.test(currentTitle);
+    var isChatActive = !isAdminActive && /Phòng Chat|Trò chuyện/i.test(currentTitle);
+    var isGameActive = !isAdminActive && !isChatActive && /Flappy|Cuộc Phiêu Lưu|Chơi game|Bangboo/i.test(currentTitle);
+    var isHomeActive = !isAdminActive && !isChatActive && !isGameActive;
+    var isAutoCollapsedPage = isGameActive || isChatActive;
+    var isGamePage = isGameActive;
 %>
 <body class="<%= isGamePage ? 'game-page-active' : '' %>">
 
@@ -41,11 +42,11 @@
 
             <!-- Menu dropdown điều hướng (Nổi ở trên các div bên dưới) -->
             <ul class="navbar-nav" id="navbar-nav-list">
-                <li><a href="/" class="nav-item">🏠 Trang chủ</a></li>
-                <li><a href="/chat" class="nav-item">💬 Phòng Chat</a></li>
-                <li><a href="/flappy" class="nav-item nav-mario">🚀 Flappy Bird & Chat</a></li>
+                <li><a href="/" class="nav-item <%= isHomeActive ? 'active' : '' %>" data-route="/">🏠 Trang chủ <%- isHomeActive ? '<span class="nav-active-badge">📍 Đang xem</span>' : '' %></a></li>
+                <li><a href="/chat" class="nav-item <%= isChatActive ? 'active' : '' %>" data-route="/chat">💬 Phòng Chat <%- isChatActive ? '<span class="nav-active-badge">📍 Đang xem</span>' : '' %></a></li>
+                <li><a href="/flappy" class="nav-item nav-mario <%= isGameActive ? 'active' : '' %>" data-route="/flappy">🚀 Flappy Bird & Chat <%- isGameActive ? '<span class="nav-active-badge">📍 Đang xem</span>' : '' %></a></li>
                 <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                    <li><a href="/admin" class="nav-item nav-admin">⚙️ Quản trị</a></li>
+                    <li><a href="/admin" class="nav-item nav-admin <%= isAdminActive ? 'active' : '' %>" data-route="/admin">⚙️ Quản trị <%- isAdminActive ? '<span class="nav-active-badge">📍 Đang xem</span>' : '' %></a></li>
                 <% } %>
 
                 <!-- Thông tin người dùng / Nút đổi tên -->
@@ -130,6 +131,34 @@
                 }
             });
         }
+
+        // Tự động đánh dấu trang hiện tại trên Menu (Client-side sync)
+        (function highlightActivePage() {
+            var path = window.location.pathname.toLowerCase();
+            var navItems = document.querySelectorAll('#navbar-nav-list a.nav-item');
+            navItems.forEach(function(item) {
+                var route = (item.getAttribute('data-route') || '').toLowerCase();
+                var isCurrent = false;
+                if (route === '/' && (path === '/' || path === '')) isCurrent = true;
+                else if (route === '/chat' && path.indexOf('/chat') === 0) isCurrent = true;
+                else if ((route === '/flappy' || route === '/mario') && (path.indexOf('/flappy') === 0 || path.indexOf('/mario') === 0)) isCurrent = true;
+                else if (route === '/admin' && path.indexOf('/admin') === 0) isCurrent = true;
+
+                if (isCurrent) {
+                    item.classList.add('active');
+                    if (!item.querySelector('.nav-active-badge')) {
+                        var badge = document.createElement('span');
+                        badge.className = 'nav-active-badge';
+                        badge.innerText = '📍 Đang xem';
+                        item.appendChild(badge);
+                    }
+                } else {
+                    item.classList.remove('active');
+                    var oldBadge = item.querySelector('.nav-active-badge');
+                    if (oldBadge) oldBadge.remove();
+                }
+            });
+        })();
     })();
     </script>
     <div class="cloud-retro cloud-1"></div>

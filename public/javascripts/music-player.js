@@ -444,20 +444,24 @@
         }
 
         // Bật / Tắt mưa tiền
-        btnToggleMoney.addEventListener('click', () => {
+        btnToggleMoney.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!window.moneyRainInstance && typeof MoneyRainEngine === 'function') {
+                window.moneyRainInstance = new MoneyRainEngine();
+            }
             if (window.moneyRainInstance) {
                 const active = window.moneyRainInstance.toggle();
                 const icon = document.getElementById('money-status-icon');
                 const text = document.getElementById('money-status-text');
                 if (active) {
-                    icon.innerText = '💸';
-                    text.innerText = 'Mưa tiền: Bật';
+                    if (icon) icon.innerText = '💸';
+                    if (text) text.innerText = 'Mưa tiền: Bật';
                     btnToggleMoney.style.background = '#ecfdf5';
                     btnToggleMoney.style.color = '#047857';
                     btnToggleMoney.style.borderColor = '#a7f3d0';
                 } else {
-                    icon.innerText = '⏹️';
-                    text.innerText = 'Mưa tiền: Tắt';
+                    if (icon) icon.innerText = '⏹️';
+                    if (text) text.innerText = 'Mưa tiền: Tắt';
                     btnToggleMoney.style.background = '#fef2f2';
                     btnToggleMoney.style.color = '#dc2626';
                     btnToggleMoney.style.borderColor = '#fca5a5';
@@ -472,6 +476,9 @@
 
         btnBurstMoney.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (!window.moneyRainInstance && typeof MoneyRainEngine === 'function') {
+                window.moneyRainInstance = new MoneyRainEngine();
+            }
             if (!window.moneyRainInstance) return;
 
             // Nếu đang trong thời gian hồi chiêu
@@ -488,9 +495,9 @@
                 burstSpamClickCount = 0;
             }, 2500);
 
-            // Bắn tung hạt tiền
+            // Bắn tung hạt tiền - Truyền force = true để luôn bùng nổ tiền khắp màn hình
             const rect = btnBurstMoney.getBoundingClientRect();
-            window.moneyRainInstance.burstAt(rect.left + rect.width / 2, rect.top, 20);
+            window.moneyRainInstance.burstAt(rect.left + rect.width / 2, rect.top, 25, true);
 
             // Cơ chế giới hạn:
             // - Bấm 1-2 lần: Cooldown 500ms

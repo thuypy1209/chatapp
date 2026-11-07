@@ -449,6 +449,30 @@ header, .navbar {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
+/* Đánh dấu trang hiện tại (Active Page) trên Menu Navbar */
+.navbar-nav .nav-item.active,
+.navbar-nav .nav-item.nav-mario.active,
+.navbar-nav .nav-item.nav-admin.active {
+    background: linear-gradient(135deg, #f43f5e, #db2777) !important;
+    color: #ffffff !important;
+    border: 2px solid #fda4af !important;
+    box-shadow: 0 4px 16px rgba(225, 29, 72, 0.45) !important;
+    font-weight: 800 !important;
+}
+
+.nav-active-badge {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    letter-spacing: -0.2px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 .nav-item.nav-admin:hover {
     background: rgba(241, 245, 249, 0.85) !important;
     border-color: rgba(100, 116, 139, 0.7) !important;
@@ -2127,13 +2151,19 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 /* Thanh công cụ điều khiển nhanh NẰM TRONG KHUNG CHƠI GAME */
 .game-hud-toolbar {
     position: absolute;
-    top: 12px;
+    top: 14px;
     left: 14px;
-    display: flex;
+    display: flex !important;
     align-items: center;
     gap: 8px;
-    z-index: 30;
-    pointer-events: auto;
+    z-index: 999 !important; /* Luôn nổi trên cùng bên trong khung game */
+    pointer-events: auto !important;
+}
+
+#mario-game-container:fullscreen .game-hud-toolbar,
+#mario-game-container:-webkit-full-screen .game-hud-toolbar,
+.is-mario-fullscreen .game-hud-toolbar {
+    display: none !important;
 }
 
 .game-hud-btn {
@@ -2141,17 +2171,17 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 7px 13px;
+    padding: 8px 14px;
     border-radius: 12px;
-    background: rgba(15, 23, 42, 0.65);
+    background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #ffffff;
-    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
     -webkit-user-select: none;
@@ -2160,10 +2190,10 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 }
 
 .game-hud-btn:hover {
-    background: rgba(15, 23, 42, 0.88);
-    border-color: #f472b6;
+    background: rgba(15, 23, 42, 0.95);
+    border-color: #ffffff;
     transform: translateY(-1px) scale(1.03);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .game-hud-btn:active {
@@ -2171,15 +2201,21 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 }
 
 .game-hud-btn.btn-hud-sound {
-    border-color: rgba(244, 114, 182, 0.65);
+    border-color: rgba(244, 114, 182, 0.85);
+    background: rgba(190, 24, 93, 0.82);
+    color: #ffffff;
 }
 
 .game-hud-btn.btn-hud-restart {
-    border-color: rgba(250, 204, 21, 0.65);
+    border-color: rgba(250, 204, 21, 0.95);
+    background: rgba(202, 138, 4, 0.9);
+    color: #ffffff;
 }
 
 .game-hud-btn.btn-hud-fs {
-    border-color: rgba(56, 189, 248, 0.65);
+    border-color: rgba(56, 189, 248, 0.9);
+    background: rgba(2, 132, 199, 0.85);
+    color: #ffffff;
 }
 
 .mario-header-title-box {
@@ -2293,7 +2329,7 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     cursor: pointer;
     outline: none;
     position: relative;
-    z-index: 105;
+    z-index: 1 !important; /* z-index thấp để các nút điều khiển nổi ở trên */
     margin: 0 auto;
     overflow: hidden;
     user-select: none;
@@ -3526,15 +3562,18 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
         top: 8px !important;
         left: 8px !important;
         gap: 6px !important;
+        z-index: 999 !important;
     }
     .game-hud-btn {
         padding: 6px 10px !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         border-radius: 10px !important;
-        gap: 0 !important;
+        gap: 4px !important;
     }
     .game-hud-btn .hud-btn-label {
-        display: none !important; /* Trên điện thoại: chỉ hiển thị icon 🔊, 🔄, ⛶ trong khung game */
+        display: inline !important; /* Trên điện thoại: hiển thị rõ chữ Âm thanh, Chơi lại, Toàn màn */
+        font-size: 11px !important;
+        font-weight: 700 !important;
     }
     .chat-card {
         height: 480px !important;
@@ -4193,7 +4232,7 @@ select:focus,
     #chatflex-music-widget {
         bottom: 95px !important;
         right: 12px !important;
-        z-index: 106 !important;
+        z-index: 9999 !important; /* Đảm bảo luôn nằm trên cùng và bấm ăn ngay */
     }
 
     #music-min-disc {

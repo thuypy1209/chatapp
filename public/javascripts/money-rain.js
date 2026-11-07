@@ -551,10 +551,21 @@
             }
         }
 
-        burstAt(x, y, count = 20) {
-            if (!this.isRunning || this.isChatOrGamePage) return;
-            // Không kích hoạt nổ tiền nếu tọa độ nằm trong khung trò chơi
-            if (this.isPointInsideGame(x, y, 15)) return;
+        burstAt(x, y, count = 20, force = false) {
+            // Khi người dùng bấm nút Tung tiền (force = true), luôn cho phép nổ tiền và bật canvas
+            if (force) {
+                if (!this.canvas) this.createCanvas();
+                if (this.canvas) this.canvas.style.display = 'block';
+                if (!this.animId) {
+                    this.isRunning = true;
+                    if (!this.loop) this.loop = this.loop.bind(this);
+                    this.animId = requestAnimationFrame(this.loop);
+                }
+            } else {
+                if (!this.isRunning) return;
+                // Không kích hoạt nổ tiền nếu tọa độ nằm trong khung trò chơi
+                if (this.isPointInsideGame(x, y, 15)) return;
+            }
 
             // Giới hạn số lượng hạt bùng nổ tối đa trên màn hình để chống giật lag
             const availableSlots = this.maxBurstParticles - this.burstParticles.length;
@@ -584,6 +595,7 @@
         }
 
         toggle(enable = null) {
+            this.isChatOrGamePage = false; // Người dùng đã chủ động bấm nút bật/tắt mưa tiền
             this.isRunning = (enable !== null) ? enable : !this.isRunning;
             if (this.isRunning && !this.canvas) {
                 this.createCanvas();
@@ -636,16 +648,14 @@
                     }
                 }
 
-                // Cập nhật và vẽ các hạt tiền nổ (burst)
+                // Cập nhật và vẽ các hạt tiền nổ (burst) - Luôn hiển thị đầy đủ hiệu ứng nổ tung tiền khi bấm nút
                 for (let i = this.burstParticles.length - 1; i >= 0; i--) {
                     const bp = this.burstParticles[i];
                     const alive = bp.update(this.width, this.height);
                     if (!alive) {
                         this.burstParticles.splice(i, 1);
                     } else {
-                        if (!isInsideGameArea(bp.x, bp.y)) {
-                            bp.draw(this.ctx);
-                        }
+                        bp.draw(this.ctx);
                     }
                 }
             }

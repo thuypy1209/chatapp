@@ -827,13 +827,13 @@
 
         if (btnSound) {
             if (isMuted) {
-                btnSound.style.background = '#f1f5f9';
-                btnSound.style.borderColor = '#cbd5e1';
-                btnSound.style.color = '#64748b';
+                btnSound.style.background = 'rgba(100, 116, 139, 0.85)';
+                btnSound.style.borderColor = 'rgba(203, 213, 225, 0.6)';
+                btnSound.style.color = '#ffffff';
             } else {
-                btnSound.style.background = '#fdf2f8';
-                btnSound.style.borderColor = '#f472b6';
-                btnSound.style.color = '#db2777';
+                btnSound.style.background = 'rgba(190, 24, 93, 0.85)';
+                btnSound.style.borderColor = 'rgba(244, 114, 182, 0.85)';
+                btnSound.style.color = '#ffffff';
             }
         }
         return !isMuted;
