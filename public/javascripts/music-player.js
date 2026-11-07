@@ -101,6 +101,17 @@
             localAudio.preload = 'auto';
             localAudio.volume = volumeLevel / 100;
             localAudio.playbackRate = currentSpeed;
+            localAudio.onerror = function() {
+                console.warn('[MusicPlayer] File âm thanh gặp lỗi (404/nguồn không hỗ trợ):', localAudio.src);
+                if (!localAudio.src.endsWith(DEFAULT_NATIVE_BGM)) {
+                    console.log('[MusicPlayer] Tự động chuyển sang file chuẩn hệ thống:', DEFAULT_NATIVE_BGM);
+                    localAudio.src = DEFAULT_NATIVE_BGM;
+                    localAudio.load();
+                    if (!isUserPaused && isPlaying) {
+                        localAudio.play().then(() => updateUIState(true)).catch(() => {});
+                    }
+                }
+            };
         } else if (localAudio.src !== audioSrc && !localAudio.src.endsWith(audioSrc)) {
             localAudio.src = audioSrc;
             localAudio.playbackRate = currentSpeed;

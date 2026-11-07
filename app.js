@@ -85,6 +85,55 @@ app.get('/api/brand-setting', function(req, res) {
     res.json({ success: true, brand: settingsUtils.getBrandSetting() });
 });
 
+// API stream file âm thanh lưu vĩnh viễn trên MongoDB Atlas (hỗ trợ HTTP Range requests cho iOS/Messenger)
+var TrackAudio = require('./schemas/TrackAudio');
+app.get(['/api/track-audio/:id', '/api/track-audio/:id.mp3'], async function(req, res) {
+    try {
+        var rawId = req.params.id ? req.params.id.replace(/\.[^/.]+$/, "") : "";
+        if (!rawId || !mongoose.Types.ObjectId.isValid(rawId)) {
+            return res.redirect('/audio/graduation-nct-dream.mp3');
+        }
+        var doc = await TrackAudio.findById(rawId);
+        if (!doc || !doc.data) {
+            return res.redirect('/audio/graduation-nct-dream.mp3');
+        }
+        var totalSize = doc.data.length;
+        var contentType = doc.contentType || 'audio/mpeg';
+
+        var range = req.headers.range;
+        if (range) {
+            var parts = range.replace(/bytes=/, "").split("-");
+            var start = parseInt(parts[0], 10);
+            var end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+            if (start >= totalSize || end >= totalSize) {
+                res.writeHead(416, { 'Content-Range': `bytes */${totalSize}` });
+                return res.end();
+            }
+            var chunksize = (end - start) + 1;
+
+            res.writeHead(206, {
+                'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': contentType,
+                'Cache-Control': 'public, max-age=86400'
+            });
+            res.end(doc.data.slice(start, end + 1));
+        } else {
+            res.writeHead(200, {
+                'Content-Length': totalSize,
+                'Content-Type': contentType,
+                'Accept-Ranges': 'bytes',
+                'Cache-Control': 'public, max-age=86400'
+            });
+            res.end(doc.data);
+        }
+    } catch (err) {
+        console.error('Lỗi stream track-audio:', err);
+        res.redirect('/audio/graduation-nct-dream.mp3');
+    }
+});
+
 // Đăng ký các đường dẫn (Routes)
 app.use('/auth', authRouter); // Đăng nhập / Kiểm tra tên
 app.use('/', indexRouter); // Trang chính 

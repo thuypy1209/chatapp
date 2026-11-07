@@ -540,14 +540,34 @@ router.post('/music-versions', async function(req, res) {
     }
 });
 
-// POST /admin/music-track-upload: Tải lên file MP3 cho từng bài hát cụ thể trong danh sách
+var TrackAudio = require('../schemas/TrackAudio');
+
+// POST /admin/music-track-upload: Tải lên file MP3 cho từng bài hát cụ thể và lưu vĩnh viễn vào MongoDB Atlas
 router.post('/music-track-upload', upload.single('trackAudio'), async function(req, res) {
     try {
         if (!req.file) {
             return res.json({ success: false, error: 'Vui lòng chọn file âm thanh .mp3 hoặc .m4a!' });
         }
-        var normPath = req.file.path.replace(/\\/g, '/');
-        var audioUrl = normPath.includes('/uploads/audios/') ? ('/uploads/audios/' + req.file.filename) : ('/uploads/' + req.file.filename);
+        var fileBuffer = null;
+        if (req.file.buffer) {
+            fileBuffer = req.file.buffer;
+        } else if (req.file.path && fs.existsSync(req.file.path)) {
+            fileBuffer = fs.readFileSync(req.file.path);
+        }
+
+        if (!fileBuffer || fileBuffer.length === 0) {
+            return res.json({ success: false, error: 'Không thể đọc dữ liệu file âm thanh!' });
+        }
+
+        // Lưu trực tiếp file âm thanh vào MongoDB Atlas để tồn tại vĩnh viễn không phụ thuộc disk Render
+        var doc = await TrackAudio.create({
+            filename: req.file.originalname,
+            contentType: req.file.mimetype || 'audio/mpeg',
+            size: fileBuffer.length,
+            data: fileBuffer
+        });
+
+        var audioUrl = '/api/track-audio/' + doc._id + '.mp3';
         res.json({ success: true, audioUrl: audioUrl, fileName: req.file.originalname });
     } catch (err) {
         console.error('Lỗi upload file MP3 bài hát:', err);

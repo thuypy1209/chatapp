@@ -1181,6 +1181,15 @@ function toggleTrackAudioPreview(url, btn) {
     currentPlayingTrackAudio = new Audio(url);
     currentPlayingTrackBtn = btn;
     btn.innerHTML = '⏸ Đang phát...';
+
+    currentPlayingTrackAudio.onerror = function() {
+        console.error('Lỗi tải file âm thanh:', url);
+        btn.innerHTML = '▶ Nghe thử MP3';
+        showAdminToast('❌ File âm thanh không tồn tại hoặc đã bị xóa. Vui lòng chọn và tải lại file MP3 mới!', 'error');
+        currentPlayingTrackAudio = null;
+        currentPlayingTrackBtn = null;
+    };
+
     currentPlayingTrackAudio.play().then(function() {
         showAdminToast('▶ Đang phát file MP3...', 'info');
     }).catch(function(e) {
