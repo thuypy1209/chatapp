@@ -74,6 +74,36 @@
     let pendingPlay = false; // Chờ player ready rồi phát (khi người dùng click trước khi player load xong)
     let localAudio = null;
 
+    // Tự động phát hiện môi trường Facebook Messenger, Instagram, TikTok WebView
+    const isFBInApp = /FBAN|FBAV|Messenger|Instagram|Line/i.test(navigator.userAgent);
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const DEFAULT_NATIVE_BGM = '/audio/bgm.mp3';
+    let isNativeAudioActive = Boolean(activeCustomAudioUrl) || isFBInApp;
+
+    // Khởi tạo đối tượng HTML5 Audio (chạy độc lập, tương thích 100% với Messenger In-App Browser)
+    function initNativeAudio(src) {
+        const audioSrc = src || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+        if (!localAudio) {
+            localAudio = new Audio(audioSrc);
+            localAudio.loop = true;
+            localAudio.volume = volumeLevel / 100;
+            localAudio.playbackRate = currentSpeed;
+        } else if (localAudio.src !== audioSrc && !localAudio.src.endsWith(audioSrc)) {
+            localAudio.src = audioSrc;
+        }
+        return localAudio;
+    }
+
+    // Tự động chuyển sang HTML5 Audio khi YouTube bị Messenger/trình duyệt chặn
+    function fallbackToNativeAudio() {
+        console.warn('[MusicPlayer] Chuyển đổi sang HTML5 Audio Native để đảm bảo phát được trên Messenger/Mobile');
+        isNativeAudioActive = true;
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+            try { ytPlayer.pauseVideo(); } catch(_) {}
+        }
+        playMusic();
+    }
+
     // --- 1. Tạo Giao diện Music Player Widget nổi ---
     function createPlayerUI() {
         if (document.getElementById('chatflex-music-widget')) return;
@@ -801,26 +831,23 @@
             versionSelect.value = currentVersionIndex;
         }
 
-        // Trường hợp 1: Phát file MP3 do Admin tải lên máy chủ
-        if (activeCustomAudioUrl) {
+        // Trường hợp 1: Phát file MP3 (Admin tải lên hoặc Native Audio trong Messenger)
+        if (activeCustomAudioUrl || isNativeAudioActive) {
             if (ytPlayer && isPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
-                ytPlayer.pauseVideo();
+                try { ytPlayer.pauseVideo(); } catch(_) {}
             }
 
-            if (trackTitle) trackTitle.innerText = setting.title || "Graduation (Custom Audio)";
+            const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+            const displayTitle = setting.title || (activeCustomAudioUrl ? "Graduation (Custom Audio)" : (currentVer ? currentVer.title : "Graduation (Relaxing Piano)"));
+            if (trackTitle) trackTitle.innerText = displayTitle;
             if (trackArtist) {
-                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">📁 File MP3 Admin</span>`;
+                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">🎹 Audio Native</span>`;
             }
 
-            if (!localAudio || localAudio.src !== activeCustomAudioUrl) {
-                if (localAudio) localAudio.pause();
-                localAudio = new Audio(activeCustomAudioUrl);
-                localAudio.loop = true;
-                localAudio.volume = volumeLevel / 100;
-                localAudio.playbackRate = currentSpeed;
-            }
+            const targetSrc = activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+            initNativeAudio(targetSrc);
 
-            if (isPlaying) {
+            if (isPlaying && !isUserPaused) {
                 localAudio.play().then(() => updateUIState(true)).catch(() => {});
             }
         } 
@@ -1001,20 +1028,27 @@
                         }
                     },
                     onError: (err) => {
-                        console.warn('Lỗi YouTube IFrame:', err);
+                        console.warn('[MusicPlayer] Lỗi YouTube IFrame, tự động chuyển ngay sang HTML5 Audio Native:', err);
+                        fallbackToNativeAudio();
                     }
                 }
             });
         } catch (e) {
             console.error('Lỗi khởi tạo YouTube player:', e);
+            fallbackToNativeAudio();
         }
     }
 
     // --- 7. Các hàm điều khiển Âm nhạc cơ bản ---
     function playMusic() {
         isUserPaused = false;
-        if (activeCustomAudioUrl && localAudio) {
-            localAudio.play().then(() => updateUIState(true)).catch((e) => {
+        if (isNativeAudioActive || isFBInApp || activeCustomAudioUrl) {
+            const audio = initNativeAudio();
+            audio.muted = false;
+            audio.volume = volumeLevel / 100;
+            audio.play().then(() => {
+                updateUIState(true);
+            }).catch((e) => {
                 console.warn('Lỗi phát localAudio:', e);
             });
             return;
@@ -1027,7 +1061,8 @@
                 ytPlayer.playVideo();
                 updateUIState(true);
             } catch(e) {
-                console.warn('Lỗi playVideo:', e);
+                console.warn('Lỗi playVideo, fallback sang native audio:', e);
+                fallbackToNativeAudio();
             }
         } else {
             // Player chưa ready → đánh dấu chờ, khi onReady sẽ tự phát
@@ -1111,6 +1146,13 @@
     // Khởi tạo
     function init() {
         createPlayerUI();
+        if (isFBInApp || isNativeAudioActive) {
+            isNativeAudioActive = true;
+            initNativeAudio();
+            if (!isUserPaused) {
+                localAudio.play().then(() => updateUIState(true)).catch(() => {});
+            }
+        }
         loadYouTubeAPI();
     }
 
