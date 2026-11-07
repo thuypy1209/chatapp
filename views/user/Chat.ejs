@@ -145,41 +145,44 @@
             <input type="hidden" id="character-icon" value="<%= character && character.icon ? character.icon : '🤖' %>">
             <input type="hidden" id="character-name" value="<%= character ? character.name : 'Bot' %>">
 
-            <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN (THIẾT KẾ PASTEL PILL GỌN GÀNG) -->
-            <div id="options-container" class="options-in-chat">
-                <% var totalQ = (typeof questions !== 'undefined' && questions) ? questions.length : 0; %>
-                <% if (totalQ > 0) { %>
-                    <div class="options-title" onclick="toggleChatSuggestions()" style="cursor: pointer; user-select: none;" title="Bấm để thu gọn/mở rộng gợi ý">
-                        <span class="options-title-badge">💡 Gợi ý câu hỏi (<%= totalQ %>)</span>
-                        <span class="options-title-sub" id="options-toggle-hint">Thu gọn ▾</span>
-                    </div>
-                    <div id="options-buttons-list" class="options-buttons-list">
-                        <% questions.forEach(function(q) { %>
-                            <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
-                                <span class="q-icon-pill"><%= character && character.icon ? character.icon : '🩺' %></span>
-                                <span class="q-text"><%= q.questionText %></span>
-                                <span class="q-arrow">➔</span>
+            <!-- KHUNG DOCK CHUNG DƯỚI ĐÁY: GỒM CÂU HỎI GỢI Ý & THANH NHẬP CHAT TRONG CÙNG 1 KHUNG THỐNG NHẤT -->
+            <div id="chat-bottom-dock" class="chat-bottom-dock">
+                <!-- CÁC NÚT CÂU HỎI LỰA CHỌN THEO KỊCH BẢN (THIẾT KẾ PASTEL PILL GỌN GÀNG - HIỂN THỊ CẢ 3 CÂU) -->
+                <div id="options-container" class="options-in-chat">
+                    <% var totalQ = (typeof questions !== 'undefined' && questions) ? questions.length : 0; %>
+                    <% if (totalQ > 0) { %>
+                        <div class="options-title" onclick="toggleChatSuggestions()" style="cursor: pointer; user-select: none;" title="Bấm để thu gọn/mở rộng gợi ý">
+                            <span class="options-title-badge">💡 Gợi ý câu hỏi (<%= totalQ %>)</span>
+                            <span class="options-title-sub" id="options-toggle-hint">Thu gọn ▾</span>
+                        </div>
+                        <div id="options-buttons-list" class="options-buttons-list">
+                            <% questions.forEach(function(q) { %>
+                                <button type="button" class="question-btn" onclick="sendQuestion('<%= q._id %>', '<%= q.questionText.replace(/'/g, "\\'") %>')">
+                                    <span class="q-icon-pill"><%= character && character.icon ? character.icon : '🩺' %></span>
+                                    <span class="q-text"><%= q.questionText %></span>
+                                    <span class="q-arrow">➔</span>
+                                </button>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="chat-finished-box">
+                            <p class="chat-finished-text">🎉 Đã hoàn thành bản hội thoại này!</p>
+                            <button type="button" onclick="restartCurrentChat()" class="btn-chat-restart">
+                                🔄 Bắt đầu lại cuộc trò chuyện
                             </button>
-                        <% }); %>
-                    </div>
-                <% } else { %>
-                    <div class="chat-finished-box">
-                        <p class="chat-finished-text">🎉 Đã hoàn thành bản hội thoại này!</p>
-                        <button type="button" onclick="restartCurrentChat()" class="btn-chat-restart">
-                            🔄 Bắt đầu lại cuộc trò chuyện
-                        </button>
-                    </div>
-                <% } %>
-            </div>
+                        </div>
+                    <% } %>
+                </div>
 
-            <!-- Ô NHẬP TIN NHẮN TỰ DO (FREE-TEXT CHAT INPUT) -->
-            <div class="chat-input-bar">
-                <form id="chat-free-form" class="chat-free-form" onsubmit="handleSendFreeText(event)">
-                    <input type="text" id="chat-free-input" class="chat-free-input" placeholder="Nhập câu hỏi để trò chuyện cùng <%= character ? character.name : 'Bot' %>..." autocomplete="off">
-                    <button type="submit" class="chat-send-btn">
-                        Gửi 🚀
-                    </button>
-                </form>
+                <!-- Ô NHẬP TIN NHẮN TỰ DO (FREE-TEXT CHAT INPUT) -->
+                <div class="chat-input-bar">
+                    <form id="chat-free-form" class="chat-free-form" onsubmit="handleSendFreeText(event)">
+                        <input type="text" id="chat-free-input" class="chat-free-input" placeholder="Nhập câu hỏi để trò chuyện cùng <%= character ? character.name : 'Bot' %>..." autocomplete="off">
+                        <button type="submit" class="chat-send-btn">
+                            Gửi 🚀
+                        </button>
+                    </form>
+                </div>
             </div>
 
         </div>

@@ -660,20 +660,16 @@ h1 {
     line-height: 1.5;
 }
 
-/* Khung chọn Options nằm nối tiếp bên trong luồng Chat - Thiết kế Pastel Pill cao cấp */
+/* Khung chọn Options nằm trong Khung Dock chung dưới đáy Chat */
 .options-in-chat {
     display: flex;
     flex-direction: column;
-    gap: 9px;
-    margin-top: 8px;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(253, 242, 248, 0.9) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 13px 15px;
-    border-radius: 18px;
-    border: 1.5px solid rgba(244, 114, 182, 0.3) !important;
-    box-shadow: 0 4px 18px rgba(219, 39, 119, 0.06);
+    gap: 6px;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     box-sizing: border-box;
     width: 100%;
 }
@@ -1944,22 +1940,38 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     background: #db2777;
 }
 
+/* Khung Dock chung dưới đáy Chat: Gồm câu hỏi gợi ý và ô nhập tin nhắn trong CÙNG 1 KHUNG LIỀN MẠCH */
+.chat-bottom-dock {
+    flex-shrink: 0;
+    background: #ffffff;
+    border-top: 2px solid #fdf2f8;
+    padding: 10px 16px 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 -4px 16px rgba(219, 39, 119, 0.04);
+    z-index: 5;
+    box-sizing: border-box;
+}
+
 /* Question Options */
 .options-in-chat {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background: #ffffff;
-    padding: 10px 16px;
-    border-top: 1px dashed #fbcfe8;
-    max-height: 150px;
-    overflow-y: auto;
-    z-index: 5;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-height: none !important;
+    overflow: visible;
     transition: all 0.2s ease;
 }
 .options-in-chat.is-collapsed {
-    padding: 8px 16px !important;
+    padding: 0 !important;
     gap: 0 !important;
 }
 .options-in-chat.is-collapsed .options-buttons-list {
@@ -1968,7 +1980,8 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 .options-buttons-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
+    max-height: 240px;
     overflow-y: auto;
 }
 .options-title {
@@ -2099,9 +2112,9 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 
 /* Chat Form Bottom */
 .chat-input-bar {
-    padding: 12px 16px;
-    background: #ffffff;
-    border-top: 1px solid #f0eae1;
+    padding: 6px 0 0 0;
+    background: transparent;
+    border-top: 1px dashed #fce7f3;
     flex-shrink: 0;
 }
 .chat-free-form {
@@ -3650,14 +3663,26 @@ body.is-playing .game-hud-toolbar:hover {
         border-radius: 14px !important;
         line-height: 1.4 !important;
     }
+    /* Khung Dock chung dưới đáy trên Mobile: Chung 1 khung, thấy cả 3 câu hỏi */
+    .chat-bottom-dock {
+        padding: 8px 10px 10px 10px !important;
+        gap: 6px !important;
+        border-radius: 0 0 16px 16px !important;
+        border-top: 1.5px solid #fdf2f8 !important;
+        background: #ffffff !important;
+    }
     .options-in-chat {
-        max-height: 110px !important;
-        padding: 6px 10px !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         gap: 4px !important;
     }
     .options-in-chat.is-collapsed {
-        max-height: 36px !important;
-        padding: 6px 10px !important;
+        max-height: 24px !important;
+        padding: 0 !important;
     }
     .options-title {
         font-size: 11px !important;
@@ -3665,7 +3690,8 @@ body.is-playing .game-hud-toolbar:hover {
     }
     .options-buttons-list {
         gap: 4px !important;
-        max-height: 80px !important;
+        max-height: 180px !important; /* Đảm bảo thấy trọn vẹn cả 3 câu hỏi không bị thanh cuộn cắt mất */
+        overflow-y: auto !important;
     }
     .question-btn {
         padding: 6px 10px !important;
@@ -3674,6 +3700,9 @@ body.is-playing .game-hud-toolbar:hover {
         line-height: 1.25 !important;
         border-radius: 12px !important;
         gap: 6px !important;
+        background: #ffffff !important;
+        border: 1px solid #fbcfe8 !important;
+        box-shadow: 0 1px 4px rgba(219, 39, 119, 0.04) !important;
     }
     .question-btn .q-icon-pill {
         width: 22px !important;
@@ -3686,6 +3715,12 @@ body.is-playing .game-hud-toolbar:hover {
     }
     .question-btn .q-arrow {
         font-size: 11px !important;
+    }
+    .chat-input-bar {
+        padding: 4px 0 0 0 !important;
+        margin: 0 !important;
+        border-top: 1px dashed #fce7f3 !important;
+        background: transparent !important;
     }
     #chat-free-form input {
         font-size: 16px !important;
@@ -4458,15 +4493,24 @@ select:focus,
         line-height: 1.5 !important;
     }
 
-    /* 5. Khung câu hỏi gợi ý tối ưu trên Mobile - Gọn gàng để tối đa hóa vùng đọc tin nhắn */
+    /* 5. Khung Dock chung dưới đáy tối ưu trên Mobile - Chung 1 khung, thấy trọn vẹn cả 3 câu hỏi */
+    .chat-bottom-dock {
+        padding: 8px 10px 10px 10px !important;
+        gap: 6px !important;
+        background: #ffffff !important;
+    }
     .options-in-chat {
-        padding: 6px 10px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        max-height: none !important;
         gap: 4px !important;
-        max-height: 110px !important;
     }
     .options-in-chat.is-collapsed {
-        max-height: 36px !important;
-        padding: 6px 10px !important;
+        max-height: 24px !important;
+        padding: 0 !important;
     }
     .options-title {
         font-size: 11px !important;
@@ -4474,13 +4518,16 @@ select:focus,
     }
     .options-buttons-list {
         gap: 4px !important;
-        max-height: 80px !important;
+        max-height: 180px !important; /* Đảm bảo đủ chiều cao hiển thị trọn vẹn CẢ 3 CÂU HỎI mà không bị thanh cuộn cắt */
+        overflow-y: auto !important;
     }
     .question-btn {
         padding: 6px 10px !important;
         border-radius: 12px !important;
         gap: 6px !important;
         min-height: 30px !important;
+        background: #ffffff !important;
+        border: 1px solid #fbcfe8 !important;
     }
     .question-btn .q-icon-pill {
         width: 22px !important;
