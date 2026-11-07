@@ -2130,6 +2130,16 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     gap: 8px;
     z-index: 999 !important; /* Luôn nổi trên cùng bên trong khung game */
     pointer-events: auto !important;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s ease !important;
+}
+
+/* Trên Desktop: Làm mờ nhẹ thanh công cụ khi đang bay để không cản trở góc nhìn, rê chuột vào sẽ rõ lại */
+body.is-playing .game-hud-toolbar {
+    opacity: 0.35;
+    transition: opacity 0.3s ease;
+}
+body.is-playing .game-hud-toolbar:hover {
+    opacity: 1;
 }
 
 /* Trong chế độ toàn màn hình: vẫn hiện 3 nút arcade pill góc trên bên trái */
@@ -3592,6 +3602,21 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
         display: inline !important; /* Trên điện thoại: hiển thị rõ chữ Âm thanh, Chơi lại, Toàn màn */
         font-size: 11px !important;
         font-weight: 700 !important;
+    }
+
+    /* Khi chơi game trên điện thoại: Tự động ẩn toàn bộ các nút điều khiển để màn hình sạch sẽ, không che tầm nhìn */
+    body.is-playing .game-hud-toolbar,
+    .is-playing .game-hud-toolbar,
+    #mario-game-container.is-playing .game-hud-toolbar,
+    body.is-playing .game-hud-exit-btn,
+    .is-playing .game-hud-exit-btn,
+    #mario-game-container.is-playing .game-hud-exit-btn,
+    body.is-playing #chatflex-music-widget {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transform: translateY(-12px) !important;
+        transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease !important;
     }
     .chat-card {
         height: 480px !important;

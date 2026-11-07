@@ -33,24 +33,9 @@
 
             <!-- Màn hình chơi Game Flappy Bangboo (DOM / GPU Hardware Accelerated - Không sử dụng Canvas) -->
             <div id="mario-canvas" class="game-canvas game-dom-viewport" tabindex="0"></div>
-
-            <!-- Phím ảo nổi HUD khi bật Toàn màn hình (Fullscreen) -->
-            <div class="mario-touch-hud" style="justify-content: center; gap: 12px;">
-                <button type="button" id="hud-vkey-jump" class="hud-key hud-key-jump" style="padding: 12px 28px; font-size: 16px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(234,88,12,0.4); touch-action: manipulation;">🚀 BAY LÊN (Space / Chạm)</button>
-                <button type="button" class="hud-key hud-key-nav" style="padding: 12px 18px; border-radius: 14px;" onclick="window.restartFlappyGame()" title="Chơi lại">🔄</button>
-            </div>
         </div>
 
         <!-- Bàn phím điều khiển ảo cho Di động & Máy tính -->
-        <div class="controls-card" style="display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 14px 20px;">
-            <!-- Nút bay to bản -->
-            <button type="button" class="virtual-key virtual-key-jump" id="vkey-jump" style="flex: 1; padding: 15px; font-size: 16px; font-weight: 800; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(234,88,12,0.3); transition: transform 0.1s ease; touch-action: manipulation;" title="Bấm để bay lên (Space / Chạm)">
-                🚀 BAY LÊN (Phím Space / Chuột / Chạm màn hình)
-            </button>
-            <button type="button" class="virtual-key" style="padding: 15px 24px; font-size: 15px; font-weight: 700; border-radius: 14px; background: #fff; border: 1.5px solid #cbd5e1; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06);" onclick="window.restartFlappyGame()" title="Chơi lại ván mới">
-                🔄 Chơi lại
-            </button>
-        </div>
     </div>
 </div>
 

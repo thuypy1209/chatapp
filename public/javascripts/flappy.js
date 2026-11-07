@@ -414,6 +414,7 @@
             this.score = 0;
             this.coins = 0;
             this.gameState = 'READY';
+            this.setPlayingState(false);
 
             // Cập nhật HUD
             if (this.hudScore) this.hudScore.textContent = '0';
@@ -428,6 +429,18 @@
             }
         }
 
+        // Quản lý trạng thái đang chơi để tự động ẩn các nút điều khiển trên điện thoại
+        setPlayingState(isPlaying) {
+            const containers = document.querySelectorAll('#mario-game-container, .game-card');
+            if (isPlaying) {
+                document.body.classList.add('is-playing');
+                containers.forEach(el => el.classList.add('is-playing'));
+            } else {
+                document.body.classList.remove('is-playing');
+                containers.forEach(el => el.classList.remove('is-playing'));
+            }
+        }
+
         // Bắt đầu chơi lại
         restart() {
             this.initGame();
@@ -439,6 +452,7 @@
 
             if (this.gameState === 'READY') {
                 this.gameState = 'PLAYING';
+                this.setPlayingState(true);
                 this.cat.vy = this.cat.jumpForce;
                 this.cat.targetRotation = -0.38;
                 audio.flap();
@@ -524,6 +538,7 @@
         triggerGameOver() {
             if (this.gameState === 'GAMEOVER') return;
             this.gameState = 'GAMEOVER';
+            this.setPlayingState(false);
 
             audio.hit();
             setTimeout(() => audio.die(), 120);
