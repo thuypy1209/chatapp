@@ -10,14 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
-<body>
 <%
     // Nhận diện nếu trang hiện tại là Phòng Chat hoặc Game (Flappy / Mario)
     var isAutoCollapsedPage = false;
-    if (typeof title !== 'undefined' && (/Phòng Chat|Flappy|Mario|Cuộc Phiêu Lưu/i.test(title))) {
-        isAutoCollapsedPage = true;
+    var isGamePage = false;
+    if (typeof title !== 'undefined') {
+        if (/Phòng Chat|Flappy|Mario|Cuộc Phiêu Lưu/i.test(title)) isAutoCollapsedPage = true;
+        if (/Flappy|Mario|Cuộc Phiêu Lưu/i.test(title)) isGamePage = true;
     }
 %>
+<body class="<%= isGamePage ? 'game-page-active' : '' %>">
 
     <nav class="navbar <%= isAutoCollapsedPage ? 'nav-compact' : '' %>" id="main-navbar">
         <div class="navbar-header-line">

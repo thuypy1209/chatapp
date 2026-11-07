@@ -2371,7 +2371,9 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 }
 .flappy-ground-dirt {
     height: 54px;
-    background: repeating-linear-gradient(-45deg, #ded895, #ded895 14px, #cbb86e 14px, #cbb86e 28px);
+    background: #ded895;
+    background-image: repeating-linear-gradient(90deg, #ded895 0px, #ded895 14px, #cbb86e 14px, #cbb86e 28px);
+    background-size: 28px 100%;
 }
 
 /* 6. Cột ống nước retro */
