@@ -977,13 +977,28 @@
                         .then(bData => {
                             if (bData && bData.brand) {
                                 const brand = bData.brand;
+                                const navBrand = document.querySelector('.navbar-brand');
                                 const navBrandIcon = document.querySelector('.navbar-brand .brand-icon');
                                 const navBrandText = document.querySelector('.navbar-brand .brand-text');
-                                if (navBrandIcon && brand.brandIcon && navBrandIcon.textContent.trim() !== brand.brandIcon.trim()) {
-                                    navBrandIcon.textContent = brand.brandIcon;
+                                const targetIcon = (brand.brandIcon && brand.brandIcon.trim()) ? brand.brandIcon.trim() : '';
+
+                                if (targetIcon) {
+                                    if (navBrandIcon) {
+                                        navBrandIcon.textContent = targetIcon;
+                                        navBrandIcon.style.display = 'inline-block';
+                                    } else if (navBrand && navBrandText) {
+                                        const newIcon = document.createElement('span');
+                                        newIcon.className = 'brand-icon';
+                                        newIcon.textContent = targetIcon;
+                                        navBrand.insertBefore(newIcon, navBrandText);
+                                    }
+                                } else if (navBrandIcon) {
+                                    navBrandIcon.style.display = 'none';
+                                    navBrandIcon.textContent = '';
                                 }
+
                                 if (navBrandText && brand.brandTitle && navBrandText.textContent.trim() !== brand.brandTitle.trim()) {
-                                    navBrandText.textContent = brand.brandTitle;
+                                    navBrandText.textContent = brand.brandTitle.trim();
                                 }
                             }
                         })

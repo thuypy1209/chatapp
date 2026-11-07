@@ -833,7 +833,7 @@ router.post('/api/brand-setting', async function(req, res) {
     try {
         var settingsUtils = require('../utils/settings');
         var brandTitle = req.body.brandTitle ? String(req.body.brandTitle).trim() : 'Phổi bạn không phải tôi';
-        var brandIcon = req.body.brandIcon ? String(req.body.brandIcon).trim() : '🍄';
+        var brandIcon = (req.body.brandIcon !== undefined) ? String(req.body.brandIcon).trim() : '';
         var welcomeText = req.body.welcomeText ? String(req.body.welcomeText).trim() : ('Chào mừng bạn đến ' + brandTitle + '!');
 
         var updated = await settingsUtils.updateBrandSetting({

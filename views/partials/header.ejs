@@ -24,7 +24,9 @@
 
     <nav class="navbar" id="main-navbar">
         <a href="/" class="navbar-brand">
-            <span class="brand-icon"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon) ? siteBrand.brandIcon : '🍄' %></span>
+            <% if (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon && siteBrand.brandIcon.trim()) { %>
+                <span class="brand-icon"><%= siteBrand.brandIcon.trim() %></span>
+            <% } %>
             <span class="brand-text"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %></span>
         </a>
 
