@@ -289,6 +289,7 @@
     <!-- Trạng thái quyền Admin toàn cục & Cài đặt nhạc hệ thống -->
     <script>
         window.IS_ADMIN = <%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'true' : 'false' %>;
+        window.IS_CHAT_OR_GAME_PAGE = <%= isAutoCollapsedPage ? 'true' : 'false' %>;
         window.SERVER_MUSIC_SETTING = <%- JSON.stringify(typeof activeMusicSetting !== 'undefined' && activeMusicSetting ? activeMusicSetting : { versionIndex: 0, speed: 1.0, customAudioUrl: null }) %>;
     </script>
 

@@ -330,10 +330,18 @@
     class MoneyRainEngine {
         constructor() {
             this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
-            this.isGamePage = window.location.pathname.includes('/flappy') || 
-                              window.location.pathname.includes('/mario') ||
-                              !!document.getElementById('mario-game-container') ||
-                              !!document.getElementById('mario-canvas');
+            
+            // Nhận diện Phòng Chat (/chat) hoặc Chơi Game (/flappy, /mario)
+            const path = window.location.pathname.toLowerCase();
+            this.isChatOrGamePage = (window.IS_CHAT_OR_GAME_PAGE === true) ||
+                                    path.includes('/chat') || 
+                                    path.includes('/flappy') || 
+                                    path.includes('/mario') ||
+                                    !!document.querySelector('.chat-card') ||
+                                    !!document.getElementById('message-box') ||
+                                    !!document.getElementById('mario-game-container') ||
+                                    !!document.getElementById('mario-canvas') ||
+                                    !!document.querySelector('.game-canvas');
 
             this.canvas = null;
             this.ctx = null;
@@ -341,7 +349,9 @@
             this.height = window.innerHeight;
             this.particles = [];
             this.burstParticles = [];
-            this.isRunning = !this.isGamePage; // Tự động tắt 100% trên trang chơi game để dành toàn bộ CPU/GPU cho trò chơi
+            
+            // Khi vào phòng chat hay chơi game: TẮT HOÀN TOÀN hiệu ứng mưa tiền mặc định
+            this.isRunning = !this.isChatOrGamePage;
 
             // Tối ưu mật độ hạt: Trên mobile chỉ giữ 6 hạt siêu nhẹ để chống giật lag & không che chữ
             this.density = this.isMobile ? 6 : 22;
@@ -353,13 +363,8 @@
             this.init();
         }
 
-        init() {
-            // Nếu là trang game thì không cần khởi tạo render canvas mưa tiền
-            if (this.isGamePage) {
-                this.isRunning = false;
-                return;
-            }
-
+        createCanvas() {
+            if (this.canvas) return;
             // Tạo Canvas toàn màn hình
             this.canvas = document.createElement('canvas');
             this.canvas.id = 'money-rain-canvas';
@@ -374,13 +379,30 @@
             this.ctx = this.canvas.getContext('2d', { alpha: true });
             this.handleResize();
             this.updateExcludedRects();
+            this.createAmbientParticles();
+        }
+
+        init() {
+            // Khi vào phòng chat hay chơi game: Tắt hoàn toàn hiệu ứng mưa tiền để không che khuất tin nhắn & tối ưu GPU/CPU
+            if (this.isChatOrGamePage) {
+                this.isRunning = false;
+                const existing = document.getElementById('money-rain-canvas');
+                if (existing && existing.parentNode) {
+                    existing.parentNode.removeChild(existing);
+                }
+                return;
+            }
+
+            this.createCanvas();
 
             window.addEventListener('resize', () => {
+                if (!this.canvas) return;
                 this.handleResize();
                 this.updateExcludedRects();
             }, { passive: true });
 
             window.addEventListener('scroll', () => {
+                if (!this.canvas) return;
                 const now = performance.now();
                 if (now - this.lastRectUpdateTime > 250) {
                     this.lastRectUpdateTime = now;
@@ -389,7 +411,9 @@
             }, { passive: true });
 
             // Cập nhật vùng an toàn định kỳ 1 giây/lần thay vì đo đạc ở mỗi frame
-            setInterval(() => this.updateExcludedRects(), 1000);
+            setInterval(() => {
+                if (this.isRunning) this.updateExcludedRects();
+            }, 1000);
 
             // Tự động tạm dừng animation khi người dùng ẩn trình duyệt / đổi app
             document.addEventListener('visibilitychange', () => {
@@ -401,9 +425,6 @@
                 }
             });
 
-            // Tạo các hạt ban đầu
-            this.createAmbientParticles();
-
             // Bắt đầu vòng lặp render
             this.loop = this.loop.bind(this);
             this.animId = requestAnimationFrame(this.loop);
@@ -411,7 +432,7 @@
             // Bắt sự kiện click vào trang web để tạo hiệu ứng bùng nổ tiền (nếu click vào nền)
             let lastBgBurstTime = 0;
             document.addEventListener('pointerdown', (e) => {
-                if (!this.isRunning) return;
+                if (!this.isRunning || this.isChatOrGamePage) return;
                 // Tuyệt đối không kích hoạt nổ tiền khi click vào khung game, thanh điều khiển, nút bấm, input...
                 if (this.isElementInsideGame(e.target) || this.isPointInsideGame(e.clientX, e.clientY, 15)) {
                     return;
@@ -531,7 +552,7 @@
         }
 
         burstAt(x, y, count = 20) {
-            if (!this.isRunning) return;
+            if (!this.isRunning || this.isChatOrGamePage) return;
             // Không kích hoạt nổ tiền nếu tọa độ nằm trong khung trò chơi
             if (this.isPointInsideGame(x, y, 15)) return;
 
@@ -564,11 +585,15 @@
 
         toggle(enable = null) {
             this.isRunning = (enable !== null) ? enable : !this.isRunning;
+            if (this.isRunning && !this.canvas) {
+                this.createCanvas();
+            }
             if (this.canvas) {
                 this.canvas.style.display = this.isRunning ? 'block' : 'none';
             }
             if (this.isRunning && !this.animId) {
                 // Restart RAF khi bật lại (vì loop tự dừng khi isRunning=false)
+                if (!this.loop) this.loop = this.loop.bind(this);
                 this.animId = requestAnimationFrame(this.loop);
             } else if (!this.isRunning && this.animId) {
                 cancelAnimationFrame(this.animId);

@@ -278,9 +278,9 @@
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1.5px dashed #fbcfe8; padding-top: 10px; margin-top: 2px;">
                     <!-- Bật/Tắt mưa tiền -->
                     <button id="btn-toggle-money-rain" type="button" style="
-                        background: #ecfdf5;
-                        border: 1px solid #a7f3d0;
-                        color: #047857;
+                        background: ${(window.IS_CHAT_OR_GAME_PAGE || window.location.pathname.includes('/chat') || window.location.pathname.includes('/flappy') || window.location.pathname.includes('/mario')) ? '#fef2f2' : '#ecfdf5'};
+                        border: 1px solid ${(window.IS_CHAT_OR_GAME_PAGE || window.location.pathname.includes('/chat') || window.location.pathname.includes('/flappy') || window.location.pathname.includes('/mario')) ? '#fca5a5' : '#a7f3d0'};
+                        color: ${(window.IS_CHAT_OR_GAME_PAGE || window.location.pathname.includes('/chat') || window.location.pathname.includes('/flappy') || window.location.pathname.includes('/mario')) ? '#dc2626' : '#047857'};
                         padding: 6px 10px;
                         border-radius: 8px;
                         font-size: 12px;
@@ -293,7 +293,8 @@
                         justify-content: center;
                         transition: all 0.15s ease;
                     ">
-                        <span id="money-status-icon">💸</span> <span id="money-status-text">Mưa tiền: Bật</span>
+                        <span id="money-status-icon">${(window.IS_CHAT_OR_GAME_PAGE || window.location.pathname.includes('/chat') || window.location.pathname.includes('/flappy') || window.location.pathname.includes('/mario')) ? '⏹️' : '💸'}</span> 
+                        <span id="money-status-text">Mưa tiền: ${(window.IS_CHAT_OR_GAME_PAGE || window.location.pathname.includes('/chat') || window.location.pathname.includes('/flappy') || window.location.pathname.includes('/mario')) ? 'Tắt' : 'Bật'}</span>
                     </button>
 
                     <!-- Nút Bắn tung tiền bùng nổ -->
