@@ -1,12 +1,17 @@
 /**
- * Flappy Bird (Flappy Cat) HTML5 Canvas Engine
- * Pure Vanilla JavaScript & Canvas 2D with Web Audio 8-bit Sound FX
- * Replaces classic Mario with Flappy Bird starring the Cool Motorcycle Cat!
+ * Flappy Bangboo (Zenless Zone Zero) - 100% DOM & GPU Hardware-Accelerated Game Engine
+ * ZERO CANVAS CONTEXT - KHÔNG SỬ DỤNG CANVAS!
+ * 
+ * Toàn bộ trò chơi được kết xuất trực tiếp bằng các phần tử DOM (HTML5/CSS3) và tăng tốc 
+ * phần cứng bằng GPU qua CSS `transform: translate3d(...)` và `will-change: transform`.
+ * - Tiêu thụ CPU và pin cực thấp trên điện thoại di động
+ * - Loại bỏ hoàn toàn hiện tượng nghẽn rasterization / Layout Thrashing của 2D Canvas
+ * - Duy trì ổn định 60 - 120 FPS mượt mà trên mọi dòng iPhone, iPad và điện thoại Android!
  */
-(function() {
+(function () {
     'use strict';
 
-    // --- Web Audio 8-bit Sound Generator ---
+    // --- 1. Web Audio 8-bit Sound Generator (Độc lập, không phụ thuộc Canvas) ---
     class RetroAudio {
         constructor() {
             this.ctx = null;
@@ -41,13 +46,13 @@
                 gain.connect(this.ctx.destination);
                 osc.start();
                 osc.stop(this.ctx.currentTime + duration);
-            } catch(e) {}
+            } catch (e) {}
         }
 
         flap() {
             this.init();
-            // Tiếng vỗ cánh / nẹt pô bay lên
-            this.tone(280, 'sine', 0.12, 0.18, 0.01, 560);
+            // Tiếng vỗ cánh / nẹt pô xe mô tô nảy lên
+            this.tone(280, 'sine', 0.11, 0.16, 0.01, 560);
         }
 
         point() {
@@ -67,7 +72,7 @@
                 osc.stop(time + dur);
             };
             playNote(987.77, now, 0.07); // B5
-            playNote(1318.51, now + 0.07, 0.28); // E6
+            playNote(1318.51, now + 0.07, 0.26); // E6
         }
 
         hit() {
@@ -82,504 +87,536 @@
 
         swoosh() {
             this.init();
-            this.tone(360, 'sine', 0.15, 0.1, 0.01, 180);
+            this.tone(360, 'sine', 0.14, 0.1, 0.01, 180);
         }
     }
 
     const audio = new RetroAudio();
     window.FlappyAudio = audio;
     window.MarioAudio = audio;
+    window.RetroAudio = RetroAudio;
 
-    // --- Flappy Bird (Flappy Cat) Game Engine ---
+    // --- 2. Flappy Bangboo DOM & GPU Engine (Zero Canvas) ---
     class FlappyGame {
-        constructor(canvasId) {
-            this.canvasId = canvasId;
-            this.canvas = document.getElementById(canvasId);
-            if (!this.canvas) return;
-            this.ctx = this.canvas.getContext('2d');
+        constructor(elementId) {
+            this.elementId = elementId;
+            let target = document.getElementById(elementId);
+            if (!target) return;
 
-            // Lưu instance toàn cục để các nút điều khiển bên ngoài tương tác trực tiếp
+            // Nếu element truyền vào là thẻ <canvas> (từ cache trình duyệt hoặc code cũ),
+            // tự động chuyển đổi thành <div> để loại bỏ 100% Canvas API và giải phóng RAM/GPU
+            if (target.tagName && target.tagName.toLowerCase() === 'canvas') {
+                const div = document.createElement('div');
+                div.id = target.id;
+                div.className = (target.className ? target.className + ' ' : '') + 'game-dom-viewport';
+                div.tabIndex = target.tabIndex || 0;
+                if (target.parentNode) {
+                    target.parentNode.replaceChild(div, target);
+                }
+                target = div;
+            } else {
+                target.classList.add('game-dom-viewport');
+            }
+            this.container = target;
+
+            // Lưu instance toàn cục để tương thích tuyệt đối với các nút bấm giao diện ngoài
             window.flappyInstance = this;
             window.marioInstance = this;
-            if (canvasId === 'mario-side-canvas') {
+            if (elementId === 'mario-side-canvas') {
                 window.flappySideGameInstance = this;
                 window.marioSideGameInstance = this;
             }
 
+            // Kích thước chuẩn sân khấu ảo tỉ lệ 16:9 (800 x 450)
             this.width = 800;
             this.height = 450;
-            this.canvas.width = this.width;
-            this.canvas.height = this.height;
+            this.groundH = 68;
+            this.playH = this.height - this.groundH; // 382px
 
-            // Skin / Theme tương thích
-            this.skin = 'classic';
-
-            // Trạng thái game
+            // Trạng thái trò chơi
             this.score = 0;
             this.coins = 0;
             this.bestScore = 0;
             try {
                 this.bestScore = parseInt(localStorage.getItem('chatflex_flappy_best') || '0', 10);
-            } catch(e) {}
+            } catch (e) {}
 
             this.gameState = 'READY'; // READY, PLAYING, GAMEOVER
-            this.gameFocus = false;
-            this.keys = {};
-
-            // Môi trường
-            this.groundH = 68;
-            this.groundX = 0;
-            this.cityX = 0;
-            this.treesX = 0;
-
-            // Rung màn hình khi va chạm
-            this.shakeTimer = 0;
-            this.shakeIntensity = 0;
-
-            // Hiệu ứng hạt
-            this.particles = [];
-            this.floatingTexts = [];
-
-            // Tải ảnh chú Bangboo phi công lái xe mô tô (Zenless Zone Zero)
-            this.catImg = new Image();
-            this.catImg.src = '/images/flappy-bangboo.png';
-            this.catImgLoaded = false;
-            this.catImg.onload = () => {
-                this.catImgLoaded = true;
-            };
-            this.catImg.onerror = () => {
-                // Thử load ảnh dự phòng
-                this.catImg.src = '/images/flappy-cat.png';
-            };
-
-            // Nhận diện thiết bị Mobile để tối ưu hóa đồ họa & hiệu năng 60-120 FPS
-            this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
             this.isTabHidden = false;
+            this.pipes = [];
+            this.groundX = 0;
 
-            // Mây bay parallax — Mobile chỉ dùng 2 đám mây để giảm vẽ
-            this.clouds = this.isMobile ? [
-                { x: 100, y: 55, scale: 1.0, speed: 0.35 },
-                { x: 500, y: 80, scale: 0.9, speed: 0.38 }
-            ] : [
-                { x: 60,  y: 50, scale: 1.1,  speed: 0.4  },
-                { x: 260, y: 90, scale: 0.85, speed: 0.35 },
-                { x: 480, y: 40, scale: 1.2,  speed: 0.45 },
-                { x: 690, y: 75, scale: 0.9,  speed: 0.38 }
-            ];
+            // Thiết lập cấu trúc DOM hoàn chỉnh
+            this.buildDOM();
 
-            // Khởi tạo thực thể & màn chơi
+            // Khởi tạo thực thể & lắng nghe sự kiện
             this.initGame();
             this.bindEvents();
 
-            // Pre-render nền tĩnh vào offscreen canvas (Mobile: tiết kiệm CPU mỗi frame)
-            this.bgCanvas = document.createElement('canvas');
-            this.bgCanvas.width = this.width;
-            this.bgCanvas.height = this.height;
-            this.bgCtx = this.bgCanvas.getContext('2d');
-            this.renderStaticBg();
+            // Tự động scale tỉ lệ sân khấu theo kích thước container
+            this.resizeStage();
+            window.addEventListener('resize', () => this.resizeStage(), { passive: true });
+            document.addEventListener('fullscreenchange', () => this.resizeStage());
+            document.addEventListener('webkitfullscreenchange', () => this.resizeStage());
 
-            // Khởi tạo kích thước Drawing Buffer ngay khi load
-            this.resizeBuffer();
-
-            // Lắng nghe resize & xoay màn hình (orientation) trên mobile
-            window.addEventListener('resize', () => {
-                this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
-                this.resizeBuffer();
-            }, { passive: true });
-
-            // Lắng nghe sự kiện toàn màn hình để đồng bộ độ phân giải Canvas
-            document.addEventListener('fullscreenchange', () => this.resizeBuffer());
-            document.addEventListener('webkitfullscreenchange', () => this.resizeBuffer());
-
-            // Tự động tạm dừng khi chuyển tab/app trên điện thoại để tiết kiệm pin
+            // Tạm dừng khi chuyển tab/app trên điện thoại để tiết kiệm pin
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     this.isTabHidden = true;
                 } else {
                     this.isTabHidden = false;
                     this.lastTime = performance.now();
-                    this.resizeBuffer();
+                    this.resizeStage();
                 }
             });
 
-            // Vòng lặp game
+            // Vòng lặp chuyển động Game Loop (60 - 120 FPS)
             this.lastTime = performance.now();
             requestAnimationFrame(this.loop.bind(this));
         }
 
-        initGame() {
-            // Phát hiện mobile để điều chỉnh physics nhẹ hơn, chơi mượt hơn
-            const mob = this.isMobile;
+        // Xây dựng cây phần tử DOM GPU bên trong container
+        buildDOM() {
+            this.container.innerHTML = `
+                <div class="flappy-dom-stage" id="flappy-dom-stage">
+                    <!-- 1. Bầu trời Flappy Bird -->
+                    <div class="flappy-sky"></div>
 
-            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Sprite trong suốt tự do, tốc độ nhanh nhẹn, kịch tính
+                    <!-- 2. Mây trắng bồng bềnh -->
+                    <div class="flappy-clouds-layer">
+                        <div class="flappy-cloud c1"></div>
+                        <div class="flappy-cloud c2"></div>
+                        <div class="flappy-cloud c3"></div>
+                    </div>
+
+                    <!-- 3. Dãy thành phố chân trời retro -->
+                    <div class="flappy-city-layer">
+                        <svg viewBox="0 0 800 110" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
+                            <rect x="15" y="30" width="38" height="80" fill="#83ccd3" />
+                            <rect x="22" y="42" width="7" height="10" fill="#9ee0e6" /><rect x="36" y="42" width="7" height="10" fill="#9ee0e6" />
+                            <rect x="22" y="62" width="7" height="10" fill="#9ee0e6" /><rect x="36" y="62" width="7" height="10" fill="#9ee0e6" />
+                            
+                            <rect x="65" y="10" width="46" height="100" fill="#83ccd3" />
+                            <rect x="74" y="22" width="8" height="12" fill="#9ee0e6" /><rect x="92" y="22" width="8" height="12" fill="#9ee0e6" />
+                            <rect x="74" y="46" width="8" height="12" fill="#9ee0e6" /><rect x="92" y="46" width="8" height="12" fill="#9ee0e6" />
+                            
+                            <rect x="125" y="45" width="40" height="65" fill="#83ccd3" />
+                            <rect x="135" y="58" width="7" height="10" fill="#9ee0e6" /><rect x="148" y="58" width="7" height="10" fill="#9ee0e6" />
+                            
+                            <rect x="180" y="20" width="44" height="90" fill="#83ccd3" />
+                            <rect x="190" y="34" width="8" height="12" fill="#9ee0e6" /><rect x="206" y="34" width="8" height="12" fill="#9ee0e6" />
+
+                            <rect x="240" y="50" width="36" height="60" fill="#83ccd3" />
+                            <rect x="290" y="15" width="48" height="95" fill="#83ccd3" />
+                            <rect x="300" y="28" width="8" height="12" fill="#9ee0e6" /><rect x="318" y="28" width="8" height="12" fill="#9ee0e6" />
+
+                            <rect x="355" y="38" width="42" height="72" fill="#83ccd3" />
+                            <rect x="415" y="8" width="50" height="102" fill="#83ccd3" />
+                            <rect x="425" y="22" width="8" height="12" fill="#9ee0e6" /><rect x="445" y="22" width="8" height="12" fill="#9ee0e6" />
+
+                            <rect x="480" y="42" width="38" height="68" fill="#83ccd3" />
+                            <rect x="535" y="25" width="46" height="85" fill="#83ccd3" />
+                            <rect x="545" y="38" width="8" height="12" fill="#9ee0e6" /><rect x="563" y="38" width="8" height="12" fill="#9ee0e6" />
+
+                            <rect x="595" y="48" width="40" height="62" fill="#83ccd3" />
+                            <rect x="650" y="18" width="46" height="92" fill="#83ccd3" />
+                            <rect x="660" y="32" width="8" height="12" fill="#9ee0e6" /><rect x="678" y="32" width="8" height="12" fill="#9ee0e6" />
+
+                            <rect x="710" y="35" width="42" height="75" fill="#83ccd3" />
+                            <rect x="765" y="15" width="30" height="95" fill="#83ccd3" />
+                        </svg>
+                    </div>
+
+                    <!-- 4. Hàng cây xanh mướt -->
+                    <div class="flappy-trees-layer"></div>
+
+                    <!-- 5. Tầng chứa các cột ống nước -->
+                    <div class="flappy-pipes-layer" id="flappy-pipes-layer"></div>
+
+                    <!-- 6. Mặt đất cỏ và sọc caro retro -->
+                    <div class="flappy-ground-layer">
+                        <div class="flappy-ground-track" id="flappy-ground-track">
+                            <div class="flappy-ground-grass"></div>
+                            <div class="flappy-ground-dirt"></div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Chú Bangboo Mô Tô (Zenless Zone Zero) -->
+                    <div class="flappy-bird-hero" id="flappy-bird-hero">
+                        <img src="/images/flappy-bangboo.png" alt="Bangboo" class="flappy-bird-img" id="flappy-bird-img" onerror="this.src='/images/flappy-cat.png';" />
+                    </div>
+
+                    <!-- 8. Tầng chứa khói pô và chữ điểm bay -->
+                    <div class="flappy-particles-layer" id="flappy-particles-layer"></div>
+
+                    <!-- 9. HUD Điểm số -->
+                    <div class="flappy-hud-score" id="flappy-hud-score">0</div>
+                    <div class="flappy-hud-best" id="flappy-hud-best">🏆 Kỷ lục: 0</div>
+
+                    <!-- 10. Màn hình GET READY -->
+                    <div class="flappy-ready-overlay" id="flappy-ready-overlay">
+                        <div class="flappy-ready-title">GET READY! 🚀</div>
+                        <div class="flappy-ready-guide">Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀</div>
+                        <div class="flappy-ready-best-badge" id="flappy-ready-best">🏆 Kỷ lục điểm: 0</div>
+                    </div>
+
+                    <!-- 11. Màn hình GAMEOVER - Tấm thiệp động viên -->
+                    <div class="flappy-gameover-overlay" id="flappy-gameover-overlay" style="display: none;">
+                        <div class="flappy-card-body" id="flappy-card-body" title="Bấm vào thiệp để xem chi tiết">
+                            <div class="flappy-card-ribbon">💌 TẤM THIỆP ĐỘNG VIÊN 💌</div>
+                            <div class="flappy-card-content">
+                                <div class="flappy-card-quote" id="flappy-card-quote">"Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖"</div>
+                                <div class="flappy-card-badge" id="flappy-card-badge">⭐ Điểm: 0 &nbsp;|&nbsp; 🏆 Kỷ lục: 0</div>
+                                <div class="flappy-card-hint">Bấm vào thiệp để mở to 💌 • Bấm bên ngoài (hoặc phím R) để chơi lại 🔄</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Lưu các tham chiếu DOM để truy xuất siêu tốc trong Game Loop
+            this.stage = document.getElementById('flappy-dom-stage');
+            this.pipesLayer = document.getElementById('flappy-pipes-layer');
+            this.groundTrack = document.getElementById('flappy-ground-track');
+            this.birdHero = document.getElementById('flappy-bird-hero');
+            this.particlesLayer = document.getElementById('flappy-particles-layer');
+            this.hudScore = document.getElementById('flappy-hud-score');
+            this.hudBest = document.getElementById('flappy-hud-best');
+            this.readyOverlay = document.getElementById('flappy-ready-overlay');
+            this.readyBest = document.getElementById('flappy-ready-best');
+            this.gameoverOverlay = document.getElementById('flappy-gameover-overlay');
+            this.cardBody = document.getElementById('flappy-card-body');
+            this.cardQuote = document.getElementById('flappy-card-quote');
+            this.cardBadge = document.getElementById('flappy-card-badge');
+        }
+
+        // Tự động đồng bộ tỉ lệ thu phóng (Scale Zoom) của sân khấu theo kích thước khung chứa
+        resizeStage() {
+            if (!this.container || !this.stage) return;
+            const rect = this.container.getBoundingClientRect();
+            const cw = rect.width;
+            const ch = rect.height;
+            if (cw <= 0 || ch <= 0) return;
+            const zoom = Math.min(cw / this.width, ch / this.height);
+            this.stage.style.transform = `translate(-50%, -50%) scale(${zoom})`;
+        }
+
+        // Khởi tạo trạng thái bàn chơi
+        initGame() {
+            // Chú Bangboo Mô Tô (Zenless Zone Zero)
             this.cat = {
                 x: 130,
-                y: (this.height - this.groundH) / 2 - 20,
-                w: 48,
-                h: 54,
+                y: (this.playH - 58) / 2,
+                w: 52,
+                h: 58,
                 vy: 0,
-                gravity: mob ? 0.20 : 0.24,      // Mobile: trọng lực nhẹ hơn để dễ điều khiển
-                jumpForce: mob ? -5.0 : -5.4,    // Mobile: lực nảy vừa phải
-                maxFallSpeed: mob ? 5.5 : 6.8,   // Mobile: giới hạn tốc độ rơi nhẹ hơn
+                gravity: 0.25,      // Trọng lực rơi tự nhiên, êm ái
+                jumpForce: -5.4,    // Lực nảy nẹt pô xe mô tô dứt khoát
+                maxFallSpeed: 6.8,  // Giới hạn tốc độ rơi tối đa
                 rotation: 0,
                 targetRotation: 0,
-                dead: false,
                 floatTimer: 0
             };
 
-            // Ống nước (Pipes) - Khe hở rộng rãi, tốc độ lướt cuốn hút
+            // Dọn sạch các ống nước cũ trong DOM
+            if (this.pipesLayer) {
+                this.pipesLayer.innerHTML = '';
+            }
             this.pipes = [];
             this.pipeSpawnTimer = 0;
-            this.pipeGap = mob ? 170 : 155;       // Mobile: khe rộng hơn 170px để dễ chơi
-            this.pipeWidth = 64;                  // Bề rộng thân ống
-            this.pipeSpeed = mob ? 2.6 : 3.3;    // Mobile: ống chậm hơn, dễ điều khiển hơn
-            this.pipeInterval = mob ? 115 : 105; // Mobile: thời gian giữa các ống dài hơn
+            this.pipeGap = 165;       // Khe hở rộng rãi 165px thoải mái bay lướt
+            this.pipeWidth = 68;      // Chiều rộng thân cột ống
+            this.pipeSpeed = 3.0;     // Tốc độ ống trôi kịch tính
+            this.pipeInterval = 105;  // Khoảng cách sinh cột ống hợp lý
 
             // Điểm số
             this.score = 0;
             this.coins = 0;
             this.gameState = 'READY';
+
+            // Cập nhật giao diện ban đầu
+            if (this.hudScore) this.hudScore.textContent = '0';
+            if (this.hudBest) this.hudBest.textContent = '🏆 Kỷ lục: ' + this.bestScore;
+            if (this.readyBest) this.readyBest.textContent = '🏆 Kỷ lục điểm: ' + this.bestScore;
+            if (this.readyOverlay) this.readyOverlay.style.display = 'flex';
+            if (this.gameoverOverlay) this.gameoverOverlay.style.display = 'none';
+
+            // Đặt vị trí ban đầu cho chú mèo
+            if (this.birdHero) {
+                this.birdHero.style.transform = `translate3d(${this.cat.x}px, ${this.cat.y}px, 0)`;
+            }
         }
 
-        setSkin(skin) {
-            this.skin = skin || 'classic';
-        }
-
-        toggleSkin() {
-            return this.skin;
-        }
-
-        toggleAudio() {
-            audio.muted = !audio.muted;
-            return !audio.muted;
-        }
-
+        // Bắt đầu chơi lại
         restart() {
             this.initGame();
-            this.gameState = 'READY';
-            this.canvas.style.cursor = 'default';
         }
 
-        // Hành động vỗ cánh / nẹt pô bay lên
+        // Hành động nẹt pô bay lên
         flap() {
             audio.init();
 
             if (this.gameState === 'READY') {
                 this.gameState = 'PLAYING';
                 this.cat.vy = this.cat.jumpForce;
-                this.cat.targetRotation = -0.38; // Ngẩng đầu lên
+                this.cat.targetRotation = -0.36;
                 audio.flap();
-                this.spawnSmokeParticles();
+                if (this.readyOverlay) this.readyOverlay.style.display = 'none';
+                this.spawnSmoke(this.cat.x + 6, this.cat.y + this.cat.h - 12);
                 return;
             }
 
-            if (this.gameState === 'PLAYING' && !this.cat.dead) {
+            if (this.gameState === 'PLAYING') {
                 this.cat.vy = this.cat.jumpForce;
-                this.cat.targetRotation = -0.42; // Ngẩng lên ~-24 độ
+                this.cat.targetRotation = -0.40;
                 audio.flap();
-                this.spawnSmokeParticles();
+                this.spawnSmoke(this.cat.x + 6, this.cat.y + this.cat.h - 12);
             }
         }
 
-        spawnSmokeParticles() {
-            // Giới hạn số lượng hạt trên Mobile để tối ưu FPS tối đa
-            if (this.particles.length > (this.isMobile ? 12 : 28)) return;
-            const count = this.isMobile ? 1 : 2;
-            const tailX = this.cat.x + 6;
-            const tailY = this.cat.y + this.cat.h - 10;
-            for (let i = 0; i < count; i++) {
-                this.particles.push({
-                    x: tailX + (Math.random() * 4 - 2),
-                    y: tailY + (Math.random() * 4 - 2),
-                    vx: -(1.5 + Math.random() * 1.5),
-                    vy: (Math.random() - 0.5) * 1.2,
-                    radius: 3 + Math.random() * 3,
-                    color: 'rgba(255, 255, 255, 0.75)',
-                    alpha: 0.8,
-                    decay: this.isMobile ? 0.05 : 0.035
-                });
-            }
+        // Hiệu ứng khói pô GPU
+        spawnSmoke(x, y) {
+            if (!this.particlesLayer) return;
+            const smoke = document.createElement('div');
+            smoke.className = 'flappy-smoke';
+            smoke.style.left = `${x}px`;
+            smoke.style.top = `${y}px`;
+            this.particlesLayer.appendChild(smoke);
+            setTimeout(() => {
+                if (smoke.parentNode) smoke.parentNode.removeChild(smoke);
+            }, 380);
         }
 
-        spawnPointSparkles(x, y) {
-            for (let i = 0; i < 8; i++) {
-                const angle = (Math.PI * 2 / 8) * i;
-                const speed = 2 + Math.random() * 2.5;
-                this.particles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    radius: 2.5 + Math.random() * 2.5,
-                    color: '#facc15',
-                    alpha: 1,
-                    decay: 0.04
-                });
-            }
-            this.floatingTexts.push({
-                x: x,
-                y: y - 10,
-                text: '+1',
-                color: '#f59e0b',
-                alpha: 1,
-                vy: -1.2
-            });
+        // Hiệu ứng chữ +1 điểm nổi lên
+        spawnFloatingScore(text, x, y) {
+            if (!this.particlesLayer) return;
+            const ft = document.createElement('div');
+            ft.className = 'flappy-floating-text';
+            ft.textContent = text;
+            ft.style.left = `${x}px`;
+            ft.style.top = `${y}px`;
+            this.particlesLayer.appendChild(ft);
+            setTimeout(() => {
+                if (ft.parentNode) ft.parentNode.removeChild(ft);
+            }, 600);
         }
 
+        // Sinh cặp cột ống nước mới
         spawnPipe() {
-            const minH = 50;
-            const maxH = this.height - this.groundH - this.pipeGap - 50;
+            if (!this.pipesLayer) return;
+            const minH = 45;
+            const maxH = this.playH - this.pipeGap - 45; // 382 - 165 - 45 = 172
             const topH = Math.floor(minH + Math.random() * (maxH - minH));
+            const botY = topH + this.pipeGap;
+            const botH = this.playH - botY;
+
+            const pipeEl = document.createElement('div');
+            pipeEl.className = 'flappy-pipe-pair';
+            pipeEl.innerHTML = `
+                <div class="flappy-pipe-top" style="height: ${topH}px;">
+                    <div class="flappy-pipe-cap"></div>
+                </div>
+                <div class="flappy-pipe-bottom" style="top: ${botY}px; height: ${botH}px;">
+                    <div class="flappy-pipe-cap"></div>
+                </div>
+            `;
+            pipeEl.style.transform = `translate3d(${this.width + 10}px, 0, 0)`;
+            this.pipesLayer.appendChild(pipeEl);
 
             this.pipes.push({
                 x: this.width + 10,
-                topH: topH,
                 w: this.pipeWidth,
-                passed: false
+                topH: topH,
+                botY: botY,
+                botH: botH,
+                passed: false,
+                el: pipeEl
             });
         }
 
+        // Xử lý khi Game Over
         triggerGameOver() {
             if (this.gameState === 'GAMEOVER') return;
             this.gameState = 'GAMEOVER';
-            this.cat.dead = true;
-
-            // Rung màn hình
-            this.shakeTimer = 14;
-            this.shakeIntensity = 6;
 
             audio.hit();
-            setTimeout(() => {
-                audio.die();
-            }, 120);
+            setTimeout(() => audio.die(), 120);
 
             // Cập nhật kỷ lục
             if (this.score > this.bestScore) {
                 this.bestScore = this.score;
                 try {
                     localStorage.setItem('chatflex_flappy_best', this.bestScore.toString());
-                } catch(e) {}
+                } catch (e) {}
             }
 
-            // Đồng bộ sang coins để modal thiệp dùng
             this.coins = this.score;
 
-            // Đổi thiệp ngẫu nhiên mới cho lần chơi này nếu cần
+            // Đổi thiệp ngẫu nhiên mới
             if (typeof window.pickRandomGameCard === 'function') {
                 window.pickRandomGameCard();
             }
+
+            // Cập nhật nội dung thiệp trên DOM
+            const cardText = (typeof window.getCurrentGameCardText === 'function')
+                ? window.getCurrentGameCardText()
+                : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+
+            if (this.cardQuote) this.cardQuote.textContent = `"${cardText}"`;
+            if (this.cardBadge) this.cardBadge.innerHTML = `⭐ Điểm: ${this.score} &nbsp;|&nbsp; 🏆 Kỷ lục: ${Math.max(this.score, this.bestScore)}`;
+            if (this.hudBest) this.hudBest.textContent = '🏆 Kỷ lục: ' + Math.max(this.score, this.bestScore);
+
+            // Hiện tấm thiệp
+            if (this.gameoverOverlay) {
+                this.gameoverOverlay.style.display = 'flex';
+            }
         }
 
+        // Gán các sự kiện tương tác chuột, cảm ứng và bàn phím
         bindEvents() {
-            // Click chuột trên Canvas
-            this.canvas.addEventListener('click', (e) => {
-                this.canvas.focus();
-                this.gameFocus = true;
-                audio.init();
+            const handleAction = (e) => {
+                if (e) {
+                    if (e.target && e.target.closest && e.target.closest('#flappy-card-body')) {
+                        // Người chơi nhấp vào thiệp -> mở modal thiệp to
+                        return;
+                    }
+                    e.preventDefault();
+                }
 
                 if (this.gameState === 'READY') {
                     this.flap();
                 } else if (this.gameState === 'PLAYING') {
                     this.flap();
                 } else if (this.gameState === 'GAMEOVER') {
-                    // Xác định vị trí bấm chuột xem bên trong hay bên ngoài tấm thiệp
-                    const rect = this.canvas.getBoundingClientRect();
-                    const scaleX = this.width / rect.width;
-                    const scaleY = this.height / rect.height;
-                    const mouseX = (e.clientX - rect.left) * scaleX;
-                    const mouseY = (e.clientY - rect.top) * scaleY;
-
-                    const cardW = Math.min(540, this.width - 40);
-                    const cardH = Math.min(270, this.height - 30);
-                    const cardX = (this.width - cardW) / 2;
-                    const cardY = (this.height - cardH) / 2;
-
-                    const isInsideCard = (
-                        mouseX >= cardX && mouseX <= cardX + cardW &&
-                        mouseY >= cardY && mouseY <= cardY + cardH
-                    );
-
-                    if (isInsideCard) {
-                        // Bấm vào thiệp: Mở thiệp to!
-                        if (typeof window.showGameOverCard === 'function') {
-                            window.showGameOverCard(this.score, this.coins, () => {
-                                this.restart();
-                            });
-                        }
-                    } else {
-                        // Bấm vào bên ngoài thiệp: Bắt đầu chơi lại!
-                        this.restart();
-                    }
+                    this.restart();
                 }
-            });
-
-            // Hover chuột khi Game Over để đổi con trỏ
-            this.canvas.addEventListener('mousemove', (e) => {
-                if (this.gameState === 'GAMEOVER') {
-                    const rect = this.canvas.getBoundingClientRect();
-                    const scaleX = this.width / rect.width;
-                    const scaleY = this.height / rect.height;
-                    const mouseX = (e.clientX - rect.left) * scaleX;
-                    const mouseY = (e.clientY - rect.top) * scaleY;
-
-                    const cardW = Math.min(540, this.width - 40);
-                    const cardH = Math.min(270, this.height - 30);
-                    const cardX = (this.width - cardW) / 2;
-                    const cardY = (this.height - cardH) / 2;
-
-                    const isInsideCard = (
-                        mouseX >= cardX && mouseX <= cardX + cardW &&
-                        mouseY >= cardY && mouseY <= cardY + cardH
-                    );
-
-                    this.canvas.style.cursor = isInsideCard ? 'pointer' : 'default';
-                } else {
-                    this.canvas.style.cursor = 'pointer';
-                }
-            });
-
-            this.canvas.addEventListener('mouseenter', () => {
-                this.gameFocus = true;
-            });
-
-            this.canvas.addEventListener('mouseleave', () => {
-                this.gameFocus = false;
-            });
+            };
 
             // Chạm cảm ứng trên điện thoại
-            this.canvas.addEventListener('touchstart', (e) => {
-                audio.init();
-                if (this.gameState !== 'GAMEOVER') {
-                    e.preventDefault();
-                    this.flap();
-                }
-            }, { passive: false });
+            this.container.addEventListener('touchstart', handleAction, { passive: false });
 
-            // Bàn phím máy tính
+            // Nhấp chuột trên máy tính
+            this.container.addEventListener('click', (e) => {
+                this.container.focus();
+                handleAction(e);
+            });
+
+            // Sự kiện nhấp trực tiếp vào Tấm thiệp để mở thiệp to
+            if (this.cardBody) {
+                this.cardBody.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (typeof window.showGameOverCard === 'function') {
+                        window.showGameOverCard(this.score, this.coins, () => {
+                            this.restart();
+                        });
+                    }
+                });
+            }
+
+            // Bàn phím điều khiển (Space / ArrowUp / KeyW / KeyR)
             window.addEventListener('keydown', (e) => {
-                if (!this.gameFocus && document.activeElement !== this.canvas) return;
-
                 if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
                     e.preventDefault();
-                    this.flap();
+                    if (this.gameState === 'GAMEOVER') {
+                        this.restart();
+                    } else {
+                        this.flap();
+                    }
                 } else if (e.code === 'KeyR') {
                     this.restart();
                 }
             });
         }
 
-        // --- Cập nhật Logic Game ---
+        // --- Cập nhật Logic & Vật lý Game (Loop) ---
         update(dt) {
-            // Chuẩn hóa chuyển động theo Delta Time (Time-based Physics):
-            // Đảm bảo tốc độ game ĐỒNG NHẤT trên cả 60Hz (điện thoại) lẫn 120Hz/144Hz (máy tính)
-            // Mobile: giới hạn timeScale max 1.2 để không bị "bật cờ" khi FPS xuống thấp
-            const maxScale = this.isMobile ? 1.2 : 1.8;
-            const timeScale = Math.min(maxScale, Math.max(0.4, (dt || 0.0166) * 60));
+            const timeScale = Math.min(1.8, Math.max(0.5, (dt || 0.0166) * 60));
 
-            // Rung màn hình
-            if (this.shakeTimer > 0) {
-                this.shakeTimer--;
-            }
-
-            // Hiệu ứng hạt
-            for (let i = this.particles.length - 1; i >= 0; i--) {
-                const p = this.particles[i];
-                p.x += p.vx * timeScale;
-                p.y += p.vy * timeScale;
-                p.alpha -= p.decay * timeScale;
-                if (p.alpha <= 0) {
-                    this.particles.splice(i, 1);
-                }
-            }
-
-            // Chữ bay nổi
-            for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
-                const ft = this.floatingTexts[i];
-                ft.y += ft.vy * timeScale;
-                ft.alpha -= 0.02 * timeScale;
-                if (ft.alpha <= 0) {
-                    this.floatingTexts.splice(i, 1);
-                }
-            }
-
-            // Mây trôi liên tục ở mọi trạng thái
-            this.clouds.forEach(c => {
-                c.x -= c.speed * timeScale;
-                if (c.x < -120) {
-                    c.x = this.width + 60;
-                }
-            });
-
-            // Trạng thái READY: Chú mèo bồng bềnh êm ái
+            // Trạng thái READY: Chú Bangboo nhấp nhô bồng bềnh
             if (this.gameState === 'READY') {
                 this.cat.floatTimer += 0.06 * timeScale;
-                this.cat.y = (this.height - this.groundH) / 2 - 20 + Math.sin(this.cat.floatTimer) * 8;
+                this.cat.y = (this.playH - this.cat.h) / 2 + Math.sin(this.cat.floatTimer) * 8;
                 this.cat.rotation = 0;
 
-                // Nền đất vẫn cuộn nhẹ
-                this.groundX = (this.groundX - 1.4 * timeScale) % 24;
-                this.cityX = (this.cityX - 0.5 * timeScale) % 800;
-                this.treesX = (this.treesX - 0.8 * timeScale) % 800;
+                if (this.birdHero) {
+                    this.birdHero.style.transform = `translate3d(${this.cat.x}px, ${this.cat.y}px, 0)`;
+                }
+
+                // Mặt đất vẫn cuộn êm
+                this.groundX = (this.groundX - 1.2 * timeScale) % 28;
+                if (this.groundTrack) {
+                    this.groundTrack.style.transform = `translate3d(${this.groundX}px, 0, 0)`;
+                }
                 return;
             }
 
             // Trạng thái PLAYING
             if (this.gameState === 'PLAYING') {
-                // Cuộn nền theo tốc độ chuẩn hóa
-                this.groundX = (this.groundX - this.pipeSpeed * timeScale) % 24;
-                this.cityX = (this.cityX - this.pipeSpeed * 0.3 * timeScale) % 800;
-                this.treesX = (this.treesX - this.pipeSpeed * 0.55 * timeScale) % 800;
+                // Cuộn mặt đất theo tốc độ trò chơi
+                this.groundX = (this.groundX - this.pipeSpeed * timeScale) % 28;
+                if (this.groundTrack) {
+                    this.groundTrack.style.transform = `translate3d(${this.groundX}px, 0, 0)`;
+                }
 
                 // Vật lý chú Bangboo
                 this.cat.vy += this.cat.gravity * timeScale;
                 if (this.cat.vy > this.cat.maxFallSpeed) this.cat.vy = this.cat.maxFallSpeed;
                 this.cat.y += this.cat.vy * timeScale;
 
-                // Góc nghiêng xe máy: ngửa lên khi bay, chúc xuống vừa phải khi rơi
+                // Góc nghiêng xe máy: ngửa lên khi phóng, chúc mũi khi rơi
                 if (this.cat.vy < 0) {
-                    this.cat.targetRotation = -0.32; // ~ -18 độ
+                    this.cat.targetRotation = -0.36; // Ngửa lên ~ -21 độ
                 } else {
-                    this.cat.targetRotation = Math.min(0.85, this.cat.vy * 0.16); // Chúc xuống tối đa ~48 độ
+                    this.cat.targetRotation = Math.min(0.9, this.cat.vy * 0.16); // Chúc xuống tối đa ~52 độ
                 }
-                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.18 * timeScale;
+                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.2 * timeScale;
 
-                // Kiểm tra va chạm trần nhà
+                // Va chạm trần
                 if (this.cat.y < 0) {
                     this.cat.y = 0;
                     this.cat.vy = 0;
                 }
 
-                // Kiểm tra va chạm mặt đất
-                const groundLimit = this.height - this.groundH - this.cat.h;
+                // Va chạm mặt đất
+                const groundLimit = this.playH - this.cat.h;
                 if (this.cat.y >= groundLimit) {
                     this.cat.y = groundLimit;
+                    if (this.birdHero) {
+                        this.birdHero.style.transform = `translate3d(${this.cat.x}px, ${this.cat.y}px, 0) rotate(${this.cat.rotation}rad)`;
+                    }
                     this.triggerGameOver();
                     return;
                 }
 
-                // Sinh ống nước theo bộ đếm chuẩn hóa
+                if (this.birdHero) {
+                    this.birdHero.style.transform = `translate3d(${this.cat.x}px, ${this.cat.y}px, 0) rotate(${this.cat.rotation}rad)`;
+                }
+
+                // Sinh cột ống nước định kỳ
                 this.pipeSpawnTimer += timeScale;
                 if (this.pipeSpawnTimer >= this.pipeInterval) {
                     this.spawnPipe();
                     this.pipeSpawnTimer = 0;
                 }
 
-                // Di chuyển & kiểm tra va chạm ống nước
+                // Di chuyển & kiểm tra va chạm cột ống nước
                 for (let i = this.pipes.length - 1; i >= 0; i--) {
                     const p = this.pipes[i];
                     p.x -= this.pipeSpeed * timeScale;
+                    p.el.style.transform = `translate3d(${p.x}px, 0, 0)`;
 
-                    // Tính điểm khi bay qua ống thành công
+                    // Ghi điểm khi bay qua ống an toàn
                     if (!p.passed && p.x + p.w < this.cat.x) {
                         p.passed = true;
                         this.score++;
                         this.coins = this.score;
                         audio.point();
-                        this.spawnPointSparkles(this.cat.x + this.cat.w / 2, this.cat.y);
+                        if (this.hudScore) this.hudScore.textContent = this.score.toString();
+                        this.spawnFloatingScore('+1', this.cat.x + this.cat.w / 2, this.cat.y);
                     }
 
-                    // Hitbox kiểm tra va chạm bo tròn an toàn (thu nhỏ 6px để chơi công bằng hơn)
-                    const inset = 6;
+                    // Hitbox kiểm tra va chạm (thu hẹp 7px để công bằng và trải nghiệm mượt mà)
+                    const inset = 7;
                     const catBox = {
                         l: this.cat.x + inset,
                         r: this.cat.x + this.cat.w - inset,
@@ -587,626 +624,42 @@
                         b: this.cat.y + this.cat.h - inset
                     };
 
-                    // Ống trên
-                    const topPipeBox = {
-                        l: p.x,
-                        r: p.x + p.w,
-                        t: 0,
-                        b: p.topH
-                    };
-
-                    // Ống dưới
-                    const bottomPipeY = p.topH + this.pipeGap;
-                    const bottomPipeBox = {
-                        l: p.x,
-                        r: p.x + p.w,
-                        t: bottomPipeY,
-                        b: this.height - this.groundH
-                    };
-
-                    const hitTop = (catBox.r > topPipeBox.l && catBox.l < topPipeBox.r && catBox.t < topPipeBox.b);
-                    const hitBottom = (catBox.r > bottomPipeBox.l && catBox.l < bottomPipeBox.r && catBox.b > bottomPipeBox.t);
+                    const hitTop = (catBox.r > p.x && catBox.l < p.x + p.w && catBox.t < p.topH);
+                    const hitBottom = (catBox.r > p.x && catBox.l < p.x + p.w && catBox.b > p.botY);
 
                     if (hitTop || hitBottom) {
                         this.triggerGameOver();
                         return;
                     }
 
-                    // Xóa ống đã trôi khuất màn hình
-                    if (p.x + p.w < -20) {
+                    // Thu dọn ống đã trôi khuất màn hình
+                    if (p.x + p.w < -30) {
+                        if (p.el && p.el.parentNode) {
+                            p.el.parentNode.removeChild(p.el);
+                        }
                         this.pipes.splice(i, 1);
                     }
                 }
             }
 
-            // Trạng thái GAMEOVER: Mèo rơi xuống đất nếu đang ở trên không
+            // Trạng thái GAMEOVER: Bangboo rơi xuống mặt đất
             if (this.gameState === 'GAMEOVER') {
-                const groundLimit = this.height - this.groundH - this.cat.h;
+                const groundLimit = this.playH - this.cat.h;
                 if (this.cat.y < groundLimit) {
                     this.cat.vy += this.cat.gravity * 1.5 * timeScale;
                     this.cat.y += this.cat.vy * timeScale;
-                    this.cat.rotation = Math.min(1.4, this.cat.rotation + 0.1 * timeScale);
+                    this.cat.rotation = Math.min(1.4, this.cat.rotation + 0.12 * timeScale);
                     if (this.cat.y >= groundLimit) {
                         this.cat.y = groundLimit;
                     }
-                }
-            }
-        }
-
-        // Tự động đồng bộ kích thước Drawing Buffer của Canvas theo độ phân giải màn hình thực tế (Retina / Full HD)
-        resizeBuffer() {
-            if (!this.canvas) return;
-            const rect = this.canvas.getBoundingClientRect();
-            // Mobile: DPR = 1.0 để render ít pixel nhất, tăng FPS tối đa
-            // Desktop: DPR tối đa 2.0 cho màn hình Retina sắc nét
-            const maxDpr = this.isMobile ? 1.0 : 2.0;
-            const dpr = Math.min(maxDpr, Math.max(1, window.devicePixelRatio || 1));
-            const dispW = rect.width > 0 ? rect.width : this.width;
-            const dispH = rect.height > 0 ? rect.height : this.height;
-            const targetW = Math.round(dispW * dpr);
-            const targetH = Math.round(dispH * dpr);
-
-            if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
-                this.canvas.width = targetW;
-                this.canvas.height = targetH;
-            }
-        }
-
-        // Pre-render nền tĩnh (trời + cây) vào offscreen canvas 1 lần duy nhất
-        renderStaticBg() {
-            const ctx = this.bgCtx;
-            const w = this.width;
-            const h = this.height;
-            const groundH = this.groundH;
-
-            // Bầu trời
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, h - groundH);
-            skyGrad.addColorStop(0, '#4ec0ca');
-            skyGrad.addColorStop(0.7, '#70c5ce');
-            skyGrad.addColorStop(1, '#b0e5eb');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, w, h);
-
-            // Dãy thành phố (chỉ render 1 lần trên desktop)
-            if (!this.isMobile) {
-                const baseY = h - groundH;
-                ctx.fillStyle = '#83ccd3';
-                const buildingWidth = 36;
-                const heights = [70, 110, 85, 130, 95, 140, 75, 120, 100, 150, 90, 65];
-                const totalCycle = heights.length * buildingWidth;
-                for (let offset = 0; offset < w + totalCycle; offset += totalCycle) {
-                    heights.forEach((bh, idx) => {
-                        const bx = offset + idx * buildingWidth;
-                        ctx.fillRect(bx, baseY - bh, buildingWidth - 2, bh);
-                        ctx.fillStyle = '#9ee0e6';
-                        for (let wy = baseY - bh + 10; wy < baseY - 10; wy += 14) {
-                            ctx.fillRect(bx + 6, wy, 6, 8);
-                            ctx.fillRect(bx + buildingWidth - 14, wy, 6, 8);
-                        }
-                        ctx.fillStyle = '#83ccd3';
-                    });
-                }
-            }
-        }
-
-        // --- Render Đồ Họa ---
-        draw() {
-            // Không gọi resizeBuffer ở mỗi frame để triệt tiêu hoàn toàn Layout Thrashing trên Mobile!
-            const ctx = this.ctx;
-            ctx.save();
-
-            // Scale toàn bộ tọa độ logic (800 x 450) lên độ phân giải thực của Canvas
-            const scaleX = this.canvas.width / this.width;
-            const scaleY = this.canvas.height / this.height;
-            ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-            ctx.imageSmoothingEnabled = !this.isMobile; // Mobile: tắt smoothing để nhanh hơn
-            ctx.imageSmoothingQuality = this.isMobile ? 'low' : 'high';
-
-            // Xử lý rung màn hình
-            if (this.shakeTimer > 0) {
-                const dx = (Math.random() - 0.5) * this.shakeIntensity;
-                const dy = (Math.random() - 0.5) * this.shakeIntensity;
-                ctx.translate(dx, dy);
-            }
-
-            // 1. Vẽ nền tĩnh từ offscreen canvas (1 lần drawImage thay vì hàng chục lệnh vẽ)
-            if (this.bgCanvas) {
-                ctx.drawImage(this.bgCanvas, 0, 0, this.width, this.height);
-            } else {
-                // Fallback: vẽ trời màu đặc
-                ctx.fillStyle = '#70c5ce';
-                ctx.fillRect(0, 0, this.width, this.height);
-            }
-
-            // 2. Mây trắng bồng bềnh
-            this.drawClouds(ctx);
-
-            // 3. Hàng cây xanh chân thành phố
-            this.drawTrees(ctx);
-
-            // 4. Ống nước xanh retro
-            this.drawPipes(ctx);
-
-            // 5. Mặt đất cỏ và sọc caro retro
-            this.drawGround(ctx);
-
-            // 6. Hiệu ứng khói pô và tia sao (bỏ trên mobile để tiết kiệm GPU)
-            if (!this.isMobile) {
-                this.drawParticles(ctx);
-            }
-
-            // 8. Chú Mèo Mô Tô (Flappy Cat)
-            this.drawCat(ctx);
-
-            // 9. Điểm số HUD trên màn hình
-            if (this.gameState === 'PLAYING') {
-                this.drawScoreHUD(ctx);
-            } else if (this.gameState === 'READY') {
-                this.drawReadyScreen(ctx);
-            } else if (this.gameState === 'GAMEOVER') {
-                this.drawGameOverCard(ctx);
-            }
-
-            ctx.restore();
-        }
-
-        drawClouds(ctx) {
-            ctx.save();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-            this.clouds.forEach(c => {
-                const cx = c.x;
-                const cy = c.y;
-                const s = c.scale;
-
-                ctx.beginPath();
-                ctx.arc(cx, cy, 22 * s, 0, Math.PI * 2);
-                ctx.arc(cx + 24 * s, cy - 8 * s, 28 * s, 0, Math.PI * 2);
-                ctx.arc(cx + 54 * s, cy - 2 * s, 22 * s, 0, Math.PI * 2);
-                ctx.arc(cx + 74 * s, cy + 6 * s, 16 * s, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.restore();
-        }
-
-        drawCitySkyline(ctx) {
-            ctx.save();
-            const baseY = this.height - this.groundH;
-            ctx.fillStyle = '#83ccd3'; // Tông lam xám của thành phố Flappy Bird
-
-            // Vẽ dãy nhà cao tầng lặp vô tận
-            const buildingWidth = 36;
-            const heights = [70, 110, 85, 130, 95, 140, 75, 120, 100, 150, 90, 65];
-            const totalCycle = heights.length * buildingWidth;
-            const startX = this.cityX;
-
-            for (let offset = -totalCycle; offset < this.width + totalCycle; offset += totalCycle) {
-                heights.forEach((h, idx) => {
-                    const bx = startX + offset + idx * buildingWidth;
-                    if (bx + buildingWidth >= 0 && bx <= this.width) {
-                        ctx.fillRect(bx, baseY - h, buildingWidth - 2, h);
-                        // Cửa sổ các tòa nhà
-                        ctx.fillStyle = '#9ee0e6';
-                        for (let wy = baseY - h + 10; wy < baseY - 10; wy += 14) {
-                            ctx.fillRect(bx + 6, wy, 6, 8);
-                            ctx.fillRect(bx + buildingWidth - 14, wy, 6, 8);
-                        }
-                        ctx.fillStyle = '#83ccd3';
-                    }
-                });
-            }
-            ctx.restore();
-        }
-
-        drawTrees(ctx) {
-            ctx.save();
-            const baseY = this.height - this.groundH;
-            const startX = this.treesX;
-            const patternW = 800;
-
-            // Màu bụi cây: Xanh lá cây tự nhiên đặc trưng Flappy Bird
-            ctx.fillStyle = '#4ea452';
-
-            // 1. Dải thân cây liền mạch bên dưới, cắm sâu vào mặt cỏ (tuyệt đối không bị tách rời khỏi mặt đất)
-            ctx.fillRect(0, baseY - 16, this.width, 18);
-
-            // 2. Các chùm vòm cây nhấp nhô liên tiếp gối đầu lên nhau, tạo thành hàng rào cây xanh mướt liền khối
-            const bushStep = 26;
-            const numBushes = Math.ceil(this.width / bushStep) + 6;
-
-            for (let offset = -patternW; offset < this.width + patternW; offset += patternW) {
-                for (let i = 0; i < numBushes; i++) {
-                    const bx = startX + offset + i * bushStep;
-                    if (bx >= -40 && bx <= this.width + 40) {
-                        // Vòm cây to nhỏ đan xen nhấp nhô sống động
-                        const r = (i % 3 === 0) ? 22 : ((i % 3 === 1) ? 18 : 20);
-                        const cy = baseY - 14;
-
-                        ctx.beginPath();
-                        ctx.arc(bx, cy, r, Math.PI, 0, false);
-                        ctx.fill();
+                    if (this.birdHero) {
+                        this.birdHero.style.transform = `translate3d(${this.cat.x}px, ${this.cat.y}px, 0) rotate(${this.cat.rotation}rad)`;
                     }
                 }
             }
-
-            // 3. Viền chân cỏ tiếp giáp mặt đất để kết nối mượt mà
-            ctx.fillStyle = '#3d8641';
-            ctx.fillRect(0, baseY - 1, this.width, 2);
-
-            ctx.restore();
         }
 
-        drawPipes(ctx) {
-            const baseY = this.height - this.groundH;
-
-            this.pipes.forEach(p => {
-                const px = p.x;
-                const pw = p.w;
-                const topH = p.topH;
-                const botY = topH + this.pipeGap;
-                const botH = baseY - botY;
-
-                // --- 1. ỐNG TRÊN (CHÚC TỪ TRẦN XUỐNG) ---
-                this.drawSinglePipe(px, 0, pw, topH, true);
-
-                // --- 2. ỐNG DƯỚI (NHÔ TỪ MẶT ĐẤT LÊN) ---
-                this.drawSinglePipe(px, botY, pw, botH, false);
-            });
-        }
-
-        drawSinglePipe(x, y, w, h, isTop) {
-            const ctx = this.ctx;
-            const capH = 26;
-            const capOverhang = 3; // Nắp ống rộng hơn thân 3px mỗi bên
-
-            ctx.save();
-
-            // Thân ống
-            const bodyY = isTop ? y : y + capH;
-            const bodyH = Math.max(0, h - capH);
-
-            // Mobile: màu đặc để tránh tạo gradient tốn CPU mỗi frame
-            if (this.isMobile) {
-                ctx.fillStyle = '#73bf2e';
-                ctx.fillRect(x, bodyY, w, bodyH);
-                ctx.strokeStyle = '#2b3d17';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(x, bodyY, w, bodyH);
-
-                const capX = x - capOverhang;
-                const capW = w + capOverhang * 2;
-                const capY = isTop ? y + h - capH : y;
-                ctx.fillStyle = '#5a9e22';
-                ctx.fillRect(capX, capY, capW, capH);
-                ctx.strokeRect(capX, capY, capW, capH);
-                ctx.restore();
-                return;
-            }
-
-            // Gradient thân ống xanh Flappy Bird (Desktop)
-            const bodyGrad = ctx.createLinearGradient(x, 0, x + w, 0);
-            bodyGrad.addColorStop(0, '#558022');   // Bóng tối cạnh trái
-            bodyGrad.addColorStop(0.18, '#73bf2e'); // Xanh chính
-            bodyGrad.addColorStop(0.35, '#9ce659'); // Vệt sáng highlight
-            bodyGrad.addColorStop(0.65, '#73bf2e'); // Xanh chính
-            bodyGrad.addColorStop(0.9, '#558022');  // Bóng tối
-            bodyGrad.addColorStop(1, '#2b3d17');    // Viền đậm
-
-            ctx.fillStyle = bodyGrad;
-            ctx.fillRect(x, bodyY, w, bodyH);
-
-            // Viền ngoài thân ống
-            ctx.strokeStyle = '#2b3d17';
-            ctx.lineWidth = 2.5;
-            ctx.strokeRect(x, bodyY, w, bodyH);
-
-            // Vành / Nắp ống (Cap)
-            const capX = x - capOverhang;
-            const capW = w + capOverhang * 2;
-            const capY = isTop ? y + h - capH : y;
-
-            const capGrad = ctx.createLinearGradient(capX, 0, capX + capW, 0);
-            capGrad.addColorStop(0, '#558022');
-            capGrad.addColorStop(0.18, '#73bf2e');
-            capGrad.addColorStop(0.35, '#9ce659');
-            capGrad.addColorStop(0.65, '#73bf2e');
-            capGrad.addColorStop(0.9, '#558022');
-            capGrad.addColorStop(1, '#2b3d17');
-
-            ctx.fillStyle = capGrad;
-            ctx.fillRect(capX, capY, capW, capH);
-
-            // Viền nắp ống
-            ctx.strokeStyle = '#2b3d17';
-            ctx.lineWidth = 2.5;
-            ctx.strokeRect(capX, capY, capW, capH);
-
-            ctx.restore();
-        }
-
-        drawGround(ctx) {
-            ctx.save();
-            const gy = this.height - this.groundH;
-            const gh = this.groundH;
-
-            // Dải cỏ xanh trên mặt đất
-            ctx.fillStyle = '#73bf2e';
-            ctx.fillRect(0, gy, this.width, 14);
-
-            // Viền cỏ sáng vàng-xanh
-            ctx.fillStyle = '#9ce659';
-            ctx.fillRect(0, gy, this.width, 3);
-
-            // Đường phân cách cỏ và đất
-            ctx.fillStyle = '#2b3d17';
-            ctx.fillRect(0, gy + 14, this.width, 2.5);
-
-            // Lớp đất cát màu kem vàng (phủ kín hoàn toàn xuống đáy canvas, không để hở khe)
-            ctx.fillStyle = '#ded895';
-            ctx.fillRect(0, gy + 16, this.width, gh + 40);
-
-            // Họa tiết kẻ caro chéo cuộn trôi liên tục theo tốc độ game
-            ctx.strokeStyle = '#cbb86e';
-            ctx.lineWidth = 2.5;
-            const stripeW = 20;
-            const startX = this.groundX;
-
-            ctx.beginPath();
-            for (let x = startX - stripeW; x < this.width + stripeW; x += stripeW) {
-                ctx.moveTo(x, gy + 16);
-                ctx.lineTo(x + 12, gy + gh + 40);
-            }
-            ctx.stroke();
-
-            // Đường viền nóc đất
-            ctx.fillStyle = '#2b3d17';
-            ctx.fillRect(0, gy, this.width, 2.5);
-
-            ctx.restore();
-        }
-
-        drawParticles(ctx) {
-            ctx.save();
-            this.particles.forEach(p => {
-                ctx.globalAlpha = Math.max(0, p.alpha);
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            this.floatingTexts.forEach(ft => {
-                ctx.globalAlpha = Math.max(0, ft.alpha);
-                ctx.fillStyle = ft.color;
-                ctx.font = 'bold 18px "Quicksand", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(ft.text, ft.x, ft.y);
-            });
-            ctx.restore();
-        }
-
-        drawCat(ctx) {
-            ctx.save();
-            const cat = this.cat;
-
-            // Tịnh tiến và xoay theo góc nghiêng
-            ctx.translate(cat.x + cat.w / 2, cat.y + cat.h / 2);
-            ctx.rotate(cat.rotation);
-
-            // Vẽ hình ảnh chú Bangboo mô tô dạng sprite tự do trên nền trời (không bọc trong hình tròn!)
-            if (this.catImgLoaded && this.catImg.naturalWidth > 0) {
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(this.catImg, -cat.w / 2, -cat.h / 2, cat.w, cat.h);
-            } else {
-                // Fallback nếu ảnh chưa tải xong: Vẽ chú mèo retro
-                ctx.fillStyle = '#475569';
-                this.roundRect(ctx, -cat.w / 2, -cat.h / 2, cat.w, cat.h, 12, true, false);
-
-                // Tai mèo
-                ctx.beginPath();
-                ctx.moveTo(-cat.w / 2 + 6, -cat.h / 2);
-                ctx.lineTo(-cat.w / 2 + 14, -cat.h / 2 - 8);
-                ctx.lineTo(-cat.w / 2 + 20, -cat.h / 2);
-                ctx.fill();
-
-                // Kính bảo hộ
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(-cat.w / 2 + 8, -cat.h / 2 + 8, 28, 12);
-
-                ctx.font = '20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🐱', 0, 4);
-            }
-
-            ctx.restore();
-        }
-
-        drawScoreHUD(ctx) {
-            ctx.save();
-
-            // Điểm số to bản chính giữa
-            ctx.font = '900 48px "Quicksand", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-
-            // Viền đen dày
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = 7;
-            ctx.strokeText(this.score.toString(), this.width / 2, 28);
-
-            // Chữ trắng nổi bật
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(this.score.toString(), this.width / 2, 28);
-
-            // Kỷ lục cao nhất (Góc trên phải)
-            ctx.font = 'bold 13px "Quicksand", sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            ctx.fillText('🏆 Kỷ lục: ' + Math.max(this.score, this.bestScore), this.width - 20, 24);
-
-            ctx.restore();
-        }
-
-        drawReadyScreen(ctx) {
-            ctx.save();
-
-            // Dòng chữ GET READY!
-            ctx.font = '900 38px "Quicksand", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = 6;
-            ctx.strokeText('GET READY! 🚀', this.width / 2, 130);
-            ctx.fillStyle = '#facc15';
-            ctx.fillText('GET READY! 🚀', this.width / 2, 130);
-
-            // Hướng dẫn tương tác nhấp nháy
-            const alpha = 0.6 + Math.sin(Date.now() * 0.006) * 0.4;
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.font = 'bold 15px "Quicksand", sans-serif';
-            ctx.fillText('Chạm màn hình hoặc nhấn [Space] để Bangboo nẹt pô bay lên! 🚀', this.width / 2, 290);
-
-            // Hộp nền màu trắng kỷ lục điểm
-            if (this.bestScore > 0) {
-                ctx.fillStyle = '#ffffff';
-                this.roundRect(ctx, this.width / 2 - 90, 320, 180, 28, 14, true, false);
-                ctx.fillStyle = '#db2777';
-                ctx.font = 'bold 13px "Quicksand", sans-serif';
-                ctx.fillText('🏆 Kỷ lục điểm: ' + this.bestScore, this.width / 2, 335);
-            }
-
-            ctx.restore();
-        }
-
-        drawGameOverCard(ctx) {
-            ctx.save();
-            // Nền tối mờ phía sau
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
-            ctx.fillRect(0, 0, this.width, this.height);
-
-            const cardW = Math.min(540, this.width - 40);
-            const cardH = Math.min(270, this.height - 30);
-            const cardX = (this.width - cardW) / 2;
-            const cardY = (this.height - cardH) / 2;
-
-            // Thân thiệp màu kem ấm
-            const grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
-            grad.addColorStop(0, '#fffdfa');
-            grad.addColorStop(1, '#fff1f2');
-            ctx.fillStyle = grad;
-            this.roundRect(ctx, cardX, cardY, cardW, cardH, 20, true, false);
-
-            // Viền thiệp nét đứt hồng pastel
-            ctx.strokeStyle = '#fbcfe8';
-            ctx.lineWidth = 3;
-            this.roundRect(ctx, cardX, cardY, cardW, cardH, 20, false, true);
-
-            // Nắp thiệp / Dải ribbon
-            const ribbonH = 44;
-            const rGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
-            rGrad.addColorStop(0, '#f43f5e');
-            rGrad.addColorStop(1, '#db2777');
-            ctx.fillStyle = rGrad;
-            this.roundRectTop(ctx, cardX, cardY, cardW, ribbonH, 20);
-
-            // Tiêu đề trên ribbon
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 16px "Quicksand", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('💌 TẤM THIỆP ĐỘNG VIÊN 💌', cardX + cardW / 2, cardY + ribbonH / 2);
-
-            // Nội dung Text Thiệp
-            const cardText = (typeof window.getCurrentGameCardText === 'function') 
-                ? window.getCurrentGameCardText() 
-                : 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
-            
-            ctx.fillStyle = '#334155';
-            ctx.font = 'italic 600 13px "Quicksand", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            this.drawWrappedText(ctx, '"' + cardText + '"', cardX + cardW / 2, cardY + ribbonH + 16, cardW - 50, 20);
-
-            // Huy hiệu điểm số Flappy Bird
-            const badgeY = cardY + cardH - 64;
-            ctx.fillStyle = '#ffffff';
-            this.roundRect(ctx, cardX + (cardW - 260) / 2, badgeY, 260, 26, 13, true, false);
-            ctx.strokeStyle = '#fbcfe8';
-            ctx.lineWidth = 1.5;
-            this.roundRect(ctx, cardX + (cardW - 260) / 2, badgeY, 260, 26, 13, false, true);
-
-            ctx.fillStyle = '#db2777';
-            ctx.font = 'bold 12px "Quicksand", sans-serif';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⭐ Điểm: ' + this.score + '  |  🏆 Kỷ lục: ' + Math.max(this.score, this.bestScore), cardX + cardW / 2, badgeY + 13);
-
-            // Hướng dẫn click
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '600 11px "Quicksand", sans-serif';
-            ctx.fillText('Bấm vào thiệp để mở to 💌  •  Bấm bên ngoài (hoặc phím R) để chơi lại 🔄', cardX + cardW / 2, cardY + cardH - 18);
-
-            ctx.restore();
-        }
-
-        drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
-            const words = text.split(' ');
-            let line = '';
-            let curY = y;
-            const maxLines = 3;
-            let lineCount = 0;
-
-            for (let n = 0; n < words.length; n++) {
-                const testLine = line + words[n] + ' ';
-                const metrics = ctx.measureText(testLine);
-                const testWidth = metrics.width;
-                if (testWidth > maxWidth && n > 0) {
-                    lineCount++;
-                    if (lineCount >= maxLines) {
-                        ctx.fillText(line.trim() + '...', x, curY);
-                        return;
-                    }
-                    ctx.fillText(line, x, curY);
-                    line = words[n] + ' ';
-                    curY += lineHeight;
-                } else {
-                    line = testLine;
-                }
-            }
-            ctx.fillText(line, x, curY);
-        }
-
-        roundRect(ctx, x, y, w, h, r, fill = true, stroke = false) {
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-            ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-            ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y);
-            ctx.closePath();
-            if (fill) ctx.fill();
-            if (stroke) ctx.stroke();
-        }
-
-        roundRectTop(ctx, x, y, w, h, r) {
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-            ctx.lineTo(x + w, y + h);
-            ctx.lineTo(x, y + h);
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // --- Game Loop ---
+        // Vòng lặp chính Game Loop
         loop(timestamp) {
             if (this.isTabHidden) {
                 requestAnimationFrame(this.loop.bind(this));
@@ -1214,66 +667,47 @@
             }
 
             const dt = (timestamp - this.lastTime) / 1000;
-
-            // Giới hạn frame rate trên Mobile: bỏ qua frame nếu quá nhanh (< 16ms ~ 60fps)
-            // Giúp tránh tình trạng GPU quá tải → game mượt hơn trên thiết bị yếu
-            if (this.isMobile && dt < 0.012) {
-                requestAnimationFrame(this.loop.bind(this));
-                return;
-            }
-
             this.lastTime = timestamp;
 
             this.update(dt);
-            this.draw();
 
             requestAnimationFrame(this.loop.bind(this));
         }
     }
 
-    // Export toàn cục (tương thích cả FlappyBirdGame & MarioGame)
+    // Export toàn cục (tương thích tuyệt đối cả FlappyBirdGame & MarioGame)
     window.FlappyGame = FlappyGame;
     window.FlappyBirdGame = FlappyGame;
     window.MarioGame = FlappyGame;
-    window.RetroAudio = RetroAudio;
-    window.FlappyAudio = audio;
-    window.MarioAudio = audio;
 
-    // --- CÁC HÀM TIỆN ÍCH ĐIỀU KHIỂN TOÀN CỤC ---
+    // --- 3. CÁC HÀM TIỆN ÍCH TOÀN CỤC CHO GIAO DIỆN NGOÀI ---
     // 1. Chơi lại (Restart)
-    window.restartFlappyGame = function() {
-        var g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
+    window.restartFlappyGame = function () {
+        const g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
         if (g && typeof g.restart === 'function') {
             g.restart();
         }
-        // Đóng thiệp modal nếu đang mở
         if (typeof window.closeGameOverCard === 'function') {
             window.closeGameOverCard();
         }
-        var overlay = document.getElementById('game-card-modal-overlay');
+        const overlay = document.getElementById('game-card-modal-overlay');
         if (overlay) overlay.style.display = 'none';
-
-        var canvas = document.getElementById('mario-canvas') || document.getElementById('mario-side-canvas');
-        if (canvas) {
-            try { canvas.focus(); } catch(e) {}
-        }
     };
     window.restartMarioGame = window.restartFlappyGame;
 
-    // 2. Bật / Tắt Âm thanh (Sound)
-    window.toggleGameAudio = function() {
-        var a = window.FlappyAudio || window.MarioAudio || audio;
+    // 2. Bật / Tắt âm thanh
+    window.toggleGameAudio = function () {
+        const a = window.FlappyAudio || window.MarioAudio || audio;
         if (a) {
             a.muted = !a.muted;
         }
-        var isMuted = a ? a.muted : false;
+        const isMuted = a ? a.muted : false;
 
-        // Cập nhật text & icon trên tất cả các nút âm thanh
-        var soundIcon = document.getElementById('sound-icon');
-        var soundText = document.getElementById('sound-text');
-        var btnSound = document.getElementById('btn-toggle-sound');
-        var fsSoundBtn = document.getElementById('fs-sound-btn');
-        var sideAudioBtn = document.getElementById('side-audio-btn');
+        const soundIcon = document.getElementById('sound-icon');
+        const soundText = document.getElementById('sound-text');
+        const btnSound = document.getElementById('btn-toggle-sound');
+        const fsSoundBtn = document.getElementById('fs-sound-btn');
+        const sideAudioBtn = document.getElementById('side-audio-btn');
 
         if (soundIcon) soundIcon.innerText = isMuted ? '🔇' : '🔊';
         if (soundText) soundText.innerText = isMuted ? 'Âm thanh: Tắt' : 'Âm thanh: Bật';
@@ -1295,24 +729,22 @@
     };
 
     // 3. Toàn màn hình (Fullscreen)
-    window.toggleFullscreenMario = function(containerId) {
+    window.toggleFullscreenMario = function (containerId) {
         containerId = containerId || 'mario-game-container';
-        var elem = document.getElementById(containerId);
+        let elem = document.getElementById(containerId);
         if (!elem) {
             elem = document.getElementById('mario-game-container') || document.getElementById('mario-side-panel');
         }
         if (!elem) return;
 
-        var isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 
         if (!isFs && !elem.classList.contains('is-mario-fullscreen')) {
             // Vào Fullscreen — tự động thu gọn navbar để không đè lên game
             if (window.toggleMainNavbar) window.toggleMainNavbar(false);
 
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(function() {
-                    elem.classList.add('is-mario-fullscreen');
-                });
+                elem.requestFullscreen().catch(() => elem.classList.add('is-mario-fullscreen'));
             } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen();
             } else if (elem.mozRequestFullScreen) {
@@ -1326,25 +758,24 @@
             document.body.classList.add('in-mario-fullscreen-mode');
 
             // Cập nhật text nút toàn màn hình
-            var fsText = elem.querySelector('.fs-text') || document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
-            var fsIcon = elem.querySelector('.fs-icon') || document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+            const fsText = elem.querySelector('.fs-text') || document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+            const fsIcon = elem.querySelector('.fs-icon') || document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
             if (fsText) fsText.innerText = 'Thu nhỏ';
             if (fsIcon) fsIcon.innerText = '🗗';
 
-            var canvas = elem.querySelector('canvas') || document.getElementById('mario-canvas');
-            if (canvas) {
-                setTimeout(function() {
-                    try { canvas.focus(); } catch(e) {}
-                }, 100);
+            // Kích hoạt đồng bộ scale stage
+            const g = window.flappyInstance || window.marioInstance;
+            if (g && typeof g.resizeStage === 'function') {
+                setTimeout(() => g.resizeStage(), 60);
             }
         } else {
             window.exitFullscreenMario(containerId);
         }
     };
 
-    window.exitFullscreenMario = function(containerId) {
+    window.exitFullscreenMario = function (containerId) {
         if (document.exitFullscreen && (document.fullscreenElement || document.webkitFullscreenElement)) {
-            document.exitFullscreen().catch(function() {});
+            document.exitFullscreen().catch(() => {});
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
         } else if (document.mozCancelFullScreen) {
@@ -1353,38 +784,37 @@
             document.msExitFullscreen();
         }
 
-        var containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
-        containers.forEach(function(c) {
-            c.classList.remove('is-mario-fullscreen');
-        });
+        const containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
+        containers.forEach(c => c.classList.remove('is-mario-fullscreen'));
         document.body.classList.remove('in-mario-fullscreen-mode');
 
-        var fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
-        var fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+        const fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+        const fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
         if (fsText) fsText.innerText = 'Toàn màn hình';
         if (fsIcon) fsIcon.innerText = '⛶';
 
-        var canvas = document.getElementById('mario-canvas') || document.getElementById('mario-side-canvas');
-        if (canvas) {
-            setTimeout(function() {
-                try { canvas.focus(); } catch(e) {}
-            }, 50);
+        const g = window.flappyInstance || window.marioInstance;
+        if (g && typeof g.resizeStage === 'function') {
+            setTimeout(() => g.resizeStage(), 60);
         }
     };
 
-    // Theo dõi sự thay đổi toàn màn hình từ hệ điều hành (nhấn ESC hoặc F11)
-    var handleFsChange = function() {
-        var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    // Lắng nghe sự kiện thoát Fullscreen
+    const handleFsChange = function () {
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
         if (!isFs) {
-            var containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
-            containers.forEach(function(c) {
-                c.classList.remove('is-mario-fullscreen');
-            });
+            const containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
+            containers.forEach(c => c.classList.remove('is-mario-fullscreen'));
             document.body.classList.remove('in-mario-fullscreen-mode');
-            var fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
-            var fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
+            const fsText = document.querySelector('.btn-mario-fullscreen-toggle .fs-text');
+            const fsIcon = document.querySelector('.btn-mario-fullscreen-toggle .fs-icon');
             if (fsText) fsText.innerText = 'Toàn màn hình';
             if (fsIcon) fsIcon.innerText = '⛶';
+
+            const g = window.flappyInstance || window.marioInstance;
+            if (g && typeof g.resizeStage === 'function') {
+                setTimeout(() => g.resizeStage(), 60);
+            }
         }
     };
     document.addEventListener('fullscreenchange', handleFsChange);
@@ -1392,16 +822,15 @@
     document.addEventListener('mozfullscreenchange', handleFsChange);
     document.addEventListener('MSFullscreenChange', handleFsChange);
 
-    // Xử lý phím ESC khi ở fallback .is-mario-fullscreen
-    window.addEventListener('keydown', function(e) {
+    window.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' || e.code === 'Escape') {
             window.exitFullscreenMario();
         }
     });
 
     // 4. Bay lên (Flap)
-    window.flapGameHero = function() {
-        var g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
+    window.flapGameHero = function () {
+        const g = window.flappyInstance || window.marioInstance || window.flappySideGameInstance || window.marioSideGameInstance;
         if (g && typeof g.flap === 'function') {
             g.flap();
         }

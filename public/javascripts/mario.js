@@ -198,29 +198,29 @@
         }
 
         initGame() {
-            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Sprite trong suốt tự do, vật lý êm ái
+            // Chú Bangboo Mô Tô (Zenless Zone Zero) - Sprite trong suốt tự do, tốc độ nhanh nhẹn, kịch tính
             this.cat = {
                 x: 130,
                 y: (this.height - this.groundH) / 2 - 20,
                 w: 48,
                 h: 54,
                 vy: 0,
-                gravity: 0.16,      // Giảm độ rơi từ 0.28 xuống 0.16 để rơi êm, nhẹ nhàng
-                jumpForce: -4.5,    // Lực nảy vừa tầm, không vọt quá cao
-                maxFallSpeed: 5.2,  // Giới hạn tốc độ rơi tối đa, không bị rơi cắm đầu quá nhanh
+                gravity: 0.24,      // Trọng lực dứt khoát, rơi tự nhiên chuẩn Flappy Bird
+                jumpForce: -5.4,    // Lực nảy nẹt pô xe mô tô đã tay, nảy vọt dứt khoát
+                maxFallSpeed: 6.8,  // Giới hạn tốc độ rơi tối đa
                 rotation: 0,
                 targetRotation: 0,
                 dead: false,
                 floatTimer: 0
             };
 
-            // Ống nước (Pipes) - Khe hở rộng rãi, dễ chơi
+            // Ống nước (Pipes) - Khe hở rộng rãi, tốc độ lướt cuốn hút
             this.pipes = [];
             this.pipeSpawnTimer = 0;
-            this.pipeGap = 155;       // Tăng khe hở từ 138 lên 155px để bay qua dễ dàng
+            this.pipeGap = 155;       // Khe hở rộng rãi 155px thoải mái bay qua
             this.pipeWidth = 64;     // Bề rộng thân ống
-            this.pipeSpeed = 2.4;    // Tốc độ ống trôi êm ái ( 1.9- 2.6 x)
-            this.pipeInterval = 160; // Khoảng cách giữa các cột ống nước thoải mái (130 - 255)
+            this.pipeSpeed = 3.3;    // Tốc độ ống trôi nhanh nhẹn, kịch tính chuẩn Flappy Bird (3.2 - 3.5px)
+            this.pipeInterval = 105; // Khoảng cách sinh cột ống hợp lý, không bị chờ đợi lâu (100 - 110 frames ~ 1.75s)
 
             // Điểm số
             this.score = 0;
@@ -457,6 +457,10 @@
 
         // --- Cập nhật Logic Game ---
         update(dt) {
+            // Chuẩn hóa chuyển động theo Delta Time (Time-based Physics):
+            // Đảm bảo tốc độ game ĐỒNG NHẤT 100% trên cả 60Hz (điện thoại) lẫn 120Hz/144Hz (máy tính)
+            const timeScale = Math.min(2.5, Math.max(0.4, (dt || 0.0166) * 60));
+
             // Rung màn hình
             if (this.shakeTimer > 0) {
                 this.shakeTimer--;
@@ -465,9 +469,9 @@
             // Hiệu ứng hạt
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.alpha -= p.decay;
+                p.x += p.vx * timeScale;
+                p.y += p.vy * timeScale;
+                p.alpha -= p.decay * timeScale;
                 if (p.alpha <= 0) {
                     this.particles.splice(i, 1);
                 }
@@ -476,8 +480,8 @@
             // Chữ bay nổi
             for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
                 const ft = this.floatingTexts[i];
-                ft.y += ft.vy;
-                ft.alpha -= 0.02;
+                ft.y += ft.vy * timeScale;
+                ft.alpha -= 0.02 * timeScale;
                 if (ft.alpha <= 0) {
                     this.floatingTexts.splice(i, 1);
                 }
@@ -485,7 +489,7 @@
 
             // Mây trôi liên tục ở mọi trạng thái
             this.clouds.forEach(c => {
-                c.x -= c.speed;
+                c.x -= c.speed * timeScale;
                 if (c.x < -120) {
                     c.x = this.width + 60;
                 }
@@ -493,28 +497,28 @@
 
             // Trạng thái READY: Chú mèo bồng bềnh êm ái
             if (this.gameState === 'READY') {
-                this.cat.floatTimer += 0.06;
+                this.cat.floatTimer += 0.06 * timeScale;
                 this.cat.y = (this.height - this.groundH) / 2 - 20 + Math.sin(this.cat.floatTimer) * 8;
                 this.cat.rotation = 0;
 
                 // Nền đất vẫn cuộn nhẹ
-                this.groundX = (this.groundX - 1.2) % 24;
-                this.cityX = (this.cityX - 0.4) % 800;
-                this.treesX = (this.treesX - 0.7) % 800;
+                this.groundX = (this.groundX - 1.4 * timeScale) % 24;
+                this.cityX = (this.cityX - 0.5 * timeScale) % 800;
+                this.treesX = (this.treesX - 0.8 * timeScale) % 800;
                 return;
             }
 
             // Trạng thái PLAYING
             if (this.gameState === 'PLAYING') {
-                // Cuộn nền
-                this.groundX = (this.groundX - this.pipeSpeed) % 24;
-                this.cityX = (this.cityX - this.pipeSpeed * 0.3) % 800;
-                this.treesX = (this.treesX - this.pipeSpeed * 0.55) % 800;
+                // Cuộn nền theo tốc độ chuẩn hóa
+                this.groundX = (this.groundX - this.pipeSpeed * timeScale) % 24;
+                this.cityX = (this.cityX - this.pipeSpeed * 0.3 * timeScale) % 800;
+                this.treesX = (this.treesX - this.pipeSpeed * 0.55 * timeScale) % 800;
 
-                // Vật lý chú Bangboo (rơi êm ái, bồng bềnh)
-                this.cat.vy += this.cat.gravity;
+                // Vật lý chú Bangboo
+                this.cat.vy += this.cat.gravity * timeScale;
                 if (this.cat.vy > this.cat.maxFallSpeed) this.cat.vy = this.cat.maxFallSpeed;
-                this.cat.y += this.cat.vy;
+                this.cat.y += this.cat.vy * timeScale;
 
                 // Góc nghiêng xe máy: ngửa lên khi bay, chúc xuống vừa phải khi rơi
                 if (this.cat.vy < 0) {
@@ -522,7 +526,7 @@
                 } else {
                     this.cat.targetRotation = Math.min(0.85, this.cat.vy * 0.16); // Chúc xuống tối đa ~48 độ
                 }
-                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.16;
+                this.cat.rotation += (this.cat.targetRotation - this.cat.rotation) * 0.18 * timeScale;
 
                 // Kiểm tra va chạm trần nhà
                 if (this.cat.y < 0) {
@@ -538,8 +542,8 @@
                     return;
                 }
 
-                // Sinh ống nước
-                this.pipeSpawnTimer++;
+                // Sinh ống nước theo bộ đếm chuẩn hóa
+                this.pipeSpawnTimer += timeScale;
                 if (this.pipeSpawnTimer >= this.pipeInterval) {
                     this.spawnPipe();
                     this.pipeSpawnTimer = 0;
@@ -548,7 +552,7 @@
                 // Di chuyển & kiểm tra va chạm ống nước
                 for (let i = this.pipes.length - 1; i >= 0; i--) {
                     const p = this.pipes[i];
-                    p.x -= this.pipeSpeed;
+                    p.x -= this.pipeSpeed * timeScale;
 
                     // Tính điểm khi bay qua ống thành công
                     if (!p.passed && p.x + p.w < this.cat.x) {
@@ -604,9 +608,9 @@
             if (this.gameState === 'GAMEOVER') {
                 const groundLimit = this.height - this.groundH - this.cat.h;
                 if (this.cat.y < groundLimit) {
-                    this.cat.vy += this.cat.gravity * 1.5;
-                    this.cat.y += this.cat.vy;
-                    this.cat.rotation = Math.min(1.4, this.cat.rotation + 0.1);
+                    this.cat.vy += this.cat.gravity * 1.5 * timeScale;
+                    this.cat.y += this.cat.vy * timeScale;
+                    this.cat.rotation = Math.min(1.4, this.cat.rotation + 0.1 * timeScale);
                     if (this.cat.y >= groundLimit) {
                         this.cat.y = groundLimit;
                     }
