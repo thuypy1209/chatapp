@@ -197,8 +197,8 @@ header, .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 36px;
-    background: rgba(255, 255, 255, 0.25) !important;
+    padding: 10px 32px;
+    background: rgba(255, 255, 255, 0.4) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1.5px solid rgba(244, 114, 182, 0.28) !important; 
@@ -206,20 +206,134 @@ header, .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    max-height: 120px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
+    transition: all 0.25s ease;
 }
 
-/* Trạng thái thu gọn Navbar */
-header.nav-collapsed, .navbar.nav-collapsed {
-    transform: translateY(-100%) !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom: none !important;
-    overflow: hidden !important;
+/* Nút 3 Gạch (Hamburger Button) - Chuẩn Pastel Retro */
+.btn-nav-hamburger {
+    display: none; /* Mặc định ẩn trên Desktop màn hình rộng */
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid #f472b6;
+    color: #db2777;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(244, 114, 182, 0.2);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-nav-hamburger:hover {
+    background: #fdf2f8;
+    transform: scale(1.04);
+    box-shadow: 0 4px 12px rgba(244, 114, 182, 0.3);
+}
+
+.btn-nav-hamburger:active {
+    transform: scale(0.94);
+}
+
+.btn-nav-hamburger.is-active {
+    background: rgba(253, 242, 248, 0.98);
+    border-color: #db2777;
+}
+
+.hamburger-box {
+    width: 20px;
+    height: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.hamburger-line {
+    display: block;
+    width: 100%;
+    height: 2.5px;
+    background: #e11d48;
+    border-radius: 4px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+
+/* Hiệu ứng morph 3 gạch thành dấu ✕ khi Menu mở */
+.btn-nav-hamburger.is-active .line-1 {
+    transform: translateY(6.25px) rotate(45deg);
+}
+.btn-nav-hamburger.is-active .line-2 {
+    opacity: 0;
+    transform: scaleX(0);
+}
+.btn-nav-hamburger.is-active .line-3 {
+    transform: translateY(-6.25px) rotate(-45deg);
+}
+
+.hamburger-text {
+    font-size: 13px;
+    font-weight: 800;
+    color: #db2777;
+    letter-spacing: -0.2px;
+}
+
+/* Chế độ Desktop thu gọn (Phòng Chat & Game): Chỉ để lại Tên, ẩn toàn bộ nút vào nút 3 gạch */
+.navbar.nav-compact {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar.nav-compact .btn-nav-hamburger {
+    display: inline-flex !important;
+}
+
+.navbar.nav-compact .navbar-nav {
+    display: none;
+}
+
+.navbar.nav-compact.menu-open .navbar-nav {
+    display: flex !important;
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 32px !important;
+    flex-direction: column !important;
+    min-width: 230px !important;
+    gap: 8px !important;
+    padding: 14px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 18px !important;
+    border: 2px solid #fbcfe8 !important;
+    box-shadow: 0 12px 35px rgba(244, 114, 182, 0.25) !important;
+    z-index: 1000 !important;
+    animation: navDropdownDesktop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navbar.nav-compact.menu-open .navbar-nav li {
+    width: 100% !important;
+}
+
+.navbar.nav-compact.menu-open .navbar-nav .nav-item,
+.navbar.nav-compact.menu-open .navbar-nav .user-badge,
+.navbar.nav-compact.menu-open .navbar-nav .btn-user-name {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+}
+
+@keyframes navDropdownDesktop {
+    0% { opacity: 0; transform: translateY(-10px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes navDropdownMobile {
+    0% { opacity: 0; transform: translateY(-8px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .navbar-header-line {
@@ -345,42 +459,91 @@ header.nav-collapsed, .navbar.nav-collapsed {
 
 @media (max-width: 768px) {
     header, .navbar {
-        padding: 8px 14px !important;
+        padding: 8px 12px !important;
         flex-direction: column !important;
-        gap: 8px !important;
+        gap: 0 !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        max-height: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
+
     .navbar-header-line {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
     }
-    .btn-toggle-nav-mobile {
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 5px 11px !important;
-        border-radius: 12px !important;
-        background: rgba(253, 242, 248, 0.95) !important;
-        border: 1.5px solid #fbcfe8 !important;
-        color: #db2777 !important;
-        font-size: 11.5px !important;
-        font-weight: 800 !important;
-        cursor: pointer !important;
-        box-shadow: 0 2px 6px rgba(219, 39, 119, 0.1) !important;
-    }
-    .btn-toggle-nav-mobile:active {
-        transform: scale(0.94);
-    }
-    .navbar-nav {
-        flex-wrap: wrap !important;
-        justify-content: center !important;
+
+    .navbar-brand {
+        font-size: 16.5px !important;
         gap: 6px !important;
+        max-width: calc(100% - 48px) !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .navbar-brand .brand-icon {
+        font-size: 20px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .navbar-brand .brand-text {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    /* Trên điện thoại: Luôn hiển thị nút 3 gạch vuông vắn xinh xắn */
+    .btn-nav-hamburger {
+        display: inline-flex !important;
+        padding: 7px 9px !important;
+        border-radius: 10px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .btn-nav-hamburger .hamburger-text {
+        display: none !important; /* Ẩn chữ Menu trên điện thoại để tiết kiệm diện tích */
+    }
+
+    /* Mặc định trên điện thoại: Toàn bộ nút điều hướng bị thu gọn hoàn toàn */
+    .navbar .navbar-nav {
+        display: none !important;
+    }
+
+    /* Khi người dùng bấm nút 3 gạch: Menu bung dạng dropdown mượt mà */
+    .navbar.menu-open .navbar-nav {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+        padding: 12px !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-radius: 16px !important;
+        border: 2px solid #fbcfe8 !important;
+        box-shadow: 0 10px 25px rgba(244, 114, 182, 0.2) !important;
+        animation: navDropdownMobile 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .navbar.menu-open .navbar-nav li {
         width: 100% !important;
     }
-    .nav-item {
-        padding: 6px 10px !important;
-        font-size: 12px !important;
+
+    .navbar.menu-open .navbar-nav .nav-item,
+    .navbar.menu-open .navbar-nav .user-badge,
+    .navbar.menu-open .navbar-nav .btn-user-name {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding: 10px 14px !important;
+        font-size: 13.5px !important;
+        box-sizing: border-box !important;
     }
 }
 

@@ -19,23 +19,21 @@
     }
 %>
 
-    <!-- Nút Bật Lại Navbar khi đã thu gọn (Floating Pill Button trên Mobile & Desktop) -->
-    <button type="button" id="btn-reopen-nav" class="nav-reopen-pill <%= isAutoCollapsedPage ? 'show' : '' %>" onclick="window.toggleMainNavbar(true)" title="Mở thanh điều hướng">
-        <span class="nav-reopen-icon">🍄</span>
-        <span class="nav-reopen-text">Menu</span>
-        <span class="nav-reopen-arrow">▼</span>
-    </button>
-
-    <nav class="navbar <%= isAutoCollapsedPage ? 'nav-collapsed' : '' %>" id="main-navbar">
+    <nav class="navbar <%= isAutoCollapsedPage ? 'nav-compact' : '' %>" id="main-navbar">
         <div class="navbar-header-line">
             <a href="/" class="navbar-brand">
                 <span class="brand-icon">🍄</span>
                 <span class="brand-text">Phổi bạn không phải tôi</span>
             </a>
             
-            <!-- Nút điều khiển thu gọn Navbar trên Mobile -->
-            <button type="button" id="btn-toggle-nav-mobile" class="btn-toggle-nav-mobile" onclick="window.toggleMainNavbar()" title="Thu gọn / Mở Menu">
-                <span id="nav-toggle-icon">▲ Thu gọn</span>
+            <!-- Nút 3 Gạch (Hamburger Menu) trên Điện Thoại & Desktop thu gọn -->
+            <button type="button" id="btn-nav-hamburger" class="btn-nav-hamburger" onclick="window.toggleNavMenu(event)" aria-label="Menu" title="Menu điều hướng">
+                <span class="hamburger-box">
+                    <span class="hamburger-line line-1"></span>
+                    <span class="hamburger-line line-2"></span>
+                    <span class="hamburger-line line-3"></span>
+                </span>
+                <span class="hamburger-text">Menu</span>
             </button>
         </div>
 
@@ -77,75 +75,58 @@
         </ul>
     </nav>
 
-    <!-- Script Tự Động Thu Gọn Navbar khi cuộn & Nút Bật Lại -->
+    <!-- Script Điều Khiển Menu 3 Gạch & Thu Gọn Navbar -->
     <script>
     (function() {
         var navbar = document.getElementById('main-navbar');
-        var reopenBtn = document.getElementById('btn-reopen-nav');
-        var toggleIcon = document.getElementById('nav-toggle-icon');
+        var hamburgerBtn = document.getElementById('btn-nav-hamburger');
+        var navList = document.getElementById('navbar-nav-list');
 
-        // Nhận diện đường dẫn: Phòng Chat (/chat) hoặc Game (/flappy, /mario)
-        var pathname = window.location.pathname.toLowerCase();
-        var isChatOrGame = pathname.startsWith('/chat') || pathname.startsWith('/flappy') || pathname.startsWith('/mario') || <%= isAutoCollapsedPage ? 'true' : 'false' %>;
-        var isCollapsed = isChatOrGame || (navbar && navbar.classList.contains('nav-collapsed'));
-
-        window.toggleMainNavbar = function(forceOpen) {
+        // Bật / tắt hiển thị menu dạng 3 gạch
+        window.toggleNavMenu = function(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
             if (!navbar) return;
-            if (forceOpen === true) {
-                isCollapsed = false;
-            } else if (forceOpen === false) {
-                isCollapsed = true;
+            var isOpen = navbar.classList.contains('menu-open');
+            if (isOpen) {
+                navbar.classList.remove('menu-open');
+                if (hamburgerBtn) hamburgerBtn.classList.remove('is-active');
             } else {
-                isCollapsed = !isCollapsed;
-            }
-
-            if (isCollapsed) {
-                navbar.classList.add('nav-collapsed');
-                if (reopenBtn) reopenBtn.classList.add('show');
-                if (toggleIcon) toggleIcon.innerText = '▼ Menu';
-            } else {
-                navbar.classList.remove('nav-collapsed');
-                if (reopenBtn) reopenBtn.classList.remove('show');
-                if (toggleIcon) toggleIcon.innerText = '▲ Thu gọn';
+                navbar.classList.add('menu-open');
+                if (hamburgerBtn) hamburgerBtn.classList.add('is-active');
             }
         };
 
-        // Khi vào phòng chat hay chơi game: Navbar LUÔN thu gọn mặc định để ưu tiên toàn bộ không gian
-        if (isChatOrGame) {
-            window.toggleMainNavbar(false);
-        }
-
-        // Tự động thu gọn khi người dùng cuộn xuống
-        var lastScrollY = window.scrollY;
-        var ticking = false;
-
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                window.requestAnimationFrame(function() {
-                    var currentScrollY = window.scrollY;
-                    var isMobile = window.innerWidth <= 768;
-
-                    // Khi cuộn xuống hơn 50px -> tự động thu gọn nav
-                    if (currentScrollY > 50 && currentScrollY > lastScrollY + 6) {
-                        if (!isCollapsed) {
-                            window.toggleMainNavbar(false);
-                        }
-                    } 
-                    // Khi cuộn lên đỉnh trang:
-                    // CHỈ tự động mở lại trên Trang Chủ (hoặc trang không phải Chat / Game).
-                    // Trên phòng Chat và Game, navbar luôn giữ trạng thái thu gọn, chỉ mở khi bấm nút Menu.
-                    else if (currentScrollY < 15 && !isChatOrGame) {
-                        if (isCollapsed) {
-                            window.toggleMainNavbar(true);
-                        }
-                    }
-
-                    lastScrollY = currentScrollY;
-                    ticking = false;
-                });
-                ticking = true;
+        // Hàm tương thích ngược với code cũ (ví dụ khi vào fullscreen)
+        window.toggleMainNavbar = function(forceOpen) {
+            if (!navbar) return;
+            if (forceOpen === true) {
+                navbar.classList.add('menu-open');
+                if (hamburgerBtn) hamburgerBtn.classList.add('is-active');
+            } else if (forceOpen === false) {
+                navbar.classList.remove('menu-open');
+                if (hamburgerBtn) hamburgerBtn.classList.remove('is-active');
+            } else {
+                window.toggleNavMenu();
             }
-        }, { passive: true });
+        };
+
+        // Đóng dropdown khi click ra ngoài vùng Navbar
+        document.addEventListener('click', function(e) {
+            if (!navbar || !navbar.classList.contains('menu-open')) return;
+            if (navbar.contains(e.target)) return;
+            navbar.classList.remove('menu-open');
+            if (hamburgerBtn) hamburgerBtn.classList.remove('is-active');
+        });
+
+        // Đóng dropdown khi click vào bất kỳ liên kết / nút nào trong menu
+        if (navList) {
+            navList.addEventListener('click', function(e) {
+                if (e.target.closest('a') || e.target.closest('button')) {
+                    if (navbar) navbar.classList.remove('menu-open');
+                    if (hamburgerBtn) hamburgerBtn.classList.remove('is-active');
+                }
+            });
+        }
     })();
     </script>
     <div class="cloud-retro cloud-1"></div>
