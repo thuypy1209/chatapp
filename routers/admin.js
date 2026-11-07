@@ -538,6 +538,20 @@ router.post('/music-versions', async function(req, res) {
     }
 });
 
+// POST /admin/music-track-upload: Tải lên file MP3 cho từng bài hát cụ thể trong danh sách
+router.post('/music-track-upload', upload.single('trackAudio'), async function(req, res) {
+    try {
+        if (!req.file) {
+            return res.json({ success: false, error: 'Vui lòng chọn file âm thanh .mp3 hoặc .m4a!' });
+        }
+        var audioUrl = '/uploads/audios/' + req.file.filename;
+        res.json({ success: true, audioUrl: audioUrl, fileName: req.file.originalname });
+    } catch (err) {
+        console.error('Lỗi upload file MP3 bài hát:', err);
+        res.json({ success: false, error: 'Lỗi tải lên file âm thanh!' });
+    }
+});
+
 // POST /admin/music-upload: Admin tải file MP3 tùy chỉnh phát cho toàn website
 router.post('/music-upload', upload.single('musicFile'), async function(req, res) {
     try {

@@ -436,6 +436,19 @@
                 <button type="button" onclick="selectBadgeIcon('new-music-badge', '🌌')" class="badge-icon-btn" title="🌌 Vũ trụ / Không gian">🌌</button>
             </div>
 
+            <!-- Chọn file MP3 riêng của bài hát (Tùy chọn) -->
+            <div style="background: #ffffff; border: 1.5px dashed #86efac; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 220px;">
+                    <label style="font-size: 12px; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
+                        <span>📁</span> Đính kèm file MP3 của bài hát (Cho Messenger & phát ngoại tuyến - Tùy chọn):
+                    </label>
+                    <div style="font-size: 11px; color: #64748b;">
+                        Hỗ trợ định dạng .mp3, .m4a. Khi mở trên Messenger hoặc khi YouTube bị lỗi, hệ thống sẽ tự động phát file MP3 này.
+                    </div>
+                </div>
+                <input type="file" id="new-music-audio-file" accept="audio/*" style="font-size: 12px; padding: 6px 10px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;">
+            </div>
+
             <button type="button" onclick="addMusicVersion()" style="background: #22c55e; color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25);">
                 ➕ Thêm phiên bản vào danh sách
             </button>
@@ -1056,11 +1069,65 @@ function extractYouTubeId(urlOrId) {
 
 // Danh sách phiên bản nhạc NCT DREAM - "Graduation" (Đã kiểm tra 100% hoạt động)
 var DEFAULT_ADMIN_MUSIC_VERSIONS = [
-    { id: "4EteI8yAsv0", title: "Graduation (Relaxing Piano)", artist: "Catiano Cover • Không bản quyền", badge: "🎹 Relaxing Piano", speed: 1.0 },
-    { id: "zuoSn3ObMz4", title: "Graduation (Special Video MV)", artist: "NCT DREAM • SM Entertainment", badge: "🎵 Bản MV", speed: 1.0 },
-    { id: "eF2qrRYiRuM", title: "Graduation (Piano Acoustic)", artist: "Piano Cover • Không bản quyền", badge: "🛡️ Piano Cover", speed: 0.9 },
-    { id: "EznbdoHi0Zs", title: "Graduation (Official Audio)", artist: "NCT DREAM • SM Entertainment", badge: "⭐ Official", speed: 1.0 }
+    { id: "4EteI8yAsv0", title: "Graduation (Relaxing Piano)", artist: "Catiano Cover • Không bản quyền", badge: "🎹 Relaxing Piano", speed: 1.0, audioUrl: "/audio/bgm.mp3" },
+    { id: "zuoSn3ObMz4", title: "Graduation (Special Video MV)", artist: "NCT DREAM • SM Entertainment", badge: "🎵 Bản MV", speed: 1.0, audioUrl: "/audio/graduation-nct-dream.mp3" },
+    { id: "eF2qrRYiRuM", title: "Graduation (Piano Acoustic)", artist: "Piano Cover • Không bản quyền", badge: "🛡️ Piano Cover", speed: 0.9, audioUrl: "/audio/bgm.mp3" },
+    { id: "EznbdoHi0Zs", title: "Graduation (Official Audio)", artist: "NCT DREAM • SM Entertainment", badge: "⭐ Official", speed: 1.0, audioUrl: "/audio/graduation-nct-dream.mp3" }
 ];
+
+// Upload file âm thanh riêng cho từng bài hát lên /admin/music-track-upload
+async function uploadTrackAudioFile(file) {
+    var formData = new FormData();
+    formData.append('trackAudio', file);
+    var res = await fetch('/admin/music-track-upload', {
+        method: 'POST',
+        body: formData
+    });
+    var data = await res.json();
+    if (!data.success) {
+        throw new Error(data.error || 'Lỗi tải lên file âm thanh!');
+    }
+    return data.audioUrl;
+}
+
+// Nghe thử file MP3 trực tiếp trong Admin
+var currentPlayingTrackAudio = null;
+var currentPlayingTrackBtn = null;
+function toggleTrackAudioPreview(url, btn) {
+    if (!url) return;
+    if (currentPlayingTrackAudio && !currentPlayingTrackAudio.paused) {
+        currentPlayingTrackAudio.pause();
+        if (currentPlayingTrackBtn) currentPlayingTrackBtn.innerHTML = '▶ Nghe thử MP3';
+        if (currentPlayingTrackBtn === btn) {
+            currentPlayingTrackAudio = null;
+            currentPlayingTrackBtn = null;
+            return;
+        }
+    }
+    currentPlayingTrackAudio = new Audio(url);
+    currentPlayingTrackBtn = btn;
+    btn.innerHTML = '⏸ Đang phát...';
+    currentPlayingTrackAudio.play().catch(function(e) {
+        console.error('Không thể phát file mp3:', e);
+        btn.innerHTML = '▶ Nghe thử MP3';
+    });
+    currentPlayingTrackAudio.onended = function() {
+        btn.innerHTML = '▶ Nghe thử MP3';
+        currentPlayingTrackAudio = null;
+        currentPlayingTrackBtn = null;
+    };
+}
+
+// Gỡ file MP3 khỏi bài hát
+function removeTrackMP3(idx) {
+    if (!ADMIN_MUSIC_VERSIONS[idx]) return;
+    if (confirm('Bạn có chắc muốn gỡ bỏ file MP3 đính kèm khỏi bài hát "' + ADMIN_MUSIC_VERSIONS[idx].title + '"?')) {
+        ADMIN_MUSIC_VERSIONS[idx].audioUrl = null;
+        syncMusicVersionsToServer();
+        renderMusicVersionsList();
+        showAdminToast('✓ Đã gỡ file MP3 khỏi bài hát!', 'info');
+    }
+}
 
 var ADMIN_MUSIC_VERSIONS = DEFAULT_ADMIN_MUSIC_VERSIONS;
 try {
@@ -1186,11 +1253,33 @@ function renderMusicVersionsList() {
                 </div>
 
                 <!-- Bảng chọn icon nhanh cho Badge khi sửa (nằm riêng bên dưới, cân đối) -->
-                <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; background: #fff; padding: 5px 10px; border: 1.5px dashed #fdba74; border-radius: 8px; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; background: #fff; padding: 5px 10px; border: 1.5px dashed #fdba74; border-radius: 8px; margin-bottom: 12px;">
                     <span style="font-size: 11px; font-weight: 700; color: #c2410c; white-space: nowrap; margin-right: 2px;">🎨 Gợi ý icon:</span>
                     ${['⭐', '🎵', '🎹', '🎧', '🎸', '🌸', '🛡️', '⚡', '🔥', '💎', '✨', '☕', '🌌'].map(ic => `
                         <button type="button" onclick="selectBadgeIcon('edit-badge-${idx}', '${ic}')" style="background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; font-size:13px; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.2)';" onmouseout="this.style.transform='scale(1)';">${ic}</button>
                     `).join('')}
+                </div>
+
+                <!-- Đính kèm hoặc thay đổi File MP3 riêng cho bài hát này -->
+                <div style="background: #fff; border: 1.5px dashed #fdba74; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+                        <label style="font-size: 12px; font-weight: 700; color: #c2410c; display: flex; align-items: center; gap: 5px;">
+                            <span>📁</span> File MP3 đính kèm (Cho Messenger & phát ngoại tuyến):
+                        </label>
+                        ${ver.audioUrl ? `
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 11px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px; font-weight: 700;">✓ Đã có MP3</span>
+                                <button type="button" onclick="toggleTrackAudioPreview('${ver.audioUrl}', this)" style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">▶ Nghe thử MP3</button>
+                                <button type="button" onclick="removeTrackMP3(${idx})" style="background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;" title="Gỡ file MP3 khỏi bài hát này">✕ Gỡ MP3</button>
+                            </div>
+                        ` : `
+                            <span style="font-size: 11px; color: #94a3b8; font-style: italic;">Chưa có file MP3 riêng</span>
+                        `}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <input type="file" id="edit-music-file-${idx}" accept="audio/*" style="font-size: 12px; padding: 6px 10px; border: 1px solid #fdba74; border-radius: 6px; background: #fff; cursor: pointer; flex: 1; min-width: 200px;">
+                        <span style="font-size: 11px; color: #64748b;">(Chọn file mới nếu muốn tải lên/thay đổi)</span>
+                    </div>
                 </div>
 
                 <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -1214,6 +1303,15 @@ function renderMusicVersionsList() {
                         <a href="https://www.youtube.com/watch?v=${ver.id}" target="_blank" style="color:#2563eb; text-decoration:none; display:inline-flex; align-items:center; gap:3px;" title="Mở video YouTube trên tab mới">
                             🔗 youtu.be/${ver.id}
                         </a>
+                        ${ver.audioUrl ? `
+                            <span>•</span>
+                            <span style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:1px 6px; border-radius:6px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:3px;">
+                                📁 MP3
+                            </span>
+                            <button type="button" onclick="toggleTrackAudioPreview('${ver.audioUrl}', this)" style="background:none; border:none; color:#16a34a; font-size:11px; font-weight:700; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:2px;" title="Bấm để nghe thử file MP3">
+                                ▶ Nghe thử MP3
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
 
@@ -1266,12 +1364,13 @@ function cancelEditTrack() {
 }
 
 // Lưu thông tin sau khi chỉnh sửa bài hát
-function saveEditTrack(idx) {
+async function saveEditTrack(idx) {
     var titleEl = document.getElementById('edit-title-' + idx);
     var urlEl = document.getElementById('edit-url-' + idx);
     var artistEl = document.getElementById('edit-artist-' + idx);
     var badgeEl = document.getElementById('edit-badge-' + idx);
     var speedEl = document.getElementById('edit-speed-' + idx);
+    var fileInput = document.getElementById('edit-music-file-' + idx);
 
     if (!titleEl || !urlEl) return;
     var title = titleEl.value.trim();
@@ -1290,12 +1389,26 @@ function saveEditTrack(idx) {
         return;
     }
 
+    var existingAudioUrl = ADMIN_MUSIC_VERSIONS[idx] ? ADMIN_MUSIC_VERSIONS[idx].audioUrl : null;
+    var finalAudioUrl = existingAudioUrl;
+
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+        try {
+            showAdminToast('⏳ Đang tải file MP3 mới lên server...', 'info');
+            finalAudioUrl = await uploadTrackAudioFile(fileInput.files[0]);
+        } catch (err) {
+            showAdminToast('❌ ' + (err.message || 'Lỗi tải lên file MP3!'), 'error');
+            return;
+        }
+    }
+
     ADMIN_MUSIC_VERSIONS[idx] = {
         id: ytid,
         title: title,
         artist: artist || 'Không rõ nguồn',
         badge: badge || '🎵 Tùy chỉnh',
-        speed: speed || 1.0
+        speed: speed || 1.0,
+        audioUrl: finalAudioUrl || null
     };
 
     editingTrackIndex = null;
@@ -1319,7 +1432,7 @@ function saveEditTrack(idx) {
         });
     }
 
-    showAdminToast('✓ Đã cập nhật thành công bài hát: ' + title, 'success');
+    showAdminToast('✓ Đã cập nhật thành công bài hát: ' + title + (fileInput && fileInput.files && fileInput.files[0] ? ' (kèm file MP3 mới)' : ''), 'success');
 }
 
 // Thay đổi tốc độ nhanh của từng bài hát
@@ -1367,14 +1480,15 @@ function switchMusicVersion(idx) {
     });
 }
 
-// Thêm phiên bản YouTube mới bằng Link URL
-function addMusicVersion() {
+// Thêm phiên bản YouTube mới bằng Link URL (Kèm tải file MP3 tùy chọn)
+async function addMusicVersion() {
     var title = document.getElementById('new-music-title').value.trim();
     var rawUrl = document.getElementById('new-music-url').value.trim();
     var artist = document.getElementById('new-music-artist').value.trim();
     var badge  = document.getElementById('new-music-badge').value.trim();
     var speedEl = document.getElementById('new-music-speed');
     var speed = speedEl ? parseFloat(speedEl.value) : 1.0;
+    var fileInput = document.getElementById('new-music-audio-file');
 
     if (!title || !rawUrl) {
         showAdminToast('⚠️ Vui lòng nhập Tiêu đề và Link URL YouTube!', 'warning');
@@ -1387,12 +1501,24 @@ function addMusicVersion() {
         return;
     }
 
+    var audioUrl = null;
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+        try {
+            showAdminToast('⏳ Đang tải file MP3 bài hát lên server...', 'info');
+            audioUrl = await uploadTrackAudioFile(fileInput.files[0]);
+        } catch (err) {
+            showAdminToast('❌ ' + (err.message || 'Lỗi tải lên file MP3!'), 'error');
+            return;
+        }
+    }
+
     ADMIN_MUSIC_VERSIONS.push({
         id: ytid,
         title: title,
         artist: artist || 'Không rõ nguồn',
         badge: badge || '🎵 Tùy chỉnh',
-        speed: speed || 1.0
+        speed: speed || 1.0,
+        audioUrl: audioUrl || null
     });
 
     syncMusicVersionsToServer();
@@ -1402,9 +1528,10 @@ function addMusicVersion() {
     document.getElementById('new-music-url').value = '';
     document.getElementById('new-music-artist').value = '';
     document.getElementById('new-music-badge').value = '';
+    if (fileInput) fileInput.value = '';
 
     renderMusicVersionsList();
-    showAdminToast('✓ Đã thêm bài hát mới: ' + title, 'success');
+    showAdminToast('✓ Đã thêm bài hát mới: ' + title + (audioUrl ? ' (kèm file MP3)' : ''), 'success');
 }
 
 // Xóa bài hát khỏi danh sách

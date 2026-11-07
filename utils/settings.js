@@ -1,10 +1,10 @@
 const Setting = require('../schemas/Setting');
 
 const DEFAULT_VERSIONS = [
-    { id: "4EteI8yAsv0", title: "Graduation (Relaxing Piano)", artist: "Catiano Cover • Không bản quyền", badge: "🎹 Relaxing Piano", speed: 1.0 },
-    { id: "zuoSn3ObMz4", title: "Graduation (Special Video MV)", artist: "NCT DREAM • SM Entertainment", badge: "🎵 Bản MV", speed: 1.0 },
-    { id: "eF2qrRYiRuM", title: "Graduation (Piano Acoustic)", artist: "Piano Cover • Không bản quyền", badge: "🛡️ Piano Cover", speed: 0.9 },
-    { id: "EznbdoHi0Zs", title: "Graduation (Official Audio)", artist: "NCT DREAM • SM Entertainment", badge: "⭐ Official", speed: 1.0 }
+    { id: "4EteI8yAsv0", title: "Graduation (Relaxing Piano)", artist: "Catiano Cover • Không bản quyền", badge: "🎹 Relaxing Piano", speed: 1.0, audioUrl: "/audio/bgm.mp3" },
+    { id: "zuoSn3ObMz4", title: "Graduation (Special Video MV)", artist: "NCT DREAM • SM Entertainment", badge: "🎵 Bản MV", speed: 1.0, audioUrl: "/audio/graduation-nct-dream.mp3" },
+    { id: "eF2qrRYiRuM", title: "Graduation (Piano Acoustic)", artist: "Piano Cover • Không bản quyền", badge: "🛡️ Piano Cover", speed: 0.9, audioUrl: "/audio/bgm.mp3" },
+    { id: "EznbdoHi0Zs", title: "Graduation (Official Audio)", artist: "NCT DREAM • SM Entertainment", badge: "⭐ Official", speed: 1.0, audioUrl: "/audio/graduation-nct-dream.mp3" }
 ];
 
 // Bộ nhớ đệm (In-memory cache) giúp truy vấn tức thì 0ms
@@ -53,6 +53,18 @@ async function initSettings() {
             if (loadedVersions.some(v => v.id === "R234wY4tTes" || v.id === "wcrkltAbh_g")) {
                 loadedVersions = DEFAULT_VERSIONS;
             }
+
+            // Gán audioUrl mặc định nếu dữ liệu cũ chưa có
+            loadedVersions = loadedVersions.map(v => {
+                if (!v.audioUrl) {
+                    if (v.id === "zuoSn3ObMz4" || v.id === "EznbdoHi0Zs") {
+                        v.audioUrl = "/audio/graduation-nct-dream.mp3";
+                    } else if (v.id === "4EteI8yAsv0" || v.id === "eF2qrRYiRuM") {
+                        v.audioUrl = "/audio/bgm.mp3";
+                    }
+                }
+                return v;
+            });
 
             cachedMusicSetting = { 
                 ...cachedMusicSetting, 

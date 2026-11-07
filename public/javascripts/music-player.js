@@ -14,28 +14,32 @@
             title: "Graduation (Relaxing Piano)",
             artist: "Catiano Cover • Không bản quyền",
             badge: "🎹 Relaxing Piano",
-            desc: "Bản Piano acoustic nhẹ nhàng phù hợp làm nhạc nền chơi game và trò chuyện"
+            desc: "Bản Piano acoustic nhẹ nhàng phù hợp làm nhạc nền chơi game và trò chuyện",
+            audioUrl: "/audio/bgm.mp3"
         },
         {
             id: "zuoSn3ObMz4",
             title: "Graduation (Special Video MV)",
             artist: "NCT DREAM • SM Entertainment",
             badge: "🎵 Bản MV",
-            desc: "Bản Special Video chính thức của NCT DREAM từ Winter Special Mini Album 'Candy'"
+            desc: "Bản Special Video chính thức của NCT DREAM từ Winter Special Mini Album 'Candy'",
+            audioUrl: "/audio/graduation-nct-dream.mp3"
         },
         {
             id: "eF2qrRYiRuM",
             title: "Graduation (Piano Acoustic)",
             artist: "Piano Cover • Không bản quyền",
             badge: "🛡️ Piano Cover",
-            desc: "Bản độc tấu Piano êm dịu, không chứa giọng hát gốc, 100% an toàn không bị gắn cờ bản quyền"
+            desc: "Bản độc tấu Piano êm dịu, không chứa giọng hát gốc, 100% an toàn không bị gắn cờ bản quyền",
+            audioUrl: "/audio/bgm.mp3"
         },
         {
             id: "EznbdoHi0Zs",
             title: "Graduation (Official Audio)",
             artist: "NCT DREAM • SM Entertainment",
             badge: "⭐ Official",
-            desc: "Bản nhạc gốc chuẩn chất lượng cao phát hành bởi SM Entertainment"
+            desc: "Bản nhạc gốc chuẩn chất lượng cao phát hành bởi SM Entertainment",
+            audioUrl: "/audio/graduation-nct-dream.mp3"
         }
     ];
 
@@ -82,7 +86,8 @@
 
     // Khởi tạo đối tượng HTML5 Audio (chạy độc lập, tương thích 100% với Messenger In-App Browser)
     function initNativeAudio(src) {
-        const audioSrc = src || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+        const audioSrc = src || activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
         if (!localAudio) {
             localAudio = new Audio(audioSrc);
             localAudio.loop = true;
@@ -101,6 +106,9 @@
         if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
             try { ytPlayer.pauseVideo(); } catch(_) {}
         }
+        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+        const targetSrc = activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
+        initNativeAudio(targetSrc);
         playMusic();
     }
 
@@ -844,7 +852,7 @@
                 trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">🎹 Audio Native</span>`;
             }
 
-            const targetSrc = activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+            const targetSrc = activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
             initNativeAudio(targetSrc);
 
             if (isPlaying && !isUserPaused) {
@@ -916,7 +924,7 @@
                     // Đồng bộ danh sách bài hát nếu Admin vừa thêm/sửa/xóa trên trang quản trị
                     if (Array.isArray(data.versions) && data.versions.length > 0) {
                         const isListDifferent = (data.versions.length !== MUSIC_VERSIONS.length) ||
-                            data.versions.some((v, idx) => !MUSIC_VERSIONS[idx] || v.id !== MUSIC_VERSIONS[idx].id || v.title !== MUSIC_VERSIONS[idx].title || v.speed !== MUSIC_VERSIONS[idx].speed);
+                            data.versions.some((v, idx) => !MUSIC_VERSIONS[idx] || v.id !== MUSIC_VERSIONS[idx].id || v.title !== MUSIC_VERSIONS[idx].title || v.speed !== MUSIC_VERSIONS[idx].speed || v.audioUrl !== MUSIC_VERSIONS[idx].audioUrl);
                         
                         if (isListDifferent) {
                             MUSIC_VERSIONS.length = 0;
@@ -1042,8 +1050,10 @@
     // --- 7. Các hàm điều khiển Âm nhạc cơ bản ---
     function playMusic() {
         isUserPaused = false;
+        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+        const targetSrc = activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
         if (isNativeAudioActive || isFBInApp || activeCustomAudioUrl) {
-            const audio = initNativeAudio();
+            const audio = initNativeAudio(targetSrc);
             audio.muted = false;
             audio.volume = volumeLevel / 100;
             audio.play().then(() => {
