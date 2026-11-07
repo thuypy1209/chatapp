@@ -205,19 +205,27 @@ header, .navbar {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 2000 !important; /* Luôn nổi cao hơn mọi div trên trang để dropdown hiển thị ở trên */
     transition: all 0.25s ease;
 }
 
-/* Nút 3 Gạch (Hamburger Button) - Chuẩn Pastel Retro */
+/* Khối bên phải Navbar chứa nút Menu 3 gạch & Dropdown menu */
+.navbar-right-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Nút 3 Gạch (Hamburger Button) - Áp dụng cho tất cả các trang, luôn nằm bên phải trên PC & Mobile */
 .btn-nav-hamburger {
-    display: none; /* Mặc định ẩn trên Desktop màn hình rộng */
+    display: inline-flex !important; /* Luôn hiển thị trên mọi trang */
     align-items: center;
     justify-content: center;
     gap: 7px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.88);
     border: 2px solid #f472b6;
     color: #db2777;
     cursor: pointer;
@@ -279,47 +287,39 @@ header, .navbar {
     letter-spacing: -0.2px;
 }
 
-/* Chế độ Desktop thu gọn (Phòng Chat & Game): Chỉ để lại Tên, ẩn toàn bộ nút vào nút 3 gạch */
-.navbar.nav-compact {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+/* Danh sách menu điều hướng: Mặc định ẩn trên tất cả các trang */
+.navbar .navbar-nav {
+    display: none !important;
 }
 
-.navbar.nav-compact .btn-nav-hamburger {
-    display: inline-flex !important;
-}
-
-.navbar.nav-compact .navbar-nav {
-    display: none;
-}
-
-.navbar.nav-compact.menu-open .navbar-nav {
+/* Khi người dùng bấm nút 3 gạch: Menu bung dạng dropdown floating ở TRÊN các div bên dưới */
+.navbar.menu-open .navbar-nav {
     display: flex !important;
     position: absolute !important;
-    top: calc(100% + 8px) !important;
-    right: 32px !important;
+    top: calc(100% + 10px) !important;
+    right: 0 !important;
     flex-direction: column !important;
-    min-width: 230px !important;
+    min-width: 240px !important;
     gap: 8px !important;
     padding: 14px !important;
-    background: rgba(255, 255, 255, 0.96) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-radius: 18px !important;
     border: 2px solid #fbcfe8 !important;
-    box-shadow: 0 12px 35px rgba(244, 114, 182, 0.25) !important;
-    z-index: 1000 !important;
+    box-shadow: 0 16px 40px rgba(244, 114, 182, 0.28), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    z-index: 2500 !important; /* Đảm bảo luôn nằm ở trên div bên dưới */
     animation: navDropdownDesktop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.navbar.nav-compact.menu-open .navbar-nav li {
+.navbar.menu-open .navbar-nav li {
     width: 100% !important;
+    list-style: none !important;
 }
 
-.navbar.nav-compact.menu-open .navbar-nav .nav-item,
-.navbar.nav-compact.menu-open .navbar-nav .user-badge,
-.navbar.nav-compact.menu-open .navbar-nav .btn-user-name {
+.navbar.menu-open .navbar-nav .nav-item,
+.navbar.menu-open .navbar-nav .user-badge,
+.navbar.menu-open .navbar-nav .btn-user-name {
     width: 100% !important;
     justify-content: flex-start !important;
     padding: 10px 14px !important;
@@ -459,29 +459,23 @@ header, .navbar {
 
 @media (max-width: 768px) {
     header, .navbar {
-        padding: 8px 12px !important;
-        flex-direction: column !important;
-        gap: 0 !important;
+        padding: 8px 14px !important;
+        flex-direction: row !important; /* 1 hàng duy nhất: Tên bên trái, Nút 3 gạch bên phải */
+        justify-content: space-between !important;
+        align-items: center !important;
         position: sticky !important;
         top: 0 !important;
-        z-index: 100 !important;
+        z-index: 2000 !important; /* Luôn nổi cao hơn mọi div bên dưới */
         max-height: none !important;
         transform: none !important;
         opacity: 1 !important;
         pointer-events: auto !important;
     }
 
-    .navbar-header-line {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-
     .navbar-brand {
         font-size: 16.5px !important;
         gap: 6px !important;
-        max-width: calc(100% - 48px) !important;
+        max-width: calc(100% - 60px) !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
@@ -496,6 +490,12 @@ header, .navbar {
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+    }
+
+    .navbar-right-box {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     /* Trên điện thoại: Luôn hiển thị nút 3 gạch vuông vắn xinh xắn */
@@ -515,20 +515,26 @@ header, .navbar {
         display: none !important;
     }
 
-    /* Khi người dùng bấm nút 3 gạch: Menu bung dạng dropdown mượt mà */
+    /* Khi người dùng bấm nút 3 gạch: Menu bung dạng floating dropdown ở TRÊN div */
     .navbar.menu-open .navbar-nav {
         display: flex !important;
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        right: 0 !important;
         flex-direction: column !important;
-        width: 100% !important;
+        width: auto !important;
+        min-width: 230px !important;
+        max-width: calc(100vw - 28px) !important;
         gap: 8px !important;
-        margin-top: 10px !important;
+        margin-top: 0 !important;
         padding: 12px !important;
-        background: rgba(255, 255, 255, 0.96) !important;
+        background: rgba(255, 255, 255, 0.98) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         border-radius: 16px !important;
         border: 2px solid #fbcfe8 !important;
-        box-shadow: 0 10px 25px rgba(244, 114, 182, 0.2) !important;
+        box-shadow: 0 14px 35px rgba(244, 114, 182, 0.28), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+        z-index: 2500 !important;
         animation: navDropdownMobile 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -2080,7 +2086,7 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     margin: 15px auto 40px auto;
     padding: 0 15px;
     position: relative;
-    z-index: 105;
+    z-index: 10; /* z-index thấp hơn navbar (2000) để menu dropdown nổi ở trên */
 }
 .mario-header-bar {
     background: rgba(255, 255, 255, 0.95);
@@ -2096,8 +2102,62 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     border: 2px solid #fbcfe8;
     box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);
     position: relative;
-    z-index: 105;
+    z-index: 10; /* z-index thấp để menu dropdown nổi hoàn toàn ở trên div này */
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Chế độ thu gọn của Flappy Bangboo: Cuộc Phiêu Lưu Trên Không */
+.mario-header-bar.is-collapsed {
+    padding: 6px 16px !important;
+    margin-bottom: 8px !important;
+}
+
+.mario-header-bar.is-collapsed .mario-header-icon {
+    font-size: 20px !important;
+}
+
+.mario-header-bar.is-collapsed .mario-header-h1 {
+    font-size: 15px !important;
+}
+
+.mario-header-bar.is-collapsed .mario-header-subtitle {
+    display: none !important;
+}
+
+.mario-header-bar.is-collapsed .mario-header-tools {
+    gap: 6px !important;
+}
+
+.mario-header-bar.is-collapsed .tool-btn {
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+}
+
+/* Nút Thu gọn / Chi tiết trên thanh Game Header */
+.btn-game-collapse {
+    background: #f1f5f9;
+    border: 2px solid #cbd5e1;
+    color: #475569;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-game-collapse:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+.btn-game-collapse:active {
+    transform: scale(0.95);
+}
+
 .mario-header-title-box {
     display: flex;
     align-items: center;
@@ -3309,37 +3369,7 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     .cloud-3 { top: 14% !important; }
 
     /* 4. Khung Header / Navbar */
-    header, .navbar {
-        padding: 8px 12px !important;
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-    .navbar-brand {
-        font-size: 19px !important;
-        gap: 6px !important;
-    }
-    .navbar-brand .brand-icon {
-        font-size: 22px !important;
-    }
-    .navbar-nav {
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 6px !important;
-    }
-    .nav-item {
-        padding: 6px 10px !important;
-        font-size: 12px !important;
-        border-radius: 12px !important;
-        gap: 4px !important;
-    }
-    .user-badge {
-        padding: 4px 10px !important;
-        font-size: 12px !important;
-    }
-    .btn-user-name {
-        padding: 6px 12px !important;
-        font-size: 12px !important;
-    }
+    /* Đã tối ưu hóa đồng bộ với hệ thống menu hamburger floating ở trên */
 
     /* 5. Modal bắt buộc nhập tên */
     #welcome-name-modal {

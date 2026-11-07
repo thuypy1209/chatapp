@@ -2,11 +2,11 @@
 
 <div class="mario-play-chat-wrapper" style="max-width: 1400px; width: 100%; margin: 10px auto 30px auto; padding: 0 15px;">
 
-    <!-- Thanh tiêu đề & Công cụ điều khiển nhanh -->
-    <div class="mario-header-bar" style="max-width: 100%;">
+    <!-- Thanh tiêu đề & Công cụ điều khiển nhanh (Hỗ trợ thu gọn/mở rộng tối ưu không gian) -->
+    <div class="mario-header-bar is-collapsed" id="mario-header-bar" style="max-width: 100%;">
         <div class="mario-header-title-box">
             <span class="mario-header-icon">🚀</span>
-            <div>
+            <div class="mario-header-text-group">
                 <div class="mario-header-title-flex">
                     <h1 class="mario-header-h1">Flappy Bangboo: Cuộc Phiêu Lưu Trên Không</h1>
                 </div>
@@ -23,6 +23,10 @@
             </button>
             <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle btn-mario-fs" onclick="window.toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi">
                 <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
+            </button>
+            <!-- Nút Thu gọn / Chi tiết -->
+            <button type="button" id="btn-toggle-game-header" class="tool-btn btn-game-collapse" onclick="window.toggleFlappyHeaderCollapse()" title="Mở rộng chi tiết giới thiệu">
+                <span class="collapse-icon">▼</span> <span class="collapse-text">Chi tiết</span>
             </button>
         </div>
     </div>
@@ -76,6 +80,56 @@
 
 <script src="/javascripts/flappy.js"></script>
 <script>
+// Điều khiển đóng / mở thanh giới thiệu Flappy Bangboo
+window.toggleFlappyHeaderCollapse = function() {
+    var header = document.getElementById('mario-header-bar');
+    if (!header) return;
+    var isCollapsed = header.classList.toggle('is-collapsed');
+    var btn = document.getElementById('btn-toggle-game-header');
+    if (btn) {
+        var icon = btn.querySelector('.collapse-icon');
+        var text = btn.querySelector('.collapse-text');
+        if (isCollapsed) {
+            if (icon) icon.textContent = '▼';
+            if (text) text.textContent = 'Chi tiết';
+            btn.title = 'Mở rộng chi tiết giới thiệu';
+        } else {
+            if (icon) icon.textContent = '▲';
+            if (text) text.textContent = 'Thu gọn';
+            btn.title = 'Thu gọn thanh giới thiệu';
+        }
+    }
+    try {
+        localStorage.setItem('flappy_header_collapsed', isCollapsed ? '1' : '0');
+    } catch(e) {}
+};
+
+// Khởi tạo trạng thái thu gọn mặc định
+(function() {
+    try {
+        var saved = localStorage.getItem('flappy_header_collapsed');
+        var header = document.getElementById('mario-header-bar');
+        var btn = document.getElementById('btn-toggle-game-header');
+        // Mặc định luôn thu gọn để diện tích game to nhất
+        var isCollapsed = (saved !== '0');
+        if (header) {
+            if (isCollapsed) header.classList.add('is-collapsed');
+            else header.classList.remove('is-collapsed');
+        }
+        if (btn) {
+            var icon = btn.querySelector('.collapse-icon');
+            var text = btn.querySelector('.collapse-text');
+            if (isCollapsed) {
+                if (icon) icon.textContent = '▼';
+                if (text) text.textContent = 'Chi tiết';
+            } else {
+                if (icon) icon.textContent = '▲';
+                if (text) text.textContent = 'Thu gọn';
+            }
+        }
+    } catch(e) {}
+})();
+
 function initMarioApp() {
     if (window.marioInstance) return;
 
