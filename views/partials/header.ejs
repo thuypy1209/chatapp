@@ -11,15 +11,22 @@
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
+<%
+    // Nhận diện nếu trang hiện tại là Phòng Chat hoặc Game (Flappy / Mario)
+    var isAutoCollapsedPage = false;
+    if (typeof title !== 'undefined' && (/Phòng Chat|Flappy|Mario|Cuộc Phiêu Lưu/i.test(title))) {
+        isAutoCollapsedPage = true;
+    }
+%>
 
     <!-- Nút Bật Lại Navbar khi đã thu gọn (Floating Pill Button trên Mobile & Desktop) -->
-    <button type="button" id="btn-reopen-nav" class="nav-reopen-pill" onclick="window.toggleMainNavbar(true)" title="Mở thanh điều hướng">
+    <button type="button" id="btn-reopen-nav" class="nav-reopen-pill <%= isAutoCollapsedPage ? 'show' : '' %>" onclick="window.toggleMainNavbar(true)" title="Mở thanh điều hướng">
         <span class="nav-reopen-icon">🍄</span>
         <span class="nav-reopen-text">Menu</span>
         <span class="nav-reopen-arrow">▼</span>
     </button>
 
-    <nav class="navbar" id="main-navbar">
+    <nav class="navbar <%= isAutoCollapsedPage ? 'nav-collapsed' : '' %>" id="main-navbar">
         <div class="navbar-header-line">
             <a href="/" class="navbar-brand">
                 <span class="brand-icon">🍄</span>
@@ -76,7 +83,11 @@
         var navbar = document.getElementById('main-navbar');
         var reopenBtn = document.getElementById('btn-reopen-nav');
         var toggleIcon = document.getElementById('nav-toggle-icon');
-        var isCollapsed = false;
+
+        // Nhận diện đường dẫn: Phòng Chat (/chat) hoặc Game (/flappy, /mario)
+        var pathname = window.location.pathname.toLowerCase();
+        var isChatOrGame = pathname.startsWith('/chat') || pathname.startsWith('/flappy') || pathname.startsWith('/mario') || <%= isAutoCollapsedPage ? 'true' : 'false' %>;
+        var isCollapsed = isChatOrGame || (navbar && navbar.classList.contains('nav-collapsed'));
 
         window.toggleMainNavbar = function(forceOpen) {
             if (!navbar) return;
@@ -99,7 +110,12 @@
             }
         };
 
-        // Tự động thu gọn khi người dùng cuộn xuống trên Mobile
+        // Khi vào phòng chat hay chơi game: Navbar LUÔN thu gọn mặc định để ưu tiên toàn bộ không gian
+        if (isChatOrGame) {
+            window.toggleMainNavbar(false);
+        }
+
+        // Tự động thu gọn khi người dùng cuộn xuống
         var lastScrollY = window.scrollY;
         var ticking = false;
 
@@ -109,14 +125,16 @@
                     var currentScrollY = window.scrollY;
                     var isMobile = window.innerWidth <= 768;
 
-                    // Khi cuộn xuống hơn 60px trên điện thoại -> tự động thu gọn nav để giải phóng màn hình
-                    if (isMobile && currentScrollY > 60 && currentScrollY > lastScrollY + 8) {
+                    // Khi cuộn xuống hơn 50px -> tự động thu gọn nav
+                    if (currentScrollY > 50 && currentScrollY > lastScrollY + 6) {
                         if (!isCollapsed) {
                             window.toggleMainNavbar(false);
                         }
                     } 
-                    // Khi cuộn lên gần đỉnh trang -> tự động mở lại
-                    else if (currentScrollY < 15) {
+                    // Khi cuộn lên đỉnh trang:
+                    // CHỈ tự động mở lại trên Trang Chủ (hoặc trang không phải Chat / Game).
+                    // Trên phòng Chat và Game, navbar luôn giữ trạng thái thu gọn, chỉ mở khi bấm nút Menu.
+                    else if (currentScrollY < 15 && !isChatOrGame) {
                         if (isCollapsed) {
                             window.toggleMainNavbar(true);
                         }

@@ -206,7 +206,8 @@ header, .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    max-height: 120px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
 }
 
 /* Trạng thái thu gọn Navbar */
@@ -214,6 +215,11 @@ header.nav-collapsed, .navbar.nav-collapsed {
     transform: translateY(-100%) !important;
     opacity: 0 !important;
     pointer-events: none !important;
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    overflow: hidden !important;
 }
 
 .navbar-header-line {
