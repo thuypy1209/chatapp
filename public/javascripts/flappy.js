@@ -363,6 +363,16 @@
             const cw = rect.width;
             const ch = rect.height;
             if (cw <= 0 || ch <= 0) return;
+
+            // Tự động thích ứng chiều cao sân khấu ảo theo tỉ lệ thực tế của khung chứa
+            // Khung 16:9 trên PC -> height = 450; Khung 4:3 trên điện thoại -> height = 600
+            const targetH = Math.round(this.width * (ch / cw));
+            this.height = Math.max(450, Math.min(800, targetH));
+            this.playH = this.height - this.groundH;
+            if (this.stage) {
+                this.stage.style.height = this.height + 'px';
+            }
+
             const zoom = Math.min(cw / this.width, ch / this.height);
             this.stage.style.transform = `translate(-50%, -50%) scale(${zoom})`;
         }
@@ -554,8 +564,8 @@
 
             const handleAction = (e) => {
                 if (e) {
-                    if (e.target && e.target.closest && e.target.closest('#flappy-card-body')) {
-                        return; // Người chơi nhấp vào thiệp -> không bay
+                    if (e.target && e.target.closest && e.target.closest('#flappy-card-body, .game-hud-toolbar, .game-hud-btn, .mario-fs-actions')) {
+                        return; // Người chơi nhấp vào thiệp hoặc các nút điều khiển -> không bay
                     }
                     if (e.cancelable) e.preventDefault();
                 }

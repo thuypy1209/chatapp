@@ -1,39 +1,31 @@
 <%- include('../partials/header') %>
 
-<div class="mario-play-chat-wrapper" style="max-width: 1400px; width: 100%; margin: 10px auto 30px auto; padding: 0 15px;">
+<div class="mario-play-chat-wrapper">
 
-    <!-- Thanh tiêu đề & Công cụ điều khiển nhanh (Hỗ trợ thu gọn/mở rộng tối ưu không gian) -->
-    <div class="mario-header-bar is-collapsed" id="mario-header-bar" style="max-width: 100%;">
+    <!-- Thanh tiêu đề Game: Chỉ để lại tên theo đúng yêu cầu -->
+    <div class="mario-header-bar" id="mario-header-bar">
         <div class="mario-header-title-box">
             <span class="mario-header-icon">🚀</span>
-            <div class="mario-header-text-group">
-                <div class="mario-header-title-flex">
-                    <h1 class="mario-header-h1">Flappy Bangboo: Cuộc Phiêu Lưu Trên Không</h1>
-                </div>
-                <p class="mario-header-subtitle">Điều khiển chú Bangboo cưỡi mô tô (Zenless Zone Zero) vượt qua các cột ống nước retro!</p>
-            </div>
-        </div>
-
-        <div class="mario-header-tools">
-            <button id="btn-toggle-sound" type="button" class="tool-btn btn-mario-sound" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh trò chơi">
-                <span id="sound-icon">🔊</span> <span id="sound-text">Âm thanh: Bật</span>
-            </button>
-            <button id="btn-restart-game" type="button" class="tool-btn btn-mario-restart" onclick="window.restartFlappyGame()" title="Chơi lại ván mới">
-                🔄 Chơi lại
-            </button>
-            <button id="btn-toggle-fullscreen" type="button" class="tool-btn btn-mario-fullscreen-toggle btn-mario-fs" onclick="window.toggleFullscreenMario('mario-game-container')" title="Bật chế độ toàn màn hình để chơi">
-                <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
-            </button>
-            <!-- Nút Thu gọn / Chi tiết -->
-            <button type="button" id="btn-toggle-game-header" class="tool-btn btn-game-collapse" onclick="window.toggleFlappyHeaderCollapse()" title="Mở rộng chi tiết giới thiệu">
-                <span class="collapse-icon">▼</span> <span class="collapse-text">Chi tiết</span>
-            </button>
+            <h1 class="mario-header-h1">Flappy Bangboo: Cuộc Phiêu Lưu Trên Không</h1>
         </div>
     </div>
 
     <!-- KHUNG CHÍNH: DUY NHẤT TRÒ CHƠI FLAPPY BANGBOO (CĂN GIỮA MÀN HÌNH) -->
     <div class="game-column" style="width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px;">
-        <div id="mario-game-container" class="game-card" style="width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);">
+        <div id="mario-game-container" class="game-card">
+            <!-- Thanh công cụ điều khiển nhanh NẰM TRONG KHUNG CHƠI GAME (Âm thanh, Chơi lại, Toàn màn hình) -->
+            <div class="game-hud-toolbar">
+                <button type="button" id="btn-toggle-sound" class="game-hud-btn btn-hud-sound" onclick="window.toggleGameAudio(event)" onpointerdown="event.stopPropagation()" title="Bật / Tắt âm thanh">
+                    <span id="sound-icon">🔊</span> <span class="hud-btn-label" id="sound-text">Âm thanh: Bật</span>
+                </button>
+                <button type="button" id="btn-restart-game" class="game-hud-btn btn-hud-restart" onclick="window.restartFlappyGame(event)" onpointerdown="event.stopPropagation()" title="Chơi lại ván mới">
+                    🔄 <span class="hud-btn-label">Chơi lại</span>
+                </button>
+                <button type="button" id="btn-toggle-fullscreen" class="game-hud-btn btn-mario-fullscreen-toggle btn-hud-fs" onclick="window.toggleFullscreenMario('mario-game-container', event)" onpointerdown="event.stopPropagation()" title="Toàn màn hình">
+                    <span class="fs-icon">⛶</span> <span class="fs-text hud-btn-label">Toàn màn hình</span>
+                </button>
+            </div>
+
             <!-- Fullscreen Top Header Bar -->
             <div class="mario-fs-header">
                 <div class="mario-fs-title-box">
@@ -43,10 +35,10 @@
                     <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
                 </div>
                 <div class="mario-fs-actions">
-                    <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio()" title="Bật / Tắt âm thanh">
+                    <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio(event)" title="Bật / Tắt âm thanh">
                         🔊
                     </button>
-                    <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame()" title="Chơi lại">
+                    <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame(event)" title="Chơi lại">
                         🔄 <span class="fs-btn-label">Chơi lại</span>
                     </button>
                     <button type="button" class="btn-exit-fullscreen" onclick="window.exitFullscreenMario('mario-game-container')" title="Thoát toàn màn hình (ESC)">
@@ -80,56 +72,6 @@
 
 <script src="/javascripts/flappy.js"></script>
 <script>
-// Điều khiển đóng / mở thanh giới thiệu Flappy Bangboo
-window.toggleFlappyHeaderCollapse = function() {
-    var header = document.getElementById('mario-header-bar');
-    if (!header) return;
-    var isCollapsed = header.classList.toggle('is-collapsed');
-    var btn = document.getElementById('btn-toggle-game-header');
-    if (btn) {
-        var icon = btn.querySelector('.collapse-icon');
-        var text = btn.querySelector('.collapse-text');
-        if (isCollapsed) {
-            if (icon) icon.textContent = '▼';
-            if (text) text.textContent = 'Chi tiết';
-            btn.title = 'Mở rộng chi tiết giới thiệu';
-        } else {
-            if (icon) icon.textContent = '▲';
-            if (text) text.textContent = 'Thu gọn';
-            btn.title = 'Thu gọn thanh giới thiệu';
-        }
-    }
-    try {
-        localStorage.setItem('flappy_header_collapsed', isCollapsed ? '1' : '0');
-    } catch(e) {}
-};
-
-// Khởi tạo trạng thái thu gọn mặc định
-(function() {
-    try {
-        var saved = localStorage.getItem('flappy_header_collapsed');
-        var header = document.getElementById('mario-header-bar');
-        var btn = document.getElementById('btn-toggle-game-header');
-        // Mặc định luôn thu gọn để diện tích game to nhất
-        var isCollapsed = (saved !== '0');
-        if (header) {
-            if (isCollapsed) header.classList.add('is-collapsed');
-            else header.classList.remove('is-collapsed');
-        }
-        if (btn) {
-            var icon = btn.querySelector('.collapse-icon');
-            var text = btn.querySelector('.collapse-text');
-            if (isCollapsed) {
-                if (icon) icon.textContent = '▼';
-                if (text) text.textContent = 'Chi tiết';
-            } else {
-                if (icon) icon.textContent = '▲';
-                if (text) text.textContent = 'Thu gọn';
-            }
-        }
-    } catch(e) {}
-})();
-
 function initMarioApp() {
     if (window.marioInstance) return;
 

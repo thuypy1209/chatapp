@@ -2082,80 +2082,104 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 
 /* --- 5. MarioChat Page Components --- */
 .mario-play-chat-wrapper {
-    max-width: 1350px;
-    margin: 15px auto 40px auto;
-    padding: 0 15px;
+    max-width: 1400px;
+    margin: 10px auto 30px auto;
+    padding: 0 14px;
     position: relative;
-    z-index: 10; /* z-index thấp hơn navbar (2000) để menu dropdown nổi ở trên */
+    z-index: 10;
 }
 .mario-header-bar {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
-    padding: 12px 20px;
-    border-radius: 16px;
-    margin-bottom: 15px;
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 18px;
+    border-radius: 14px;
+    margin-bottom: 10px;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
+    justify-content: flex-start;
     gap: 10px;
     border: 2px solid #fbcfe8;
-    box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);
+    box-shadow: 0 3px 10px rgba(244, 114, 182, 0.12);
     position: relative;
-    z-index: 10; /* z-index thấp để menu dropdown nổi hoàn toàn ở trên div này */
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 10;
 }
 
-/* Chế độ thu gọn của Flappy Bangboo: Cuộc Phiêu Lưu Trên Không */
-.mario-header-bar.is-collapsed {
-    padding: 6px 16px !important;
-    margin-bottom: 8px !important;
+.mario-header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.mario-header-bar.is-collapsed .mario-header-icon {
-    font-size: 20px !important;
+.mario-header-icon {
+    font-size: 22px;
+    line-height: 1;
 }
 
-.mario-header-bar.is-collapsed .mario-header-h1 {
-    font-size: 15px !important;
+.mario-header-h1 {
+    font-size: 16px;
+    margin: 0;
+    color: #1e293b;
+    font-weight: 800;
+    letter-spacing: -0.2px;
 }
 
-.mario-header-bar.is-collapsed .mario-header-subtitle {
-    display: none !important;
+/* Thanh công cụ điều khiển nhanh NẰM TRONG KHUNG CHƠI GAME */
+.game-hud-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 30;
+    pointer-events: auto;
 }
 
-.mario-header-bar.is-collapsed .mario-header-tools {
-    gap: 6px !important;
-}
-
-.mario-header-bar.is-collapsed .tool-btn {
-    padding: 5px 9px !important;
-    font-size: 12px !important;
-}
-
-/* Nút Thu gọn / Chi tiết trên thanh Game Header */
-.btn-game-collapse {
-    background: #f1f5f9;
-    border: 2px solid #cbd5e1;
-    color: #475569;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
+.game-hud-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.btn-game-collapse:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    border-color: #94a3b8;
+.game-hud-btn:hover {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: #f472b6;
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
-.btn-game-collapse:active {
+.game-hud-btn:active {
     transform: scale(0.95);
+}
+
+.game-hud-btn.btn-hud-sound {
+    border-color: rgba(244, 114, 182, 0.65);
+}
+
+.game-hud-btn.btn-hud-restart {
+    border-color: rgba(250, 204, 21, 0.65);
+}
+
+.game-hud-btn.btn-hud-fs {
+    border-color: rgba(56, 189, 248, 0.65);
 }
 
 .mario-header-title-box {
@@ -3461,9 +3485,9 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
         font-size: 13px !important;
     }
 
-    /* 8. Trang Mario & Chat (MarioChat.ejs) */
+    /* 8. Trang Mario & Chat (MarioChat.ejs / FlappyChat.ejs) */
     .mario-play-chat-wrapper {
-        margin: 6px auto 20px auto !important;
+        margin: 4px auto 12px auto !important;
         padding: 0 4px !important;
         width: 100% !important;
         max-width: 100vw !important;
@@ -3471,25 +3495,46 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     .game-column {
         width: 100% !important;
         max-width: 100% !important;
-        gap: 10px !important;
+        gap: 8px !important;
     }
     .game-card {
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         border-width: 2.5px !important;
     }
     .game-canvas,
     .game-dom-viewport {
-        border-radius: 10px !important;
-        max-height: 75vh !important;
+        border-radius: 12px !important;
+        aspect-ratio: 4 / 3 !important; /* Tỉ lệ 4:3 cao hơn, to hơn rõ rệt 33% trên màn hình điện thoại */
+        max-height: 65vh !important;
+        min-height: 290px !important;
     }
     .mario-header-bar {
-        padding: 8px 12px !important;
-        margin-bottom: 8px !important;
+        padding: 6px 12px !important;
+        margin-bottom: 6px !important;
+        border-radius: 10px !important;
     }
-    .tool-btn {
+    .mario-header-icon {
+        font-size: 18px !important;
+    }
+    .mario-header-h1 {
+        font-size: 14px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .game-hud-toolbar {
+        top: 8px !important;
+        left: 8px !important;
+        gap: 6px !important;
+    }
+    .game-hud-btn {
         padding: 6px 10px !important;
-        font-size: 12px !important;
-        gap: 4px !important;
+        font-size: 13px !important;
+        border-radius: 10px !important;
+        gap: 0 !important;
+    }
+    .game-hud-btn .hud-btn-label {
+        display: none !important; /* Trên điện thoại: chỉ hiển thị icon 🔊, 🔄, ⛶ trong khung game */
     }
     .chat-card {
         height: 480px !important;
