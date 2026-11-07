@@ -2,7 +2,7 @@
 
 <div class="container home-container">
     <h1 class="home-title">
-        Chào mừng bạn đến với Phổi bạn không phải tôi
+        Chào mừng bạn đến với <%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %>
     </h1>
     <p class="home-subtitle">
         Nền tảng trò chuyện thông minh kết hợp giải trí game retro Super Mario độc đáo!

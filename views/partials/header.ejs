@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Phổi bạn không phải tôi' %></title>
+    <title><%= typeof title !== 'undefined' ? title : ((typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi') %></title>
     <!-- Google Fonts: Quicksand (Rounded Cute Aesthetic with Full Vietnamese Support) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,8 +24,8 @@
 
     <nav class="navbar" id="main-navbar">
         <a href="/" class="navbar-brand">
-            <span class="brand-icon">🍄</span>
-            <span class="brand-text">Phổi bạn không phải tôi</span>
+            <span class="brand-icon"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon) ? siteBrand.brandIcon : '🍄' %></span>
+            <span class="brand-text"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %></span>
         </a>
 
         <!-- Khối Menu bên phải trên PC & Điện Thoại -->
@@ -174,7 +174,7 @@
                 <img src="/images/cat-avatar.png" alt="Avatar Thú Cưng" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerText='🐱';">
             </div>
 
-            <h2 class="welcome-title">Chào mừng bạn đến Phổi bạn không phải tôi!</h2>
+            <h2 class="welcome-title"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.welcomeText) ? siteBrand.welcomeText : ('Chào mừng bạn đến ' + ((typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi') + '!') %></h2>
             <p class="welcome-desc">
                 Vui lòng nhập tên của bạn để bắt đầu trò chuyện & chơi game:
             </p>
@@ -323,6 +323,7 @@
         window.IS_ADMIN = <%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'true' : 'false' %>;
         window.IS_CHAT_OR_GAME_PAGE = <%= (typeof isAutoCollapsedPage !== 'undefined' && isAutoCollapsedPage) ? 'true' : 'false' %>;
         window.SERVER_MUSIC_SETTING = <%- JSON.stringify(typeof activeMusicSetting !== 'undefined' && activeMusicSetting ? activeMusicSetting : { versionIndex: 0, speed: 1.0, customAudioUrl: null }) %>;
+        window.SERVER_SITE_BRAND = <%- JSON.stringify(typeof siteBrand !== 'undefined' && siteBrand ? siteBrand : { brandTitle: 'Phổi bạn không phải tôi', brandIcon: '🍄' }) %>;
     </script>
 
     <!-- Emoji Avatar dễ thương tự động theo tên người dùng -->

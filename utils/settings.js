@@ -42,6 +42,16 @@ const DEFAULT_GAME_CARD = {
 
 let cachedGameCardSetting = { ...DEFAULT_GAME_CARD };
 
+// Cài đặt mặc định Tiêu đề & Logo Thương hiệu website
+const DEFAULT_BRAND_SETTING = {
+    brandTitle: 'Phổi bạn không phải tôi',
+    brandIcon: '🍄',
+    welcomeText: 'Chào mừng bạn đến Phổi bạn không phải tôi!',
+    updatedAt: Date.now()
+};
+
+let cachedBrandSetting = { ...DEFAULT_BRAND_SETTING };
+
 async function initSettings() {
     try {
         const item = await Setting.findOne({ key: 'music_setting' });
@@ -90,6 +100,17 @@ async function initSettings() {
             };
             console.log('Đã nạp cài đặt text thiệp Game Over từ MongoDB, số câu:', cachedGameCardSetting.messages.length, 'random:', cachedGameCardSetting.isRandom);
         }
+
+        // Nạp cài đặt Tiêu đề & Logo thương hiệu từ MongoDB
+        const brandItem = await Setting.findOne({ key: 'site_brand_setting' });
+        if (brandItem && brandItem.value) {
+            cachedBrandSetting = {
+                ...DEFAULT_BRAND_SETTING,
+                ...brandItem.value,
+                updatedAt: brandItem.updatedAt ? new Date(brandItem.updatedAt).getTime() : Date.now()
+            };
+            console.log('Đã nạp cài đặt thương hiệu từ MongoDB:', cachedBrandSetting.brandIcon, cachedBrandSetting.brandTitle);
+        }
     } catch (e) {
         console.error('Lỗi nạp settings ban đầu:', e);
     }
@@ -130,6 +151,28 @@ async function updateGameCardSetting(newSetting) {
     return cachedGameCardSetting;
 }
 
+function getBrandSetting() {
+    return cachedBrandSetting;
+}
+
+async function updateBrandSetting(newSetting) {
+    cachedBrandSetting = {
+        ...cachedBrandSetting,
+        ...newSetting,
+        updatedAt: Date.now()
+    };
+    try {
+        await Setting.findOneAndUpdate(
+            { key: 'site_brand_setting' },
+            { key: 'site_brand_setting', value: cachedBrandSetting, updatedAt: new Date() },
+            { upsert: true, returnDocument: 'after' }
+        );
+    } catch (e) {
+        console.error('Lỗi lưu cài đặt thương hiệu vào MongoDB:', e);
+    }
+    return cachedBrandSetting;
+}
+
 async function updateMusicSetting(newSetting) {
     cachedMusicSetting = {
         ...cachedMusicSetting,
@@ -158,5 +201,8 @@ module.exports = {
     updateGameCardSetting,
     getRandomCardMessage,
     DEFAULT_CARD_MESSAGES,
+    getBrandSetting,
+    updateBrandSetting,
+    DEFAULT_BRAND_SETTING,
     initSettings
 };

@@ -65,6 +65,7 @@ app.use(function(req, res, next) {
     res.locals.adminUsername = adminUser || 'Admin';
     res.locals.activeMusicSetting = settingsUtils.getMusicSetting();
     res.locals.gameOverCard = settingsUtils.getGameCardSetting();
+    res.locals.siteBrand = settingsUtils.getBrandSetting();
     res.locals.getEmojiForName = emojiUtils.getEmojiForName;
     next();
 });
@@ -77,6 +78,11 @@ app.get('/api/music-setting', function(req, res) {
 // API công khai để client đồng bộ cài đặt text thiệp Game Over
 app.get('/api/game-card', function(req, res) {
     res.json({ success: true, card: settingsUtils.getGameCardSetting() });
+});
+
+// API công khai để client đồng bộ tiêu đề & icon thương hiệu website
+app.get('/api/brand-setting', function(req, res) {
+    res.json({ success: true, brand: settingsUtils.getBrandSetting() });
 });
 
 // Đăng ký các đường dẫn (Routes)

@@ -458,6 +458,93 @@
         </div>
     </div>
 
+    <!-- KHỐI: CÀI ĐẶT TIÊU ĐỀ WEBSITE & LOGO THƯƠNG HIỆU -->
+    <div id="section-brand-setting" class="admin-card" style="background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #a7f3d0; box-shadow: 0 8px 24px rgba(16,185,129,0.1); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
+        <div onclick="toggleAdminSection('brand-setting-body', 'brand-toggle-btn')" 
+             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
+             title="Bấm để thu gọn hoặc mở rộng phần này">
+            <h2 style="font-size: 17px; margin: 0; color: #047857; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>🏷️</span> Cài đặt Tiêu đề Website &amp; Logo Thương hiệu
+            </h2>
+            <button type="button" id="brand-toggle-btn"
+                style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; pointer-events: none; transition: all 0.2s ease;">
+                <span>Thu gọn</span> <span class="arrow-icon" style="font-size: 10px;">▲</span>
+            </button>
+        </div>
+
+        <div id="brand-setting-body" style="margin-top: 18px; border-top: 2px dashed #a7f3d0; padding-top: 18px;">
+            <!-- KHUNG XEM TRƯỚC TRỰC TIẾP (LIVE PREVIEW) -->
+            <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">
+                        👁️ Xem trước diện mạo trên Thanh Navbar:
+                    </span>
+                    <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 8px 18px; border-radius: 12px; border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(244,114,182,0.15);">
+                        <span id="preview-brand-icon" style="font-size: 26px; line-height: 1;"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon) ? siteBrand.brandIcon : '🍄' %></span>
+                        <span id="preview-brand-title" style="font-weight: 800; font-size: 18px; color: #db2777; text-shadow: 0 1px 0 #fbbf24, 0 2px 4px rgba(219,39,119,0.25);"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %></span>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #64748b; max-width: 340px; line-height: 1.5;">
+                    💡 Tiêu đề này sẽ được hiển thị trên góc trái thanh điều hướng (Navbar), tiêu đề tab trình duyệt và phần chân trang trên toàn bộ website.
+                </div>
+            </div>
+
+            <form id="form-brand-setting" onsubmit="handleSaveBrandSetting(event)">
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 14px; margin-bottom: 14px;">
+                    <!-- Biểu tượng Logo / Emoji -->
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                            Icon / Emoji (*):
+                        </label>
+                        <input type="text" id="brand-icon-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon) ? siteBrand.brandIcon : '🍄' %>" required
+                            oninput="updateBrandLivePreview()"
+                            style="width: 100%; padding: 10px 12px; font-size: 20px; text-align: center; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
+                            onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
+                    </div>
+
+                    <!-- Tên tiêu đề thương hiệu -->
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                            Tiêu đề thương hiệu website (*):
+                        </label>
+                        <input type="text" id="brand-title-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %>" required placeholder="VD: Phổi bạn không phải tôi, ChatFlex..."
+                            oninput="updateBrandLivePreview()"
+                            style="width: 100%; padding: 10px 14px; font-size: 14px; font-weight: 700; color: #1e293b; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
+                            onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
+                    </div>
+                </div>
+
+                <!-- Gợi ý icon phổ biến -->
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: #ffffff; padding: 6px 12px; border: 1px dashed #86efac; border-radius: 8px; margin-bottom: 14px;">
+                    <span style="font-size: 11px; font-weight: 700; color: #047857; white-space: nowrap; margin-right: 4px;">🎨 Chọn nhanh Icon:</span>
+                    <% ['🍄', '🚀', '🎮', '⭐', '🌸', '☕', '🔥', '💎', '🎧', '🐱', '🍀', '🧁', '🧸', '✨', '👑', '🌈', '⚡', '🍉'].forEach(function(ic) { %>
+                        <button type="button" onclick="selectBrandIcon('<%= ic %>')" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 14px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;" onmouseover="this.style.transform='scale(1.2)';" onmouseout="this.style.transform='scale(1)';"><%= ic %></button>
+                    <% }); %>
+                </div>
+
+                <!-- Lời chào mừng trên Modal -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Lời chào mừng trên khung nhập tên (Tùy chọn):
+                    </label>
+                    <input type="text" id="brand-welcome-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.welcomeText) ? siteBrand.welcomeText : 'Chào mừng bạn đến Phổi bạn không phải tôi!' %>" placeholder="VD: Chào mừng bạn đến Phổi bạn không phải tôi!"
+                        style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
+                        onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
+                </div>
+
+                <!-- Nút bấm lưu -->
+                <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" onclick="resetBrandSettingToDefault()" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                        🔄 Mặc định ("🍄 Phổi bạn không phải tôi")
+                    </button>
+                    <button type="submit" id="btn-save-brand-setting" style="background: #10b981; color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(16,185,129,0.3); transition: background 0.15s ease;">
+                        💾 Lưu thay đổi tiêu đề
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- KHỐI: CÀI ĐẶT BỨC THIỆP ĐỘNG VIÊN GAME OVER -->
     <div id="section-game-card" class="admin-card" style="background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid #fbcfe8; box-shadow: 0 8px 24px rgba(244,114,182,0.1); padding: 22px 24px; margin-bottom: 24px; transition: all 0.2s ease;">
         <div onclick="toggleAdminSection('game-card-body', 'game-card-toggle-btn')" 
@@ -2125,6 +2212,83 @@ document.addEventListener('keydown', function(e) {
         closeDeleteChatUserModal();
     }
 });
+
+
+// ==========================================
+// QUẢN LÝ TIÊU ĐỀ WEBSITE & LOGO THƯƠNG HIỆU
+// ==========================================
+function updateBrandLivePreview() {
+    var iconInput = document.getElementById('brand-icon-input');
+    var titleInput = document.getElementById('brand-title-input');
+    var previewIcon = document.getElementById('preview-brand-icon');
+    var previewTitle = document.getElementById('preview-brand-title');
+    if (iconInput && previewIcon) previewIcon.textContent = iconInput.value.trim() || '🍄';
+    if (titleInput && previewTitle) previewTitle.textContent = titleInput.value.trim() || 'Phổi bạn không phải tôi';
+}
+
+function selectBrandIcon(icon) {
+    var iconInput = document.getElementById('brand-icon-input');
+    if (iconInput) {
+        iconInput.value = icon;
+        updateBrandLivePreview();
+        iconInput.focus();
+    }
+}
+
+function resetBrandSettingToDefault() {
+    var iconInput = document.getElementById('brand-icon-input');
+    var titleInput = document.getElementById('brand-title-input');
+    var welcomeInput = document.getElementById('brand-welcome-input');
+    if (iconInput) iconInput.value = '🍄';
+    if (titleInput) titleInput.value = 'Phổi bạn không phải tôi';
+    if (welcomeInput) welcomeInput.value = 'Chào mừng bạn đến Phổi bạn không phải tôi!';
+    updateBrandLivePreview();
+    showAdminToast('✓ Đã điền thông tin mặc định, nhấn "Lưu thay đổi" để áp dụng!', 'info');
+}
+
+function handleSaveBrandSetting(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var icon = document.getElementById('brand-icon-input').value.trim() || '🍄';
+    var title = document.getElementById('brand-title-input').value.trim() || 'Phổi bạn không phải tôi';
+    var welcome = document.getElementById('brand-welcome-input').value.trim() || ('Chào mừng bạn đến ' + title + '!');
+
+    var btn = document.getElementById('btn-save-brand-setting');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Đang lưu...';
+    }
+
+    fetch('/admin/api/brand-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brandIcon: icon, brandTitle: title, welcomeText: welcome })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '💾 Lưu thay đổi tiêu đề';
+        }
+        if (data.success) {
+            // Cập nhật ngay thanh Navbar của trang Admin hiện tại
+            var navBrandIcon = document.querySelector('.navbar-brand .brand-icon');
+            var navBrandText = document.querySelector('.navbar-brand .brand-text');
+            if (navBrandIcon) navBrandIcon.textContent = icon;
+            if (navBrandText) navBrandText.textContent = title;
+            document.title = title;
+            showAdminToast('✓ Đã cập nhật tiêu đề thương hiệu thành công: ' + icon + ' ' + title, 'success');
+        } else {
+            showAdminToast('❌ ' + (data.error || 'Lỗi khi lưu tiêu đề!'), 'error');
+        }
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '💾 Lưu thay đổi tiêu đề';
+        }
+        showAdminToast('❌ Lỗi kết nối máy chủ!', 'error');
+    });
+}
 
 </script>
 

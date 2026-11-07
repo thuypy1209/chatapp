@@ -43,6 +43,9 @@
         }
     ];
 
+    // Cài đặt ban đầu từ máy chủ (được truyền qua window.SERVER_MUSIC_SETTING)
+    const serverSetting = (window.SERVER_MUSIC_SETTING && typeof window.SERVER_MUSIC_SETTING === 'object') ? window.SERVER_MUSIC_SETTING : {};
+
     // Tự động dọn dẹp các link cũ hỏng nếu có lưu trong trình duyệt
     let storedVersions = null;
     try {
@@ -54,13 +57,17 @@
     } catch (e) {
         storedVersions = null;
     }
-    const MUSIC_VERSIONS = storedVersions || DEFAULT_MUSIC_VERSIONS;
+
+    // Ưu tiên dữ liệu mới nhất từ server nếu có (đảm bảo điện thoại luôn cập nhật phiên bản mới nhất ngay khi mở)
+    const MUSIC_VERSIONS = (serverSetting.versions && Array.isArray(serverSetting.versions) && serverSetting.versions.length > 0)
+        ? serverSetting.versions
+        : (storedVersions || DEFAULT_MUSIC_VERSIONS);
+    try {
+        localStorage.setItem('chatflex_music_versions', JSON.stringify(MUSIC_VERSIONS));
+    } catch (_) {}
 
     // Kiểm tra quyền Admin (được truyền từ server qua window.IS_ADMIN)
     const isAdmin = Boolean(window.IS_ADMIN);
-
-    // Cài đặt ban đầu từ máy chủ (được truyền qua window.SERVER_MUSIC_SETTING)
-    const serverSetting = (window.SERVER_MUSIC_SETTING && typeof window.SERVER_MUSIC_SETTING === 'object') ? window.SERVER_MUSIC_SETTING : {};
     
     let currentVersionIndex = (typeof serverSetting.versionIndex === 'number' && MUSIC_VERSIONS[serverSetting.versionIndex]) ? serverSetting.versionIndex : 0;
     let currentSpeed = serverSetting.speed || 1.0;
@@ -940,18 +947,36 @@
                         }
                     }
 
-                    // Chỉ đồng bộ khi phiên bản nhạc, file MP3 hoặc tốc độ THỰC SỰ THAY ĐỔI
+                    // Đồng bộ khi phiên bản nhạc, file MP3, tốc độ hoặc DANH SÁCH BÀI HÁT THỰC SỰ THAY ĐỔI
                     const versionDiff = (typeof data.versionIndex === 'number' && data.versionIndex !== currentVersionIndex);
                     const customAudioDiff = (data.customAudioUrl !== activeCustomAudioUrl);
                     const speedDiff = (typeof data.speed === 'number' && Math.abs(data.speed - currentSpeed) > 0.05);
 
-                    if (versionDiff || customAudioDiff || speedDiff) {
-                        console.log('⚡ Nhận diện bản nhạc mới trên server:', data);
+                    if (versionDiff || customAudioDiff || speedDiff || isListDifferent) {
+                        console.log('⚡ Nhận diện bản nhạc hoặc MP3 mới trên server:', data);
                         lastSettingTimestamp = data.updatedAt || Date.now();
                         applyMusicSetting(data, true);
                     } else if (data.updatedAt) {
                         lastSettingTimestamp = data.updatedAt;
                     }
+
+                    // Đồng bộ tiêu đề thương hiệu thời gian thực nếu Admin vừa đổi
+                    fetch('/api/brand-setting')
+                        .then(r => r.json())
+                        .then(bData => {
+                            if (bData && bData.brand) {
+                                const brand = bData.brand;
+                                const navBrandIcon = document.querySelector('.navbar-brand .brand-icon');
+                                const navBrandText = document.querySelector('.navbar-brand .brand-text');
+                                if (navBrandIcon && brand.brandIcon && navBrandIcon.textContent.trim() !== brand.brandIcon.trim()) {
+                                    navBrandIcon.textContent = brand.brandIcon;
+                                }
+                                if (navBrandText && brand.brandTitle && navBrandText.textContent.trim() !== brand.brandTitle.trim()) {
+                                    navBrandText.textContent = brand.brandTitle;
+                                }
+                            }
+                        })
+                        .catch(() => {});
                 })
                 .catch(() => {});
         }, 3500);

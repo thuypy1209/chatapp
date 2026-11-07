@@ -819,4 +819,33 @@ router.post('/api/game-card', async function(req, res) {
     }
 });
 
+// 5. API Quản lý Tiêu đề Website & Logo Thương hiệu
+router.get('/api/brand-setting', async function(req, res) {
+    try {
+        var settingsUtils = require('../utils/settings');
+        res.json({ success: true, brand: settingsUtils.getBrandSetting() });
+    } catch (err) {
+        res.json({ success: false, error: 'Lỗi tải cài đặt thương hiệu!' });
+    }
+});
+
+router.post('/api/brand-setting', async function(req, res) {
+    try {
+        var settingsUtils = require('../utils/settings');
+        var brandTitle = req.body.brandTitle ? String(req.body.brandTitle).trim() : 'Phổi bạn không phải tôi';
+        var brandIcon = req.body.brandIcon ? String(req.body.brandIcon).trim() : '🍄';
+        var welcomeText = req.body.welcomeText ? String(req.body.welcomeText).trim() : ('Chào mừng bạn đến ' + brandTitle + '!');
+
+        var updated = await settingsUtils.updateBrandSetting({
+            brandTitle: brandTitle,
+            brandIcon: brandIcon,
+            welcomeText: welcomeText
+        });
+        res.json({ success: true, message: 'Đã lưu cài đặt tiêu đề thương hiệu thành công!', brand: updated });
+    } catch (err) {
+        console.error('Lỗi lưu cài đặt thương hiệu:', err);
+        res.status(500).json({ success: false, error: 'Lỗi khi lưu cài đặt tiêu đề thương hiệu!' });
+    }
+});
+
 module.exports = router;
