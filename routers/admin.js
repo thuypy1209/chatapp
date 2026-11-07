@@ -501,11 +501,18 @@ router.post('/music-setting', async function(req, res) {
         if (isNaN(versionIndex)) versionIndex = 0;
         var speed = parseFloat(req.body.speed) || 1.0;
 
-        var updated = await settingsUtils.updateMusicSetting({
+        var updateData = {
             versionIndex: versionIndex,
-            speed: speed,
-            customAudioUrl: null
-        });
+            speed: speed
+        };
+        if (req.body.customAudioUrl !== undefined) {
+            updateData.customAudioUrl = req.body.customAudioUrl;
+            if (req.body.title) updateData.title = req.body.title;
+        } else {
+            updateData.customAudioUrl = null;
+        }
+
+        var updated = await settingsUtils.updateMusicSetting(updateData);
 
         res.json({ success: true, setting: updated });
     } catch (err) {

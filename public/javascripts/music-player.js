@@ -77,7 +77,7 @@
     // Tự động phát hiện môi trường Facebook Messenger, Instagram, TikTok WebView
     const isFBInApp = /FBAN|FBAV|Messenger|Instagram|Line/i.test(navigator.userAgent);
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const DEFAULT_NATIVE_BGM = '/audio/bgm.mp3';
+    const DEFAULT_NATIVE_BGM = '/audio/graduation-nct-dream.mp3';
     let isNativeAudioActive = Boolean(activeCustomAudioUrl) || isFBInApp;
 
     // Khởi tạo đối tượng HTML5 Audio (chạy độc lập, tương thích 100% với Messenger In-App Browser)
