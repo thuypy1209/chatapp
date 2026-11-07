@@ -29,7 +29,7 @@ body {
     z-index: 10;
     pointer-events: none;
     background-color: #c84c0c;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='48' viewBox='0 0 32 48' preserveAspectRatio='none'%3E%3Crect x='0' y='0' width='100%25' height='100%25' fill='%23c84c0c'/%3E%3Crect x='0' y='12' width='100%25' height='2' fill='%23451a03'/%3E%3Crect x='0' y='30' width='100%25' height='2' fill='%23451a03'/%3E%3Crect x='15' y='12' width='2' height='18' fill='%23451a03'/%3E%3Crect x='0' y='30' width='2' height='18' fill='%23451a03'/%3E%3Crect x='30' y='30' width='2' height='18' fill='%23451a03'/%3E%3Crect x='2' y='16' width='11' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='19' y='16' width='11' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='4' y='34' width='24' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='0' y='0' width='100%25' height='10' fill='%2300a800'/%3E%3Crect x='0' y='0' width='100%25' height='3' fill='%234ade80'/%3E%3Cpolygon points='0,10 4,13 8,10 12,13 16,10 20,13 24,10 28,13 32,10 32,12 0,12' fill='%23004d00'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='48' viewBox='0 0 32 48'%3E%3Crect x='0' y='0' width='100%25' height='100%25' fill='%23c84c0c'/%3E%3Crect x='0' y='12' width='100%25' height='2' fill='%23451a03'/%3E%3Crect x='0' y='30' width='100%25' height='2' fill='%23451a03'/%3E%3Crect x='15' y='12' width='2' height='18' fill='%23451a03'/%3E%3Crect x='0' y='30' width='2' height='18' fill='%23451a03'/%3E%3Crect x='30' y='30' width='2' height='18' fill='%23451a03'/%3E%3Crect x='2' y='16' width='11' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='19' y='16' width='11' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='4' y='34' width='24' height='2' fill='%23ea7c3a' opacity='0.7'/%3E%3Crect x='0' y='0' width='100%25' height='3' fill='%234ade80'/%3E%3Crect x='0' y='3' width='100%25' height='7' fill='%2300a800'/%3E%3Crect x='0' y='10' width='100%25' height='2' fill='%23004d00'/%3E%3C/svg%3E");
     background-repeat: repeat-x;
     background-position: bottom left;
     background-size: 32px 48px;
@@ -1977,9 +1977,9 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 .options-buttons-list {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    max-height: 240px;
-    overflow-y: auto;
+    gap: 6px;
+    max-height: none;
+    overflow-y: visible;
 }
 .options-title {
     font-size: 12px;
@@ -3712,9 +3712,9 @@ body.is-playing .game-hud-toolbar:hover {
         margin-bottom: 2px !important;
     }
     .options-buttons-list {
-        gap: 4px !important;
-        max-height: 180px !important; /* Đảm bảo thấy trọn vẹn cả 3 câu hỏi không bị thanh cuộn cắt mất */
-        overflow-y: auto !important;
+        gap: 5px !important;
+        max-height: none !important; /* Đảm bảo thấy trọn vẹn cả 3 câu hỏi không bị thanh cuộn cắt mất */
+        overflow-y: visible !important;
     }
     .question-btn {
         padding: 6px 10px !important;
@@ -4540,9 +4540,9 @@ select:focus,
         margin-bottom: 2px !important;
     }
     .options-buttons-list {
-        gap: 4px !important;
-        max-height: 180px !important; /* Đảm bảo đủ chiều cao hiển thị trọn vẹn CẢ 3 CÂU HỎI mà không bị thanh cuộn cắt */
-        overflow-y: auto !important;
+        gap: 5px !important;
+        max-height: none !important; /* Đảm bảo đủ chiều cao hiển thị trọn vẹn CẢ 3 CÂU HỎI mà không bị thanh cuộn cắt */
+        overflow-y: visible !important;
     }
     .question-btn {
         padding: 6px 10px !important;

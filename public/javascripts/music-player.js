@@ -252,16 +252,20 @@
                         <span id="play-pause-icon" style="font-size: 11px; letter-spacing: -0.5px;">▶</span> <span id="play-pause-text">Phát</span>
                     </button>
 
-                    <!-- Âm lượng -->
-                    <div style="display: flex; align-items: center; gap: 6px; flex: 1; justify-content: flex-end;">
-                        <button id="btn-toggle-mute" type="button" style="background: none; border: none; font-size: 14px; cursor: pointer; color: #64748b; padding: 1px;">
+                    <!-- Âm lượng: Thiết kế chạm vuốt mượt mà trên điện thoại -->
+                    <div id="music-volume-box" style="display: flex; align-items: center; gap: 4px; flex: 1; justify-content: flex-end; touch-action: none; -webkit-tap-highlight-color: transparent;">
+                        <button id="btn-toggle-mute" type="button" style="background: none; border: none; font-size: 15px; cursor: pointer; color: #64748b; padding: 4px; display: flex; align-items: center; justify-content: center; touch-action: manipulation;" title="Bật/Tắt tiếng">
                             🔊
                         </button>
-                        <input type="range" id="music-volume-slider" min="0" max="100" value="75" style="
-                            width: 65px;
-                            accent-color: #db2777;
-                            cursor: pointer;
-                        ">
+                        <div id="music-slider-touch-wrapper" style="position: relative; display: flex; align-items: center; height: 32px; padding: 0 4px; cursor: pointer; touch-action: none;">
+                            <input type="range" id="music-volume-slider" min="0" max="100" value="75" style="
+                                width: 80px;
+                                height: 28px;
+                                cursor: pointer;
+                                touch-action: none;
+                                -webkit-tap-highlight-color: transparent;
+                            ">
+                        </div>
                     </div>
 
                     ${isAdmin ? `
@@ -354,6 +358,70 @@
             .btn-speed-pill:hover {
                 border-color: #db2777 !important;
             }
+
+            /* Thanh trượt âm lượng mượt mà trên điện thoại & máy tính */
+            #music-volume-slider {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 80px;
+                height: 28px;
+                background: transparent;
+                cursor: pointer;
+                touch-action: none !important;
+                user-select: none;
+                -webkit-user-select: none;
+                outline: none;
+                margin: 0;
+                padding: 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+            #music-volume-slider::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 8px;
+                border-radius: 999px;
+                background: var(--vol-track, linear-gradient(to right, #db2777 0%, #db2777 75%, #e2e8f0 75%, #e2e8f0 100%));
+                cursor: pointer;
+                border: none;
+            }
+            #music-volume-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #db2777;
+                border: 2px solid #ffffff;
+                box-shadow: 0 1px 6px rgba(219, 39, 119, 0.5);
+                cursor: grab;
+                margin-top: -6px;
+                transition: transform 0.1s ease;
+            }
+            #music-volume-slider:active::-webkit-slider-thumb {
+                transform: scale(1.2);
+                cursor: grabbing;
+            }
+            #music-volume-slider::-moz-range-track {
+                width: 100%;
+                height: 8px;
+                border-radius: 999px;
+                background: var(--vol-track, linear-gradient(to right, #db2777 0%, #db2777 75%, #e2e8f0 75%, #e2e8f0 100%));
+                border: none;
+            }
+            #music-volume-slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #db2777;
+                border: 2px solid #ffffff;
+                box-shadow: 0 1px 6px rgba(219, 39, 119, 0.5);
+                border: none;
+            }
+            @media (max-width: 640px) {
+                #chatflex-music-widget {
+                    bottom: 84px !important;
+                    right: 12px !important;
+                }
+            }
         `;
         document.head.appendChild(style);
         document.body.appendChild(widget);
@@ -369,8 +437,38 @@
         const btnPlayPause = document.getElementById('btn-play-pause-music');
         const btnMute = document.getElementById('btn-toggle-mute');
         const volSlider = document.getElementById('music-volume-slider');
+        const touchWrapper = document.getElementById('music-slider-touch-wrapper');
         const btnToggleMoney = document.getElementById('btn-toggle-money-rain');
         const btnBurstMoney = document.getElementById('btn-burst-money');
+
+        // Hàm cập nhật màu nền thanh trượt và icon loa
+        function updateSliderVisual(val) {
+            const pct = Math.max(0, Math.min(100, Math.round(val)));
+            if (volSlider) {
+                volSlider.value = pct;
+                volSlider.style.setProperty('--vol-track', `linear-gradient(to right, #db2777 0%, #db2777 ${pct}%, #e2e8f0 ${pct}%, #e2e8f0 100%)`);
+            }
+            if (btnMute) {
+                btnMute.innerText = (pct === 0) ? '🔇' : '🔊';
+            }
+        }
+
+        // Cập nhật giao diện thanh âm lượng ban đầu
+        updateSliderVisual(volumeLevel);
+
+        // Tính âm lượng từ vị trí chạm/kéo trên màn hình
+        function setVolumeFromClientX(clientX) {
+            const el = touchWrapper || volSlider;
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            if (rect.width <= 0) return;
+            const offsetX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+            const newVol = Math.round((offsetX / rect.width) * 100);
+            volumeLevel = newVol;
+            isMuted = (newVol === 0);
+            updateSliderVisual(newVol);
+            setMusicVolume(newVol);
+        }
 
         // Thu nhỏ / Phóng to Widget
         btnMinimize.addEventListener('click', () => {
@@ -389,22 +487,69 @@
             toggleMusic();
         });
 
-        // Thanh chỉnh âm lượng
-        volSlider.addEventListener('input', (e) => {
-            volumeLevel = parseInt(e.target.value, 10);
-            setMusicVolume(volumeLevel);
-            btnMute.innerText = (volumeLevel === 0) ? '🔇' : '🔊';
-        });
+        // 1. Sự kiện input native (Desktop & Mobile)
+        if (volSlider) {
+            volSlider.addEventListener('input', (e) => {
+                volumeLevel = parseInt(e.target.value, 10);
+                isMuted = (volumeLevel === 0);
+                updateSliderVisual(volumeLevel);
+                setMusicVolume(volumeLevel);
+            });
+            volSlider.addEventListener('change', (e) => {
+                volumeLevel = parseInt(e.target.value, 10);
+                isMuted = (volumeLevel === 0);
+                updateSliderVisual(volumeLevel);
+                setMusicVolume(volumeLevel);
+            });
+        }
+
+        // 2. Chạm vuốt & kéo mượt mà trên cảm ứng Safari iOS / Chrome Mobile
+        let isDraggingVol = false;
+        const dragTarget = touchWrapper || volSlider;
+        if (dragTarget) {
+            dragTarget.addEventListener('touchstart', (e) => {
+                if (!e.touches || !e.touches[0]) return;
+                isDraggingVol = true;
+                setVolumeFromClientX(e.touches[0].clientX);
+                if (e.cancelable) e.preventDefault();
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDraggingVol || !e.touches || !e.touches[0]) return;
+                setVolumeFromClientX(e.touches[0].clientX);
+                if (e.cancelable) e.preventDefault();
+            }, { passive: false });
+
+            const stopTouchDrag = () => { isDraggingVol = false; };
+            window.addEventListener('touchend', stopTouchDrag);
+            window.addEventListener('touchcancel', stopTouchDrag);
+
+            // Pointer Events
+            dragTarget.addEventListener('pointerdown', (e) => {
+                try { dragTarget.setPointerCapture(e.pointerId); } catch (_) {}
+                isDraggingVol = true;
+                setVolumeFromClientX(e.clientX);
+            });
+            dragTarget.addEventListener('pointermove', (e) => {
+                if (isDraggingVol && (e.buttons === 1 || e.pointerType === 'touch')) {
+                    setVolumeFromClientX(e.clientX);
+                }
+            });
+            dragTarget.addEventListener('pointerup', () => { isDraggingVol = false; });
+            dragTarget.addEventListener('pointercancel', () => { isDraggingVol = false; });
+        }
 
         // Nút tắt tiếng (Mute)
         btnMute.addEventListener('click', () => {
             isMuted = !isMuted;
             if (isMuted) {
-                btnMute.innerText = '🔇';
+                updateSliderVisual(0);
                 setMusicVolume(0);
             } else {
-                btnMute.innerText = '🔊';
-                setMusicVolume(volumeLevel);
+                const restoreVol = (volumeLevel > 0) ? volumeLevel : 75;
+                volumeLevel = restoreVol;
+                updateSliderVisual(restoreVol);
+                setMusicVolume(restoreVol);
             }
         });
 
@@ -867,11 +1012,26 @@
     }
 
     function setMusicVolume(val) {
-        if (ytPlayer && isPlayerReady && typeof ytPlayer.setVolume === 'function') {
-            ytPlayer.setVolume(val);
+        const clampedVal = Math.max(0, Math.min(100, Math.round(val)));
+        if (ytPlayer && isPlayerReady) {
+            try {
+                if (clampedVal === 0) {
+                    if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+                } else {
+                    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+                    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(clampedVal);
+                }
+            } catch (err) {
+                console.warn('[MusicPlayer] ytPlayer volume error:', err);
+            }
         }
         if (localAudio) {
-            localAudio.volume = val / 100;
+            try {
+                localAudio.volume = clampedVal / 100;
+                localAudio.muted = (clampedVal === 0);
+            } catch (err) {
+                console.warn('[MusicPlayer] localAudio volume error:', err);
+            }
         }
     }
 
