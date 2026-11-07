@@ -564,7 +564,7 @@
 
             const handleAction = (e) => {
                 if (e) {
-                    if (e.target && e.target.closest && e.target.closest('#flappy-card-body, .game-hud-toolbar, .game-hud-btn, .mario-fs-actions')) {
+                    if (e.target && e.target.closest && e.target.closest('#flappy-card-body, .game-hud-toolbar, .game-hud-btn, .game-hud-exit-btn, .mario-fs-actions')) {
                         return; // Người chơi nhấp vào thiệp hoặc các nút điều khiển -> không bay
                     }
                     if (e.cancelable) e.preventDefault();

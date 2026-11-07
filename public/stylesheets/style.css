@@ -1148,52 +1148,24 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 #mario-game-container:fullscreen .mario-fs-header,
 .is-mario-fullscreen .mario-panel-header,
 .is-mario-fullscreen .mario-fs-header {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    width: 100% !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    flex-shrink: 0 !important;
-    background: #0f172a !important;
-    border-bottom: 2px solid #334155 !important;
-    padding: 0 20px !important;
-    z-index: 1000 !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    box-sizing: border-box !important;
+    display: none !important;
 }
 
 #mario-side-panel:-webkit-full-screen .mario-panel-header,
 #mario-game-container:-webkit-full-screen .mario-fs-header {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    width: 100% !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    flex-shrink: 0 !important;
-    background: #0f172a !important;
-    border-bottom: 2px solid #334155 !important;
-    padding: 0 20px !important;
-    z-index: 1000 !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    box-sizing: border-box !important;
+    display: none !important;
 }
 
-/* Canvas / DOM Viewport trong Fullscreen: Tỉ lệ 16:9 sắc nét, căn giữa hoàn hảo bên dưới thanh Header */
+/* Canvas / DOM Viewport trong Fullscreen: Tỉ lệ 16:9 sắc nét, căn giữa hoàn hảo - Full height vì không còn thanh header */
 #mario-side-panel:fullscreen canvas,
 #mario-game-container:fullscreen canvas,
 .is-mario-fullscreen canvas,
 #mario-side-panel:fullscreen .game-dom-viewport,
 #mario-game-container:fullscreen .game-dom-viewport,
 .is-mario-fullscreen .game-dom-viewport {
-    width: min(100vw, calc((100vh - 48px) * 16 / 9)) !important;
+    width: min(100vw, calc(100vh * 16 / 9)) !important;
     height: auto !important;
-    max-height: calc(100vh - 48px) !important;
+    max-height: 100vh !important;
     aspect-ratio: 16 / 9 !important;
     object-fit: contain !important;
     display: block !important;
@@ -1208,9 +1180,9 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 #mario-game-container:-webkit-full-screen canvas,
 #mario-side-panel:-webkit-full-screen .game-dom-viewport,
 #mario-game-container:-webkit-full-screen .game-dom-viewport {
-    width: min(100vw, calc((100vh - 48px) * 16 / 9)) !important;
+    width: min(100vw, calc(100vh * 16 / 9)) !important;
     height: auto !important;
-    max-height: calc(100vh - 48px) !important;
+    max-height: 100vh !important;
     aspect-ratio: 16 / 9 !important;
     object-fit: contain !important;
     display: block !important;
@@ -2160,10 +2132,56 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     pointer-events: auto !important;
 }
 
+/* Trong chế độ toàn màn hình: vẫn hiện 3 nút arcade pill góc trên bên trái */
 #mario-game-container:fullscreen .game-hud-toolbar,
 #mario-game-container:-webkit-full-screen .game-hud-toolbar,
 .is-mario-fullscreen .game-hud-toolbar {
-    display: none !important;
+    display: flex !important;
+    top: 14px !important;
+    left: 14px !important;
+    z-index: 100000 !important;
+}
+
+/* Nút thoát toàn màn hình nổi góc trên bên phải */
+.game-hud-exit-btn {
+    display: none;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 100000;
+    background: rgba(220, 38, 38, 0.88);
+    color: #ffffff;
+    border: 1.5px solid rgba(248, 113, 113, 0.8);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.game-hud-exit-btn:hover {
+    background: rgba(185, 28, 28, 0.95);
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.6);
+}
+
+.game-hud-exit-btn:active {
+    transform: scale(0.95);
+}
+
+/* Chỉ hiện nút thoát khi đang ở chế độ toàn màn hình */
+#mario-game-container:fullscreen .game-hud-exit-btn,
+#mario-game-container:-webkit-full-screen .game-hud-exit-btn,
+.is-mario-fullscreen .game-hud-exit-btn {
+    display: flex !important;
 }
 
 .game-hud-btn {
@@ -4181,22 +4199,22 @@ select:focus,
    TỐI ƯU HÓA HIỆU NĂNG & GIAO DIỆN DI ĐỘNG (MOBILE OPTIMIZATION)
    ======================================================== */
 @media (max-width: 680px) {
-    /* 1. Header Toàn màn hình trên Mobile: Tinh gọn, không tràn dòng, không đè nút */
+    /* 1. Header Toàn màn hình trên Mobile: Đã ẩn hoàn toàn, chỉ dùng arcade pill buttons */
     #mario-side-panel:fullscreen .mario-panel-header,
     #mario-game-container:fullscreen .mario-fs-header,
     .is-mario-fullscreen .mario-panel-header,
     .is-mario-fullscreen .mario-fs-header,
     #mario-side-panel:-webkit-full-screen .mario-panel-header,
     #mario-game-container:-webkit-full-screen .mario-fs-header {
-        height: 42px !important;
-        min-height: 42px !important;
-        padding: 0 10px !important;
+        display: none !important;
     }
 
-    .mario-fs-guide-text,
-    .mario-fs-fps-badge,
-    .fs-extra-title,
-    .fs-btn-label {
+    /* Nút thoát fullscreen nhỏ hơn trên điện thoại */
+    .game-hud-exit-btn {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+    .game-hud-exit-btn .hud-btn-label {
         display: none !important;
     }
 

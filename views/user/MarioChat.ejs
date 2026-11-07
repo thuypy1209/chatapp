@@ -26,25 +26,10 @@
                 </button>
             </div>
 
-            <!-- Fullscreen Top Header Bar -->
-            <div class="mario-fs-header">
-                <div class="mario-fs-title-box">
-                    <span class="mario-fs-icon">🚀</span>
-                    <span class="mario-fs-text-title">Flappy Bangboo <span class="fs-extra-title">(Zenless Zone Zero)</span></span>
-                    <span class="mario-fs-guide-text">(Chạm màn hình / Chuột hoặc Phím Space để bay)</span>
-                </div>
-                <div class="mario-fs-actions">
-                    <button type="button" id="fs-sound-btn" class="fs-sound-btn" onclick="window.toggleGameAudio(event)" title="Bật / Tắt âm thanh">
-                        🔊
-                    </button>
-                    <button type="button" class="fs-restart-btn" onclick="window.restartFlappyGame(event)" title="Chơi lại">
-                        🔄 <span class="fs-btn-label">Chơi lại</span>
-                    </button>
-                    <button type="button" class="btn-exit-fullscreen" onclick="window.exitFullscreenMario('mario-game-container')" title="Thoát toàn màn hình (ESC)">
-                        ✕ <span class="fs-btn-label">Thoát (ESC)</span>
-                    </button>
-                </div>
-            </div>
+            <!-- Nút thoát toàn màn hình (nổi góc trên bên phải, chỉ hiện khi fullscreen) -->
+            <button type="button" class="game-hud-exit-btn" onclick="window.exitFullscreenMario('mario-game-container')" onpointerdown="event.stopPropagation()" title="Thoát toàn màn hình (ESC)">
+                ✕ <span class="hud-btn-label">Thoát (ESC)</span>
+            </button>
 
             <!-- Màn hình chơi Game Flappy Bangboo (DOM / GPU Hardware Accelerated - Không sử dụng Canvas) -->
             <div id="mario-canvas" class="game-canvas game-dom-viewport" tabindex="0"></div>
