@@ -1593,16 +1593,13 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     margin: 0 auto;
     transition: all 0.3s ease;
 }
-.mario-side-panel {
+.mario-side-panel,
+.mario-side-panel-wrapper {
     display: none;
-    background: #0f172a;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    border: 4px solid #38bdf8;
     position: relative;
     z-index: 105;
     align-self: start;
+    width: 100%;
 }
 .mario-panel-header {
     background: #1e293b;
@@ -2195,6 +2192,28 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
     letter-spacing: -0.2px;
 }
 
+.side-panel-close-btn {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1.5px solid rgba(239, 68, 68, 0.35);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+.side-panel-close-btn:hover {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: #ef4444;
+    transform: translateY(-1px);
+}
+
 /* Thanh công cụ điều khiển nhanh NẰM TRONG KHUNG CHƠI GAME */
 .game-hud-toolbar {
     position: absolute;
@@ -2220,6 +2239,8 @@ body.is-playing .game-hud-toolbar:hover {
 /* Trong chế độ toàn màn hình: vẫn hiện 3 nút arcade pill góc trên bên trái */
 #mario-game-container:fullscreen .game-hud-toolbar,
 #mario-game-container:-webkit-full-screen .game-hud-toolbar,
+#mario-side-container:fullscreen .game-hud-toolbar,
+#mario-side-container:-webkit-full-screen .game-hud-toolbar,
 .is-mario-fullscreen .game-hud-toolbar {
     display: flex !important;
     top: 14px !important;
@@ -2265,6 +2286,8 @@ body.is-playing .game-hud-toolbar:hover {
 /* Chỉ hiện nút thoát khi đang ở chế độ toàn màn hình */
 #mario-game-container:fullscreen .game-hud-exit-btn,
 #mario-game-container:-webkit-full-screen .game-hud-exit-btn,
+#mario-side-container:fullscreen .game-hud-exit-btn,
+#mario-side-container:-webkit-full-screen .game-hud-exit-btn,
 .is-mario-fullscreen .game-hud-exit-btn {
     display: flex !important;
 }

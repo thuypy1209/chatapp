@@ -25,38 +25,40 @@
     <div id="chat-layout-wrapper" class="chat-layout-wrapper">
         
         <!-- BẢNG GAME FLAPPY BANGBOO SONG SONG (Mặc định ẩn, bật lên khi bấm nút) -->
-        <div id="mario-side-panel" class="mario-side-panel">
-            <!-- Header bar của panel -->
-            <div class="mario-panel-header">
-                <div class="mario-panel-title-group">
-                    <span>🚀</span>
-                    <span class="mario-panel-game-title">Flappy Bangboo (Mini Game)</span>
+        <div id="mario-side-panel" class="mario-side-panel-wrapper" style="display: none; align-self: start; width: 100%;">
+            <!-- Thanh tiêu đề Game: Đồng bộ 100% giống bên /flappy (chỉ để lại tên + nút Đóng) -->
+            <div class="mario-header-bar" id="mario-side-header-bar" style="justify-content: space-between;">
+                <div class="mario-header-title-box">
+                    <span class="mario-header-icon">🚀</span>
+                    <h1 class="mario-header-h1">Flappy Bangboo: Cuộc Phiêu Lưu Trên Không</h1>
                 </div>
-                <div class="mario-panel-actions">
-                    <button type="button" id="side-audio-btn" onclick="toggleSideAudio()" title="Bật/Tắt âm thanh game" class="side-audio-btn">
-                        🔊
-                    </button>
-                    <button type="button" onclick="restartSideMario()" title="Chơi lại từ đầu" class="side-restart-btn">
-                        🔄
-                    </button>
-                    <button type="button" id="side-fs-btn" class="btn-mario-fullscreen-toggle side-fs-btn" onclick="toggleFullscreenMario('mario-side-panel')" title="Phóng to toàn màn hình để chơi">
-                        <span class="fs-icon">⛶</span> <span class="fs-text">Toàn màn hình</span>
-                    </button>
-                    <button type="button" onclick="toggleMarioSidePanel()" title="Đóng bảng game" class="side-close-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 4px 8px; font-weight: 700; cursor: pointer; font-size: 13px; line-height: 1;">
-                        ✕
-                    </button>
-                </div>
+                <button type="button" onclick="toggleMarioSidePanel()" title="Đóng bảng game" class="side-panel-close-btn" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 10px; padding: 4px 10px; font-weight: 800; cursor: pointer; font-size: 13px; line-height: 1; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
+                    ✕ <span class="side-close-label" style="font-size: 11px;">Đóng</span>
+                </button>
             </div>
 
-            <!-- Màn hình chơi Game Flappy Bangboo (DOM / GPU Hardware Accelerated - Không sử dụng Canvas) -->
-            <div id="mario-side-canvas" class="mario-panel-canvas game-dom-viewport" tabindex="0"></div>
-
-            <!-- Footer điều khiển & phím ảo cho Side Panel -->
-            <div class="mario-panel-footer">
-                <span>Điều khiển: <b>Chạm màn hình</b> hoặc phím <b>Space / W / ↑</b></span>
-                <div class="mario-side-vkeys" style="display: flex; gap: 8px; width: 100%;">
-                    <button type="button" class="side-vkey-jump" style="flex: 1;" onmousedown="if(window.marioSideGameInstance) window.marioSideGameInstance.flap();" ontouchstart="if(window.marioSideGameInstance) window.marioSideGameInstance.flap(); event.preventDefault();">🚀 BAY LÊN (Space / Chạm)</button>
+            <!-- KHUNG CHÍNH CHƠI GAME: ĐỒNG BỘ 100% THEO CHUẨN /flappy -->
+            <div id="mario-side-container" class="game-card">
+                <!-- Thanh công cụ điều khiển nhanh NẰM TRONG KHUNG CHƠI GAME (Âm thanh, Chơi lại, Toàn màn hình) -->
+                <div class="game-hud-toolbar">
+                    <button type="button" id="side-audio-btn" class="game-hud-btn btn-hud-sound" onclick="window.toggleGameAudio(event)" onpointerdown="event.stopPropagation()" title="Bật / Tắt âm thanh">
+                        <span id="side-sound-icon">🔊</span> <span class="hud-btn-label" id="side-sound-text">Âm thanh: Bật</span>
+                    </button>
+                    <button type="button" id="side-restart-game" class="game-hud-btn btn-hud-restart" onclick="window.restartFlappyGame(event)" onpointerdown="event.stopPropagation()" title="Chơi lại ván mới">
+                        🔄 <span class="hud-btn-label">Chơi lại</span>
+                    </button>
+                    <button type="button" id="side-fs-btn" class="game-hud-btn btn-mario-fullscreen-toggle btn-hud-fs" onclick="window.toggleFullscreenMario('mario-side-container', event)" onpointerdown="event.stopPropagation()" title="Toàn màn hình">
+                        <span class="fs-icon">⛶</span> <span class="fs-text hud-btn-label">Toàn màn hình</span>
+                    </button>
                 </div>
+
+                <!-- Nút thoát toàn màn hình (nổi góc trên bên phải, chỉ hiện khi fullscreen) -->
+                <button type="button" class="game-hud-exit-btn" onclick="window.exitFullscreenMario('mario-side-container')" onpointerdown="event.stopPropagation()" title="Thoát toàn màn hình (ESC)">
+                    ✕ <span class="hud-btn-label">Thoát (ESC)</span>
+                </button>
+
+                <!-- Màn hình chơi Game Flappy Bangboo (DOM / GPU Hardware Accelerated - Không sử dụng Canvas) -->
+                <div id="mario-side-canvas" class="game-canvas game-dom-viewport" tabindex="0"></div>
             </div>
         </div>
 

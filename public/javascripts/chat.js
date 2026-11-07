@@ -481,26 +481,15 @@
                 btnToggle.setAttribute('title', 'Đóng mini game');
             }
 
-            // Khởi tạo Game Mario nếu chưa khởi tạo (không gắn marioChatBridge để không làm mất đoạn hội thoại trong phòng chat)
+            // Khởi tạo Game Flappy Bangboo nếu chưa khởi tạo
             if (!window.marioSideGameInstance && window.MarioGame) {
                 window.marioSideGameInstance = new window.MarioGame('mario-side-canvas');
             }
-
-            // Cập nhật nhãn nút skin ban đầu
             if (window.marioSideGameInstance) {
-                var skinBtn = document.getElementById('side-skin-btn');
-                if (skinBtn && window.marioSideGameInstance.skin) {
-                    if (window.marioSideGameInstance.skin === 'minecraft') {
-                        skinBtn.innerHTML = '🟩 Minecraft';
-                        skinBtn.style.background = '#065f46';
-                        skinBtn.style.borderColor = '#10b981';
-                        skinBtn.style.color = '#a7f3d0';
-                    } else {
-                        skinBtn.innerHTML = '🍄 Mario';
-                        skinBtn.style.background = '#991b1b';
-                        skinBtn.style.borderColor = '#f87171';
-                        skinBtn.style.color = '#fecaca';
-                    }
+                window.flappyInstance = window.marioSideGameInstance;
+                window.marioInstance = window.marioSideGameInstance;
+                if (typeof window.marioSideGameInstance.resizeStage === 'function') {
+                    setTimeout(function() { window.marioSideGameInstance.resizeStage(); }, 60);
                 }
             }
 
@@ -535,41 +524,23 @@
         }
     };
 
-    // Điều khiển Game Mario trên Side Panel
-    window.toggleSideSkin = function() {
-        if (!window.marioSideGameInstance && window.MarioGame) {
-            window.marioSideGameInstance = new window.MarioGame('mario-side-canvas');
-        }
-        if (window.marioSideGameInstance) {
-            var nextSkin = window.marioSideGameInstance.toggleSkin();
-            var skinBtn = document.getElementById('side-skin-btn');
-            if (skinBtn) {
-                if (nextSkin === 'minecraft') {
-                    skinBtn.innerHTML = '🟩 Minecraft';
-                    skinBtn.style.background = '#065f46';
-                    skinBtn.style.borderColor = '#10b981';
-                    skinBtn.style.color = '#a7f3d0';
-                } else {
-                    skinBtn.innerHTML = '🍄 Mario';
-                    skinBtn.style.background = '#991b1b';
-                    skinBtn.style.borderColor = '#f87171';
-                    skinBtn.style.color = '#fecaca';
-                }
-            }
-            var sideCanvas = document.getElementById('mario-side-canvas');
-            if (sideCanvas) sideCanvas.focus();
-        }
-    };
-
-    window.restartSideMario = function() {
-        if (window.marioSideGameInstance) {
+    // Điều khiển Game Flappy Bangboo trên Side Panel
+    window.restartSideMario = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (typeof window.restartFlappyGame === 'function') {
+            window.restartFlappyGame();
+        } else if (window.marioSideGameInstance) {
             window.marioSideGameInstance.restart();
-            var sideCanvas = document.getElementById('mario-side-canvas');
-            if (sideCanvas) sideCanvas.focus();
         }
+        var sideCanvas = document.getElementById('mario-side-canvas');
+        if (sideCanvas) sideCanvas.focus();
     };
 
-    window.toggleSideAudio = function() {
+    window.toggleSideAudio = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (typeof window.toggleGameAudio === 'function') {
+            return window.toggleGameAudio();
+        }
         var audio = window.FlappyAudio || window.MarioAudio;
         if (audio) {
             audio.muted = !audio.muted;

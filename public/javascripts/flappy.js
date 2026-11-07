@@ -829,28 +829,26 @@
         }
         const isMuted = a ? a.muted : false;
 
-        const soundIcon = document.getElementById('sound-icon');
-        const soundText = document.getElementById('sound-text');
-        const btnSound = document.getElementById('btn-toggle-sound');
+        const soundIcons = document.querySelectorAll('#sound-icon, #side-sound-icon, .hud-sound-icon');
+        const soundTexts = document.querySelectorAll('#sound-text, #side-sound-text');
         const fsSoundBtn = document.getElementById('fs-sound-btn');
-        const sideAudioBtn = document.getElementById('side-audio-btn');
+        const soundBtns = document.querySelectorAll('#btn-toggle-sound, #side-audio-btn, .btn-hud-sound');
 
-        if (soundIcon) soundIcon.innerText = isMuted ? '🔇' : '🔊';
-        if (soundText) soundText.innerText = isMuted ? 'Âm thanh: Tắt' : 'Âm thanh: Bật';
+        soundIcons.forEach(el => el.innerText = isMuted ? '🔇' : '🔊');
+        soundTexts.forEach(el => el.innerText = isMuted ? 'Âm thanh: Tắt' : 'Âm thanh: Bật');
         if (fsSoundBtn) fsSoundBtn.innerText = isMuted ? '🔇' : '🔊';
-        if (sideAudioBtn) sideAudioBtn.innerText = isMuted ? '🔇' : '🔊';
 
-        if (btnSound) {
+        soundBtns.forEach(btn => {
             if (isMuted) {
-                btnSound.style.background = 'rgba(100, 116, 139, 0.85)';
-                btnSound.style.borderColor = 'rgba(203, 213, 225, 0.6)';
-                btnSound.style.color = '#ffffff';
+                btn.style.background = 'rgba(100, 116, 139, 0.85)';
+                btn.style.borderColor = 'rgba(203, 213, 225, 0.6)';
+                btn.style.color = '#ffffff';
             } else {
-                btnSound.style.background = 'rgba(190, 24, 93, 0.85)';
-                btnSound.style.borderColor = 'rgba(244, 114, 182, 0.85)';
-                btnSound.style.color = '#ffffff';
+                btn.style.background = 'rgba(190, 24, 93, 0.85)';
+                btn.style.borderColor = 'rgba(244, 114, 182, 0.85)';
+                btn.style.color = '#ffffff';
             }
-        }
+        });
         return !isMuted;
     };
 
@@ -859,7 +857,7 @@
         containerId = containerId || 'mario-game-container';
         let elem = document.getElementById(containerId);
         if (!elem) {
-            elem = document.getElementById('mario-game-container') || document.getElementById('mario-side-panel');
+            elem = document.getElementById('mario-game-container') || document.getElementById('mario-side-container') || document.getElementById('mario-side-panel');
         }
         if (!elem) return;
 
@@ -907,7 +905,7 @@
             document.msExitFullscreen();
         }
 
-        const containers = document.querySelectorAll('#mario-game-container, #mario-side-panel, .is-mario-fullscreen');
+        const containers = document.querySelectorAll('#mario-game-container, #mario-side-container, #mario-side-panel, .is-mario-fullscreen');
         containers.forEach(c => c.classList.remove('is-mario-fullscreen'));
         document.body.classList.remove('in-mario-fullscreen-mode');
 
