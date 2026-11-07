@@ -839,20 +839,22 @@
             versionSelect.value = currentVersionIndex;
         }
 
-        // Trường hợp 1: Phát file MP3 (Admin tải lên hoặc Native Audio trong Messenger)
-        if (activeCustomAudioUrl || isNativeAudioActive) {
+        // Trường hợp 1: Phát file MP3 (Nếu bài này có MP3 riêng, hoặc Admin có MP3 chung, hoặc Native Audio trong Messenger)
+        const currentVer = MUSIC_VERSIONS[currentVersionIndex];
+        const hasTrackAudio = Boolean(currentVer && currentVer.audioUrl);
+
+        if (hasTrackAudio || activeCustomAudioUrl || isNativeAudioActive) {
             if (ytPlayer && isPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
                 try { ytPlayer.pauseVideo(); } catch(_) {}
             }
 
-            const currentVer = MUSIC_VERSIONS[currentVersionIndex];
             const displayTitle = setting.title || (activeCustomAudioUrl ? "Graduation (Custom Audio)" : (currentVer ? currentVer.title : "Graduation (Relaxing Piano)"));
             if (trackTitle) trackTitle.innerText = displayTitle;
             if (trackArtist) {
-                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">🎹 Audio Native</span>`;
+                trackArtist.innerHTML = `<span style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1.5px 7px; border-radius: 6px; color: #047857; display: inline-flex; align-items: center; gap: 4px;">🎵 MP3 Audio</span>`;
             }
 
-            const targetSrc = activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
+            const targetSrc = (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
             initNativeAudio(targetSrc);
 
             if (isPlaying && !isUserPaused) {
@@ -1051,8 +1053,9 @@
     function playMusic() {
         isUserPaused = false;
         const currentVer = MUSIC_VERSIONS[currentVersionIndex];
-        const targetSrc = activeCustomAudioUrl || (currentVer && currentVer.audioUrl) || DEFAULT_NATIVE_BGM;
-        if (isNativeAudioActive || isFBInApp || activeCustomAudioUrl) {
+        const hasTrackAudio = Boolean(currentVer && currentVer.audioUrl);
+        const targetSrc = (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+        if (hasTrackAudio || isNativeAudioActive || isFBInApp || activeCustomAudioUrl) {
             const audio = initNativeAudio(targetSrc);
             audio.muted = false;
             audio.volume = volumeLevel / 100;

@@ -22,9 +22,11 @@ var storage = multer.diskStorage({
         } else if (file.fieldname === 'imageFile' || file.fieldname.startsWith('nodeImage_')) {
             // Lưu vào thư mục chung public/uploads/images/
             cb(null, 'public/uploads/images/');
-        } else if (file.fieldname === 'audioFile' || file.fieldname === 'audio' || file.fieldname === 'musicFile' || file.fieldname.startsWith('nodeAudio_')) {
+        } else if (file.fieldname === 'audioFile' || file.fieldname === 'audio' || file.fieldname === 'musicFile' || file.fieldname === 'trackAudio' || file.fieldname.startsWith('nodeAudio_')) {
             // Lưu vào thư mục public/uploads/audios/
-            cb(null, 'public/uploads/audios/');
+            var audioDir = path.join(__dirname, '../public/uploads/audios/');
+            if (!fs.existsSync(audioDir)) fs.mkdirSync(audioDir, { recursive: true });
+            cb(null, audioDir);
         } else if (file.fieldname === 'scriptFile') {
             // Lưu file kịch bản vào thư mục public/uploads/seeds/
             cb(null, 'public/uploads/seeds/');
@@ -544,7 +546,8 @@ router.post('/music-track-upload', upload.single('trackAudio'), async function(r
         if (!req.file) {
             return res.json({ success: false, error: 'Vui lòng chọn file âm thanh .mp3 hoặc .m4a!' });
         }
-        var audioUrl = '/uploads/audios/' + req.file.filename;
+        var normPath = req.file.path.replace(/\\/g, '/');
+        var audioUrl = normPath.includes('/uploads/audios/') ? ('/uploads/audios/' + req.file.filename) : ('/uploads/' + req.file.filename);
         res.json({ success: true, audioUrl: audioUrl, fileName: req.file.originalname });
     } catch (err) {
         console.error('Lỗi upload file MP3 bài hát:', err);
