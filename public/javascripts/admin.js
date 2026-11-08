@@ -6,13 +6,19 @@
  * - Live Audio Player Preview
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+window.initAdminEnhancements = function() {
     initAvatarStudio();
     initScriptPreview();
     initAudioPreview();
     initIconPicker();
     initDynamicNodes();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.initAdminEnhancements);
+} else {
+    window.initAdminEnhancements();
+}
 
 // --- 1. AVATAR STUDIO: XEM TRƯỚC, TẢI ẢNH, CHỌN ẢNH MẪU & URL ---
 function initAvatarStudio() {

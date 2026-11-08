@@ -799,6 +799,18 @@
 
             this._rafId = requestAnimationFrame(this._boundLoop);
         }
+
+        // Dọn dẹp game khi chuyển trang (hỗ trợ Seamless SPA Router không giật lag)
+        destroy() {
+            if (this._rafId) {
+                cancelAnimationFrame(this._rafId);
+                this._rafId = null;
+            }
+            this.gameState = 'DESTROYED';
+            if (this.container) {
+                this.container.innerHTML = '';
+            }
+        }
     }
 
     // Export toàn cục (tương thích tuyệt đối cả FlappyBirdGame & MarioGame)

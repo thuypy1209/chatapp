@@ -69,6 +69,7 @@ function initMarioApp() {
         hudJump.addEventListener('pointerdown', triggerJump);
     }
 }
+window.initMarioApp = initMarioApp;
 
 if (document.readyState === 'loading') {
     document.addEventListener("DOMContentLoaded", initMarioApp);

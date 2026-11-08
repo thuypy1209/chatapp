@@ -4605,3 +4605,12 @@ body.game-page-active .controls-card {
 body.game-page-active .game-card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* Seamless SPA Router View Container */
+.app-router-view {
+    width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 120px);
+}

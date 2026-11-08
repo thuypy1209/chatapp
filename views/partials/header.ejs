@@ -65,7 +65,7 @@
                                 <% } %>
                                 <span id="nav-username-display"><%= currentUser %></span>
                             </span>
-                            <a href="/auth/logout" title="Đổi tên / Đăng xuất" class="user-badge-logout" aria-label="Đăng xuất">
+                            <a href="/auth/logout" title="Đổi tên / Đăng xuất" class="user-badge-logout" aria-label="Đăng xuất" data-no-pjax="true">
                                 ✕
                             </a>
                         </div>
@@ -134,8 +134,8 @@
             });
         }
 
-        // Tự động đánh dấu trang hiện tại trên Menu (Client-side sync)
-        (function highlightActivePage() {
+        // Tự động đánh dấu trang hiện tại trên Menu (Client-side sync & SPA Router)
+        window.highlightActivePage = function() {
             var path = window.location.pathname.toLowerCase();
             var navItems = document.querySelectorAll('#navbar-nav-list a.nav-item');
             navItems.forEach(function(item) {
@@ -160,7 +160,8 @@
                     if (oldBadge) oldBadge.remove();
                 }
             });
-        })();
+        };
+        window.highlightActivePage();
     })();
     </script>
     <div class="cloud-retro cloud-1"></div>
@@ -334,3 +335,9 @@
     <!-- Hiệu ứng Mưa tiền xu & tiền giấy + Trình phát nhạc Graduation (NCT DREAM) -->
     <script src="/javascripts/money-rain.js"></script>
     <script src="/javascripts/music-player.js"></script>
+
+    <!-- THANH TIẾN TRÌNH CHUYỂN TRANG SEAMLESS (PJAX PROGRESS BAR) -->
+    <div id="spa-progress-bar" style="position: fixed; top: 0; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, #ec4899, #f43f5e, #8b5cf6); z-index: 999999; transition: width 0.25s ease, opacity 0.3s ease; pointer-events: none; opacity: 0; box-shadow: 0 0 10px rgba(236,72,153,0.7);"></div>
+
+    <!-- KHUNG NỘI DUNG CHÍNH ĐƯỢC CHUYỂN TRANG MƯỢT MÀ KHÔNG DỪNG NHẠC (SPA ROUTER VIEW) -->
+    <main id="app-router-view" class="app-router-view">
