@@ -1087,16 +1087,47 @@
 
             <div id="chat-users-alert" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px;"></div>
 
-            <!-- Thanh tìm kiếm & công cụ -->
+            <!-- Thanh tìm kiếm, Bộ lọc & công cụ -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                <div style="position: relative; flex: 1; max-width: 380px; min-width: 240px;">
-                    <input type="text" id="search-chat-users-input" placeholder="🔍 Tìm kiếm theo tên người dùng..." oninput="handleSearchChatUsers(this.value)"
-                        style="width: 100%; padding: 9px 14px 9px 36px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; transition: border-color 0.2s;"
-                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'">
-                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none;">👤</span>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1; max-width: 820px;">
+                    <!-- Ô tìm kiếm theo tên -->
+                    <div style="position: relative; flex: 1; min-width: 200px; max-width: 300px;">
+                        <input type="text" id="search-chat-users-input" placeholder="🔍 Tìm kiếm theo tên người dùng..." oninput="handleSearchChatUsers(this.value)"
+                            style="width: 100%; padding: 9px 14px 9px 36px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; transition: border-color 0.2s; box-sizing: border-box;"
+                            onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'">
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none;">👤</span>
+                    </div>
+
+                    <!-- Chỗ lọc ngay cạnh ô tìm kiếm: Lọc trang truy cập -->
+                    <div style="min-width: 180px; flex: 1; max-width: 240px;">
+                        <select id="filter-chat-users-page" onchange="handleFilterChatUsers()"
+                            style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-weight: 700; color: #334155; background: #ffffff; outline: none; cursor: pointer; transition: border-color 0.2s; box-sizing: border-box;"
+                            onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'" title="Lọc danh sách theo trang người dùng đã vào">
+                            <option value="all">🌐 Tất cả trang truy cập</option>
+                            <option value="Game Flappy Cat">🎮 Game Flappy Cat</option>
+                            <option value="Phòng Chat">💬 Phòng Chat</option>
+                            <option value="Chat: Bác Sĩ Phổi Khỏe">🤖 Chat: Bác Sĩ Phổi Khỏe</option>
+                        </select>
+                    </div>
+
+                    <!-- Chỗ lọc sắp xếp -->
+                    <div style="min-width: 170px; flex: 1; max-width: 220px;">
+                        <select id="filter-chat-users-sort" onchange="handleFilterChatUsers()"
+                            style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-weight: 700; color: #334155; background: #ffffff; outline: none; cursor: pointer; transition: border-color 0.2s; box-sizing: border-box;"
+                            onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#cbd5e1'" title="Sắp xếp danh sách người dùng">
+                            <option value="active_desc">⚡ Hoạt động gần nhất</option>
+                            <option value="created_desc">🆕 Lần đầu tham gia (Mới nhất)</option>
+                            <option value="created_asc">⏳ Lần đầu tham gia (Cũ nhất)</option>
+                            <option value="visits_desc">🔥 Số lần vào nhiều nhất</option>
+                            <option value="name_asc">🔤 Tên (A - Z)</option>
+                        </select>
+                    </div>
                 </div>
+
+                <!-- Nút làm mới -->
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button type="button" onclick="refreshChatUsersList()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <button type="button" onclick="refreshChatUsersList()" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s ease;"
+                        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                         🔄 Làm mới
                     </button>
                 </div>
@@ -1118,7 +1149,7 @@
                     </thead>
                     <tbody id="chat-users-table-body">
                         <% if (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 0) { %>
-                            <% chatUsers.forEach(function(u, idx) { %>
+                            <% chatUsers.slice(0, 10).forEach(function(u, idx) { %>
                                 <tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-<%= u._id %>" class="chat-user-row" data-username="<%= (u.username || '').toLowerCase() %>">
                                     <td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">
                                         #<%= idx + 1 %>
@@ -1169,6 +1200,28 @@
                         <% } %>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- THANH PHÂN TRANG (PAGINATION: 10 NGƯỜI DÙNG / TRANG, NÚT TIẾP & QUAY LẠI) -->
+            <div id="chat-users-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 16px; background: #fdfbf7; border: 1.5px solid #fbcfe8; border-radius: 12px; flex-wrap: wrap; gap: 10px;">
+                <div id="chat-users-page-info" style="font-size: 13px; font-weight: 700; color: #64748b;">
+                    Đang hiển thị <span id="pagination-from" style="color: #db2777; font-weight: 800;">1</span> - <span id="pagination-to" style="color: #db2777; font-weight: 800;">10</span> trên tổng số <span id="pagination-total" style="color: #1e293b; font-weight: 800;"><%= (typeof chatUsers !== 'undefined' && chatUsers) ? chatUsers.length : 0 %></span> người dùng
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <button type="button" id="btn-page-prev" onclick="goToChatUsersPage(currentChatUserPage - 1)"
+                        style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        ◀ Quay lại
+                    </button>
+
+                    <div id="chat-users-page-numbers" style="display: flex; gap: 4px; align-items: center;">
+                    </div>
+
+                    <button type="button" id="btn-page-next" onclick="goToChatUsersPage(currentChatUserPage + 1)"
+                        style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        <span id="btn-page-next-text">Tiếp trang ▶</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -2300,84 +2353,248 @@ initCollapsibleSections();
 <script src="/javascripts/admin.js"></script>
 <script>
 
-// ===== QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT USERS) =====
-function handleSearchChatUsers(keyword) {
-    var kw = (keyword || '').toLowerCase().trim();
-    var rows = document.querySelectorAll('.chat-user-row');
-    var visibleCount = 0;
-    rows.forEach(function(row) {
-        var user = row.getAttribute('data-username') || '';
-        if (!kw || user.includes(kw)) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+// ===== QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT USERS: LỌC & PHÂN TRANG 10) =====
+var ALL_CHAT_USERS = <%- JSON.stringify(typeof chatUsers !== 'undefined' && chatUsers ? chatUsers : []) %>;
+var currentChatUserPage = 1;
+var CHAT_USERS_PAGE_SIZE = 10;
+var currentIsSuperAdmin = <%= (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) ? 'true' : 'false' %>;
+
+function formatVN(d) {
+    if (!d) return '';
+    try {
+        return new Date(d).toLocaleString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour12: false
+        });
+    } catch(e) { return ''; }
+}
+
+function updatePageFilterOptions() {
+    var select = document.getElementById('filter-chat-users-page');
+    if (!select || !ALL_CHAT_USERS || !Array.isArray(ALL_CHAT_USERS)) return;
+    var currentVal = select.value;
+    var pages = [];
+    ALL_CHAT_USERS.forEach(function(u) {
+        var p = (u.lastPage || 'Phòng Chat').trim();
+        if (p && !pages.includes(p)) pages.push(p);
     });
-    var emptyRow = document.getElementById('chat-users-empty-row');
-    if (emptyRow) {
-        emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+
+    var html = '<option value="all">🌐 Tất cả trang truy cập</option>';
+    pages.forEach(function(p) {
+        var icon = '💬';
+        if (/flappy|game|cat|bangboo/i.test(p)) icon = '🎮';
+        else if (/chat:|bác sĩ|nhân vật/i.test(p)) icon = '🤖';
+        var selected = (p === currentVal) ? ' selected' : '';
+        html += '<option value="' + escapeHtml(p) + '"' + selected + '>' + icon + ' ' + escapeHtml(p) + '</option>';
+    });
+    select.innerHTML = html;
+}
+
+function renderChatUsersTable() {
+    var tbody = document.getElementById('chat-users-table-body');
+    var badge = document.getElementById('chat-users-badge-count');
+    var fromEl = document.getElementById('pagination-from');
+    var toEl = document.getElementById('pagination-to');
+    var totalEl = document.getElementById('pagination-total');
+    var btnPrev = document.getElementById('btn-page-prev');
+    var btnNext = document.getElementById('btn-page-next');
+    var pageNumbersEl = document.getElementById('chat-users-page-numbers');
+
+    if (!tbody || !ALL_CHAT_USERS) return;
+
+    var searchInput = document.getElementById('search-chat-users-input');
+    var kw = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    var pageSelect = document.getElementById('filter-chat-users-page');
+    var pageFilter = pageSelect ? pageSelect.value : 'all';
+    var sortSelect = document.getElementById('filter-chat-users-sort');
+    var sortFilter = sortSelect ? sortSelect.value : 'active_desc';
+
+    // 1. Lọc theo từ khóa tìm kiếm & trang truy cập
+    var filtered = ALL_CHAT_USERS.filter(function(u) {
+        var username = (u.username || '').toLowerCase();
+        var userPage = (u.lastPage || 'Phòng Chat').trim();
+
+        if (kw && !username.includes(kw)) return false;
+
+        if (pageFilter !== 'all') {
+            if (userPage !== pageFilter && !userPage.toLowerCase().includes(pageFilter.toLowerCase())) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    // 2. Sắp xếp danh sách
+    filtered.sort(function(a, b) {
+        var aActive = a.lastActive ? new Date(a.lastActive).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        var bActive = b.lastActive ? new Date(b.lastActive).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        var aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        var bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        var aVisits = a.visitCount || 1;
+        var bVisits = b.visitCount || 1;
+
+        if (sortFilter === 'active_desc') return bActive - aActive;
+        if (sortFilter === 'created_desc') return bCreated - aCreated;
+        if (sortFilter === 'created_asc') return aCreated - bCreated;
+        if (sortFilter === 'visits_desc') return bVisits - aVisits;
+        if (sortFilter === 'name_asc') return (a.username || '').localeCompare(b.username || '');
+        return bActive - aActive;
+    });
+
+    // 3. Phân trang 10 người dùng / trang
+    var totalUsers = filtered.length;
+    var totalPages = Math.ceil(totalUsers / CHAT_USERS_PAGE_SIZE) || 1;
+
+    if (currentChatUserPage > totalPages) currentChatUserPage = totalPages;
+    if (currentChatUserPage < 1) currentChatUserPage = 1;
+
+    var startIndex = (currentChatUserPage - 1) * CHAT_USERS_PAGE_SIZE;
+    var endIndex = Math.min(startIndex + CHAT_USERS_PAGE_SIZE, totalUsers);
+    var pageUsers = filtered.slice(startIndex, endIndex);
+
+    if (badge) {
+        badge.innerText = totalUsers + ' người dùng';
+    }
+
+    // 4. Render danh sách dòng
+    if (totalUsers === 0) {
+        tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Không tìm thấy người dùng nào phù hợp với bộ lọc.</td></tr>';
+    } else {
+        var html = '';
+        pageUsers.forEach(function(u, idx) {
+            var stt = startIndex + idx + 1;
+            var created = u.createdAt ? formatVN(u.createdAt) : 'Không rõ';
+            var active = u.lastActive ? formatVN(u.lastActive) : (u.createdAt ? formatVN(u.createdAt) : 'Mới tham gia');
+            var page = u.lastPage || 'Phòng Chat';
+            var visits = u.visitCount || 1;
+            var cleanName = (u.username || '').replace(/'/g, "\\'");
+            var avatarEmoji = window.getEmojiForName ? window.getEmojiForName(u.username) : '🐱';
+
+            html += '<tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-' + u._id + '" class="chat-user-row" data-username="' + (u.username || '').toLowerCase() + '">' +
+                '<td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">#' + stt + '</td>' +
+                '<td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">' +
+                    '<div style="display: flex; align-items: center; gap: 8px;">' +
+                        '<span class="chat-user-avatar" data-name="' + cleanName + '" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 4px rgba(219,39,119,0.1);">' + avatarEmoji + '</span>' +
+                        '<span style="font-size: 14px;">' + escapeHtml(u.username) + '</span>' +
+                    '</div>' +
+                '</td>' +
+                '<td style="padding: 10px 14px; color: #475569; font-size: 12px;">' + created + '</td>' +
+                '<td style="padding: 10px 14px; color: #059669; font-weight: 600; font-size: 12px;">' + active + '</td>' +
+                '<td style="padding: 10px 14px;"><span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">' + escapeHtml(page) + '</span></td>' +
+                '<td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">' + visits + '</td>' +
+                '<td style="padding: 10px 14px; text-align: right;">' +
+                    (currentIsSuperAdmin ? 
+                        '<button type="button" onclick="openDeleteChatUserModal('' + u._id + '', '' + cleanName + '')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' :
+                        '<span class="admin-badge-viewonly" title="Chỉ Super Admin mới có quyền xóa người dùng">👁️ Chỉ xem</span>'
+                    ) +
+                '</td>' +
+            '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+
+    // 5. Cập nhật thông tin phân trang (From - To / Total)
+    if (fromEl) fromEl.innerText = totalUsers > 0 ? (startIndex + 1) : 0;
+    if (toEl) toEl.innerText = endIndex;
+    if (totalEl) totalEl.innerText = totalUsers;
+
+    // 6. Cập nhật nút "Quay lại"
+    if (btnPrev) {
+        if (currentChatUserPage <= 1) {
+            btnPrev.disabled = true;
+            btnPrev.style.opacity = '0.45';
+            btnPrev.style.cursor = 'not-allowed';
+            btnPrev.style.pointerEvents = 'none';
+            btnPrev.innerText = '◀ Quay lại';
+        } else {
+            btnPrev.disabled = false;
+            btnPrev.style.opacity = '1';
+            btnPrev.style.cursor = 'pointer';
+            btnPrev.style.pointerEvents = 'auto';
+            btnPrev.innerText = '◀ Quay lại trang ' + (currentChatUserPage - 1);
+        }
+    }
+
+    // 7. Cập nhật nút "Tiếp trang"
+    if (btnNext) {
+        if (currentChatUserPage >= totalPages) {
+            btnNext.disabled = true;
+            btnNext.style.opacity = '0.45';
+            btnNext.style.cursor = 'not-allowed';
+            btnNext.style.pointerEvents = 'none';
+            btnNext.innerHTML = '<span>Tiếp trang ▶</span>';
+        } else {
+            btnNext.disabled = false;
+            btnNext.style.opacity = '1';
+            btnNext.style.cursor = 'pointer';
+            btnNext.style.pointerEvents = 'auto';
+            btnNext.innerHTML = '<span>Tiếp trang ' + (currentChatUserPage + 1) + ' ▶</span>';
+        }
+    }
+
+    // 8. Render các nút số trang 1, 2, 3...
+    if (pageNumbersEl) {
+        var pNumbersHtml = '';
+        for (var p = 1; p <= totalPages; p++) {
+            var isActive = (p === currentChatUserPage);
+            pNumbersHtml += '<button type="button" onclick="goToChatUsersPage(' + p + ')" style="' +
+                'padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.15s ease; ' +
+                (isActive ? 
+                    'background: #db2777; color: #ffffff; border: 1.5px solid #db2777; box-shadow: 0 2px 6px rgba(219,39,119,0.3);' : 
+                    'background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1;'
+                ) +
+                '" title="Chuyển đến trang ' + p + '">' + p + '</button>';
+        }
+        pageNumbersEl.innerHTML = pNumbersHtml;
     }
 }
 
-function refreshChatUsersList() {
-    var tbody = document.getElementById('chat-users-table-body');
-    var badge = document.getElementById('chat-users-badge-count');
-    if (!tbody) return;
+function goToChatUsersPage(page) {
+    currentChatUserPage = page;
+    renderChatUsersTable();
+    var tableSection = document.getElementById('section-chat-users');
+    if (tableSection && window.innerWidth <= 768) {
+        tableSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
 
+function handleSearchChatUsers(keyword) {
+    currentChatUserPage = 1;
+    renderChatUsersTable();
+}
+
+function handleFilterChatUsers() {
+    currentChatUserPage = 1;
+    renderChatUsersTable();
+}
+
+function refreshChatUsersList() {
+    var badge = document.getElementById('chat-users-badge-count');
     fetch('/admin/api/chat-users')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success && data.users) {
-                if (badge) badge.innerText = data.users.length + ' người dùng';
-                if (data.users.length === 0) {
-                    tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Chưa có người dùng nào nhập tên vào trò chuyện.</td></tr>';
-                    return;
-                }
-                var html = '';
-                data.users.forEach(function(u, idx) {
-                    var formatVN = function(d) {
-                        if (!d) return '';
-                        try {
-                            return new Date(d).toLocaleString('vi-VN', {
-                                timeZone: 'Asia/Ho_Chi_Minh',
-                                hour: '2-digit', minute: '2-digit', second: '2-digit',
-                                day: '2-digit', month: '2-digit', year: 'numeric',
-                                hour12: false
-                            });
-                        } catch(e) { return ''; }
-                    };
-                    var created = u.createdAt ? formatVN(u.createdAt) : 'Không rõ';
-                    var active = u.lastActive ? formatVN(u.lastActive) : (u.createdAt ? formatVN(u.createdAt) : 'Mới tham gia');
-                    var page = u.lastPage || 'Phòng Chat';
-                    var visits = u.visitCount || 1;
-                    var cleanName = (u.username || '').replace(/'/g, "\\'");
-                    html += '<tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-' + u._id + '" class="chat-user-row" data-username="' + (u.username || '').toLowerCase() + '">' +
-                        '<td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">#' + (idx + 1) + '</td>' +
-                        '<td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">' +
-                            '<div style="display: flex; align-items: center; gap: 8px;">' +
-                                '<span class="chat-user-avatar" data-name="' + cleanName + '" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 4px rgba(219,39,119,0.1);">' + (window.getEmojiForName ? window.getEmojiForName(u.username) : '🐱') + '</span>' +
-                                '<span style="font-size: 14px;">' + u.username + '</span>' +
-                            '</div>' +
-                        '</td>' +
-                        '<td style="padding: 10px 14px; color: #475569; font-size: 12px;">' + created + '</td>' +
-                        '<td style="padding: 10px 14px; color: #059669; font-weight: 600; font-size: 12px;">' + active + '</td>' +
-                        '<td style="padding: 10px 14px;"><span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">' + page + '</span></td>' +
-                        '<td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">' + visits + '</td>' +
-                        '<td style="padding: 10px 14px; text-align: right;">' +
-                            (currentIsSuperAdmin ? 
-                                '<button type="button" onclick="openDeleteChatUserModal(\'' + u._id + '\', \'' + cleanName + '\')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' :
-                                '<span class="admin-badge-viewonly" title="Chỉ Super Admin mới có quyền xóa người dùng">👁️ Chỉ xem</span>'
-                            ) +
-                        '</td>' +
-                    '</tr>';
-                });
-                tbody.innerHTML = html;
+                window.ALL_CHAT_USERS = data.users;
+                updatePageFilterOptions();
+                renderChatUsersTable();
             }
         })
         .catch(function(err) {
             console.error('Lỗi refresh chat users:', err);
         });
+}
+
+// Khởi chạy cập nhật bộ lọc và phân trang ngay khi tải trang
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePageFilterOptions();
+        renderChatUsersTable();
+    });
+} else {
+    updatePageFilterOptions();
+    renderChatUsersTable();
 }
 
 var currentIsSuperAdmin = <%= (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) ? 'true' : 'false' %>;
@@ -2445,15 +2662,8 @@ function executeDeleteChatUser(userId) {
                 alertEl.style.color = '#166534';
                 setTimeout(function() { alertEl.style.display = 'none'; }, 4000);
             }
-            var remaining = document.querySelectorAll('.chat-user-row').length;
-            var countEl = document.getElementById('chat-users-badge-count');
-            if (countEl) countEl.innerText = remaining + ' người dùng';
-            if (remaining === 0) {
-                var tbody = document.getElementById('chat-users-table-body');
-                if (tbody) {
-                    tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Chưa có người dùng nào nhập tên vào trò chuyện.</td></tr>';
-                }
-            }
+            window.ALL_CHAT_USERS = window.ALL_CHAT_USERS.filter(function(u) { return u._id !== userId; });
+            renderChatUsersTable();
         } else {
             if (errEl) {
                 errEl.innerText = data.error || 'Lỗi xóa người dùng!';
