@@ -167,23 +167,23 @@
                             <!-- CÁC THAO TÁC AVATAR -->
                             <div style="flex: 1; min-width: 0;">
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-                                    <button type="button" onclick="document.getElementById('avatar-input').click()" 
-                                        style="background: #fdf2f8; color: #db2777; border: 1.5px solid #fbcfe8; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 0 #f472b6;">
-                                        <span>📁</span> Chọn ảnh từ máy tính
-                                    </button>
+                                    <label for="avatar-input" 
+                                        style="background: #fdf2f8; color: #db2777; border: 1.5px solid #fbcfe8; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 0 #f472b6;">
+                                        <span>📷</span> <span id="avatar-choose-text">Chọn ảnh từ thiết bị / máy tính</span>
+                                    </label>
                                     
                                     <button type="button" id="btn-remove-avatar" style="display: none; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
                                         ✕ Gỡ ảnh
                                     </button>
                                 </div>
 
-                                <!-- Thẻ input file ẩn (kích hoạt bằng click) -->
+                                <!-- Thẻ input file ẩn (kích hoạt bằng click hoặc label) -->
                                 <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display: none;">
                                 <input type="hidden" id="avatar-url-input" name="avatarUrl" value="">
 
                                 <!-- Trạng thái ảnh -->
                                 <div id="avatar-info-text" style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
-                                    Bấm vào vòng tròn hoặc kéo thả file ảnh vào
+                                    Chạm vào vòng tròn hoặc bấm nút để chọn ảnh từ điện thoại / máy tính
                                 </div>
 
                                 <!-- Ô dán URL ảnh trực tuyến -->
@@ -234,22 +234,22 @@
 
             </div>
 
-            <!-- Phần 3: File Kịch bản .txt (CÓ XEM TRƯỚC TRỰC QUAN & HƯỚNG DẪN MẪU) -->
+            <!-- Phần 3: Kịch bản hội thoại (HỖ TRỢ SOẠN TRỰC TIẾP TRÊN WEB CHO ĐIỆN THOẠI & TẢI FILE .TXT) -->
             <div style="background: #ffffff; padding: 18px; border-radius: 14px; border: 2px solid #fbcfe8; margin-bottom: 22px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <label style="font-size: 14px; font-weight: 700; color: #db2777; display: flex; align-items: center; gap: 6px;">
-                        <span>📜</span> Tải lên file kịch bản hội thoại (.txt) (*):
+                        <span>📜</span> Kịch bản hội thoại nhân vật (*):
                     </label>
                     <button type="button" onclick="var el = document.getElementById('script-guide-box'); el.style.display = (el.style.display==='none'?'block':'none');"
                         style="background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                        💡 Xem hướng dẫn & Tải file mẫu .txt
+                        💡 Xem hướng dẫn cú pháp kịch bản
                     </button>
                 </div>
 
-                <!-- HỘP HƯỚNG DẪN CHI TIẾT CÁCH VIẾT KỊCH BẢN .TXT -->
+                <!-- HỘP HƯỚNG DẪN CHI TIẾT CÁCH VIẾT KỊCH BẢN -->
                 <div id="script-guide-box" style="display: none; background: #fdfbf7; border: 1.5px dashed #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 14px;">
                     <div style="font-size: 13px; font-weight: 800; color: #b45309; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                        <span>📖</span> Quy tắc viết file kịch bản .txt chuẩn:
+                        <span>📖</span> Quy tắc viết kịch bản hội thoại:
                     </div>
                     <ul style="font-size: 12px; color: #475569; margin: 0 0 10px 18px; line-height: 1.6;">
                         <li><b>Dòng bắt đầu bằng <code>Q: </code>:</b> Là các nút câu hỏi / lựa chọn của người dùng (có thể có nhiều <code>Q:</code> trong 1 khối).</li>
@@ -280,12 +280,73 @@
                     </div>
                 </div>
 
-                <input type="file" id="script-input" name="scriptFile" accept=".txt" required
-                    style="width: 100%; padding: 10px 14px; border: 2px dashed #f472b6; border-radius: 10px; background: #fdf2f8; cursor: pointer; font-size: 13px;">
+                <!-- THANH CHUYỂN ĐỔI CHẾ ĐỘ: SOẠN TRÊN WEB (CHO ĐIỆN THOẠI) HOẶC TẢI FILE .TXT -->
+                <div class="script-mode-tabs" style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+                    <button type="button" id="tab-script-direct" onclick="switchScriptMode('direct')"
+                        style="flex: 1; min-width: 220px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; border: 2px solid #22c55e; background: #f0fdf4; color: #166534; box-shadow: 0 2px 6px rgba(34,197,94,0.15);">
+                        <span>📱</span>
+                        <span>Soạn kịch bản ngay tại web</span>
+                        <span style="background: #22c55e; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">Dành cho Điện thoại</span>
+                    </button>
 
-                <!-- KHUNG XEM TRƯỚC KỊCH BẢN (SCRIPT PREVIEW) -->
+                    <button type="button" id="tab-script-file" onclick="switchScriptMode('file')"
+                        style="flex: 1; min-width: 180px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; border: 2px solid #cbd5e1; background: #f8fafc; color: #64748b;">
+                        <span>📁</span>
+                        <span>Tải lên file .txt từ máy tính</span>
+                    </button>
+                </div>
+
+                <!-- CHẾ ĐỘ 1: SOẠN KỊCH BẢN TRỰC TIẾP TRÊN WEB (ĐẶC BIỆT DÀNH CHO ĐIỆN THOẠI) -->
+                <div id="script-mode-direct-panel">
+                    <!-- Thanh công cụ hỗ trợ gõ 1-chạm cực tiện trên mobile -->
+                    <div style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 11px; font-weight: 700; color: #db2777; margin-right: 4px;">⚡ Chèn nhanh:</span>
+                        <button type="button" onclick="insertScriptToken('Q: ')" title="Chèn câu hỏi của người dùng"
+                            style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            ➕ Câu hỏi (Q:)
+                        </button>
+                        <button type="button" onclick="insertScriptToken('A: ')" title="Chèn câu trả lời của bot"
+                            style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            💬 Trả lời (A:)
+                        </button>
+                        <button type="button" onclick="insertScriptToken('\n---\n')" title="Ngắt sang bước hội thoại tiếp theo"
+                            style="background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            ➖ Ngắt bước (---)
+                        </button>
+                        <button type="button" onclick="insertSampleScript()" title="Nạp kịch bản mẫu có sẵn để chỉnh sửa nhanh"
+                            style="background: #fef08a; border: 1px solid #facc15; color: #854d0e; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: auto;">
+                            📋 Chèn mẫu kịch bản
+                        </button>
+                        <button type="button" onclick="clearDirectScript()" title="Xóa trắng để soạn lại từ đầu"
+                            style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 6px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                            🗑️ Xóa trắng
+                        </button>
+                    </div>
+
+                    <!-- Ô soạn thảo văn bản kịch bản trực tiếp -->
+                    <textarea id="script-direct-editor" name="scriptText" rows="7"
+                        placeholder="Nhập hoặc dán nội dung kịch bản tại đây...&#10;&#10;Ví dụ:&#10;Q: Xin chào bạn!&#10;Q: Giới thiệu về bạn đi!&#10;A: Chào bạn! Mình là bạn đồng hành cùng bạn đây!&#10;---&#10;Q: Hôm nay có gì vui không?&#10;A: Hôm nay mình cùng nhau phiêu lưu và chơi game nhé!"
+                        style="width: 100%; padding: 12px 14px; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; line-height: 1.6; border: 2px solid #fbcfe8; border-radius: 12px; background: #ffffff; color: #1e293b; outline: none; box-sizing: border-box; resize: vertical; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#fbcfe8'"></textarea>
+
+                    <div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>💡 Bấm nút <b>[📋 Chèn mẫu kịch bản]</b> để có ngay nội dung chuẩn rồi sửa lại.</span>
+                        <span id="script-char-count" style="font-weight: 700; color: #db2777;">0 ký tự</span>
+                    </div>
+                </div>
+
+                <!-- CHẾ ĐỘ 2: TẢI FILE .TXT TỪ MÁY TÍNH -->
+                <div id="script-mode-file-panel" style="display: none;">
+                    <label for="script-input" id="script-file-picker-btn"
+                        style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; border: 2px dashed #f472b6; border-radius: 12px; background: #fdf2f8; color: #db2777; font-weight: 700; font-size: 13px; cursor: pointer; box-sizing: border-box; transition: all 0.2s ease;">
+                        <span style="font-size: 18px;">📄</span>
+                        <span id="script-file-name-label">Bấm để chọn file kịch bản .txt từ máy tính</span>
+                    </label>
+                    <input type="file" id="script-input" name="scriptFile" accept=".txt,text/plain" style="display: none;">
+                </div>
+
+                <!-- KHUNG XEM TRƯỚC KỊCH BẢN (SCRIPT PREVIEW - TỰ ĐỘNG CẬP NHẬT TRỰC QUAN) -->
                 <div id="script-preview-wrapper" style="display: none; margin-top: 15px; border-top: 1px dashed #fbcfe8; padding-top: 14px;">
-                    
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
                         <div id="script-preview-stats" style="font-size: 13px; color: #1e293b; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                         </div>
@@ -310,11 +371,15 @@
                 <div id="dialogue-container">
                     <div class="node-box" id="node-0" style="background: #fdfbf7; border: 1px solid #fbcfe8; padding: 14px; border-radius: 12px; margin-bottom: 0;">
                         <div style="font-size: 13px; font-weight: 700; color: #db2777; margin-bottom: 8px;">
-                            Âm thanh chào mừng nhân vật (Audio MP3 / WAV):
+                            Âm thanh chào mừng nhân vật (Audio MP3 / WAV / M4A):
                         </div>
                         
-                        <input type="file" id="audio-input" name="nodeAudio_0" accept="audio/*"
-                            style="width: 100%; padding: 8px 12px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px;">
+                        <label for="audio-input" id="audio-picker-btn"
+                            style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 18px; border: 2px dashed #f472b6; border-radius: 12px; background: #fff5f8; color: #db2777; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
+                            <span style="font-size: 18px;">🎵</span>
+                            <span id="audio-picker-label">Chạm để chọn file âm thanh từ điện thoại / máy tính (.mp3, .wav, .m4a)</span>
+                        </label>
+                        <input type="file" id="audio-input" name="nodeAudio_0" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.opus" style="display: none;">
 
                         <div id="audio-preview-wrapper" style="display: none; margin-top: 10px; background: #ffffff; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">

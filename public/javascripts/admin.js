@@ -157,39 +157,188 @@ function initAvatarStudio() {
     };
 }
 
-// --- 2. XEM TRƯỚC FILE KỊCH BẢN .TXT ---
+// --- 2. QUẢN LÝ KỊCH BẢN: SOẠN TRỰC TIẾP TRÊN WEB (CHO ĐIỆN THOẠI) HOẶC TẢI FILE .TXT ---
 function initScriptPreview() {
     const scriptInput = document.getElementById('script-input');
+    const directEditor = document.getElementById('script-direct-editor');
     const scriptPreviewWrapper = document.getElementById('script-preview-wrapper');
     const scriptPreviewStats = document.getElementById('script-preview-stats');
     const scriptPreviewContent = document.getElementById('script-preview-content');
     const btnToggleRawScript = document.getElementById('btn-toggle-raw-script');
     const scriptRawContent = document.getElementById('script-raw-content');
+    const charCountEl = document.getElementById('script-char-count');
+    const scriptFileLabel = document.getElementById('script-file-name-label');
 
-    if (!scriptInput) return;
+    // Chuyển đổi giữa 2 chế độ: Soạn trực tiếp (Điện thoại) và Tải file (Máy tính)
+    window.switchScriptMode = function(mode) {
+        const tabDirect = document.getElementById('tab-script-direct');
+        const tabFile = document.getElementById('tab-script-file');
+        const panelDirect = document.getElementById('script-mode-direct-panel');
+        const panelFile = document.getElementById('script-mode-file-panel');
 
-    scriptInput.addEventListener('change', function() {
-        const file = this.files && this.files[0];
-        if (file) {
-            if (!file.name.endsWith('.txt')) {
-                alert('Vui lòng chọn đúng file văn bản định dạng .txt!');
-                this.value = '';
-                return;
+        if (mode === 'direct') {
+            if (panelDirect) panelDirect.style.display = 'block';
+            if (panelFile) panelFile.style.display = 'none';
+            if (tabDirect) {
+                tabDirect.style.border = '2px solid #22c55e';
+                tabDirect.style.background = '#f0fdf4';
+                tabDirect.style.color = '#166534';
+                tabDirect.style.boxShadow = '0 2px 6px rgba(34,197,94,0.15)';
             }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                renderScriptPreview(text, file.name, file.size);
-            };
-            reader.readAsText(file);
+            if (tabFile) {
+                tabFile.style.border = '2px solid #cbd5e1';
+                tabFile.style.background = '#f8fafc';
+                tabFile.style.color = '#64748b';
+                tabFile.style.boxShadow = 'none';
+            }
+            if (directEditor && directEditor.value.trim()) {
+                renderScriptPreview(directEditor.value, 'Soạn trực tiếp trên web (Điện thoại)', new Blob([directEditor.value]).size);
+            }
+        } else {
+            if (panelDirect) panelDirect.style.display = 'none';
+            if (panelFile) panelFile.style.display = 'block';
+            if (tabFile) {
+                tabFile.style.border = '2px solid #3b82f6';
+                tabFile.style.background = '#eff6ff';
+                tabFile.style.color = '#1d4ed8';
+                tabFile.style.boxShadow = '0 2px 6px rgba(59,130,246,0.15)';
+            }
+            if (tabDirect) {
+                tabDirect.style.border = '2px solid #cbd5e1';
+                tabDirect.style.background = '#f8fafc';
+                tabDirect.style.color = '#64748b';
+                tabDirect.style.boxShadow = 'none';
+            }
+            if (scriptInput && scriptInput.files && scriptInput.files[0]) {
+                const file = scriptInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    renderScriptPreview(e.target.result, file.name, file.size);
+                };
+                reader.readAsText(file);
+            }
         }
-    });
+    };
 
-    function renderScriptPreview(rawText, fileName, fileSize) {
+    // Chèn ký tự / cú pháp nhanh vào vị trí con trỏ
+    window.insertScriptToken = function(token) {
+        if (!directEditor) return;
+        const start = directEditor.selectionStart;
+        const end = directEditor.selectionEnd;
+        const text = directEditor.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end, text.length);
+
+        // Đảm bảo dòng mới nếu cần
+        let insertText = token;
+        if ((token === 'Q: ' || token === 'A: ') && start > 0 && text[start - 1] !== '\n') {
+            insertText = '\n' + token;
+        }
+
+        directEditor.value = before + insertText + after;
+        directEditor.selectionStart = directEditor.selectionEnd = start + insertText.length;
+        directEditor.focus();
+        directEditor.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // Chèn kịch bản mẫu chuẩn
+    window.insertSampleScript = function() {
+        if (!directEditor) return;
+        const sample = `Q: Xin chào bạn! Rất vui được gặp bạn!
+Q: Giới thiệu về bạn đi!
+A: Chào bạn yêu quý! Mình là người bạn đồng hành luôn sẵn sàng trò chuyện cùng bạn đây!
+---
+Q: Hôm nay bạn cảm thấy thế nào?
+Q: Có điều gì vui muốn chia sẻ không?
+A: Hôm nay là một ngày tuyệt vời! Hãy cùng nhau khám phá những điều thú vị và cùng chơi game nhé!
+---
+Q: Bạn có thể giúp gì cho mình?
+A: Mình luôn lắng nghe bạn tâm sự, cùng chơi game Flappy Bangboo và gửi gắm những tấm thiệp tốt nghiệp ấm áp!`;
+        directEditor.value = sample;
+        directEditor.focus();
+        directEditor.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // Xóa trắng kịch bản
+    window.clearDirectScript = function() {
+        if (!directEditor) return;
+        if (directEditor.value.trim() && !confirm('Bạn có chắc muốn xóa trắng ô kịch bản đang soạn không?')) {
+            return;
+        }
+        directEditor.value = '';
+        directEditor.dispatchEvent(new Event('input', { bubbles: true }));
+        if (scriptPreviewWrapper) scriptPreviewWrapper.style.display = 'none';
+    };
+
+    // Lắng nghe người dùng gõ trực tiếp trong Textarea
+    if (directEditor) {
+        directEditor.addEventListener('input', function() {
+            const val = this.value;
+            if (charCountEl) {
+                charCountEl.innerText = val.length + ' ký tự';
+            }
+            if (val.trim()) {
+                renderScriptPreview(val, 'Soạn trực tiếp trên web (Điện thoại)', new Blob([val]).size);
+            } else {
+                if (scriptPreviewWrapper) scriptPreviewWrapper.style.display = 'none';
+            }
+        });
+
+        // Nếu đã có sẵn nội dung (VD trang chỉnh sửa EditCharacter)
+        if (directEditor.value.trim()) {
+            renderScriptPreview(directEditor.value, 'Kịch bản hiện tại', new Blob([directEditor.value]).size);
+        }
+    }
+
+    // Khi người dùng chọn file .txt từ máy
+    if (scriptInput) {
+        scriptInput.addEventListener('change', function() {
+            const file = this.files && this.files[0];
+            if (file) {
+                if (!file.name.endsWith('.txt')) {
+                    alert('Vui lòng chọn đúng file văn bản định dạng .txt!');
+                    this.value = '';
+                    if (scriptFileLabel) scriptFileLabel.innerText = 'Bấm để chọn file kịch bản .txt từ máy tính';
+                    return;
+                }
+
+                if (scriptFileLabel) {
+                    scriptFileLabel.innerText = '✓ Đã chọn file: ' + file.name + ' (' + formatBytes(file.size) + ')';
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    renderScriptPreview(text, file.name, file.size);
+                    // Đồng bộ sang direct editor nếu đang rỗng
+                    if (directEditor && !directEditor.value.trim()) {
+                        directEditor.value = text;
+                        if (charCountEl) charCountEl.innerText = text.length + ' ký tự';
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                if (scriptFileLabel) scriptFileLabel.innerText = 'Bấm để chọn file kịch bản .txt từ máy tính';
+            }
+        });
+    }
+
+    // Tự động kích hoạt chế độ "Soạn trực tiếp trên web (Điện thoại)" trên màn hình mobile
+    if (window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
+        window.switchScriptMode('direct');
+    } else {
+        window.switchScriptMode('direct');
+    }
+
+    // Render xem trước kịch bản
+    function renderScriptPreview(rawText, sourceName, fileSize) {
         if (!scriptPreviewWrapper) return;
-        scriptPreviewWrapper.style.display = 'block';
+        if (!rawText || !rawText.trim()) {
+            scriptPreviewWrapper.style.display = 'none';
+            return;
+        }
 
+        scriptPreviewWrapper.style.display = 'block';
         const rawBlocks = rawText.split('---').map(b => b.trim()).filter(b => b.length > 0);
 
         let totalQuestions = 0;
@@ -212,16 +361,27 @@ function initScriptPreview() {
             });
 
             formattedBlocksHtml += `
-                <div class="script-block-card" style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                    <div style="font-size: 12px; font-weight: 700; color: #db2777; margin-bottom: 6px; display: flex; justify-content: space-between;">
-                        <span>Khối ${idx + 1} (Bước hội thoại ${idx + 1})</span>
-                        <span style="color: #64748b; font-weight: normal;">${questions.length} câu hỏi lựa chọn</span>
+                <div class="script-block-card" style="background: #ffffff; border: 1.5px solid #fbcfe8; border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div style="font-size: 12px; font-weight: 800; color: #db2777; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 2px 8px; border-radius: 8px;">Bước ${idx + 1}</span>
+                            <span>Khối hội thoại ${idx + 1}</span>
+                        </span>
+                        <span style="color: #64748b; font-size: 11px; font-weight: 600;">${questions.length} câu hỏi lựa chọn</span>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
-                        ${questions.map(q => `<div style="font-size: 13px; color: #1e293b; background: #fdf2f8; padding: 4px 8px; border-radius: 6px; border-left: 3px solid #f472b6;"><b>Q:</b> ${escapeHtml(q)}</div>`).join('')}
+                    <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px;">
+                        ${questions.map(q => `
+                            <div style="font-size: 13px; color: #1e293b; background: #fdf2f8; padding: 6px 10px; border-radius: 8px; border-left: 3px solid #f472b6; display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 11px; background: #f472b6; color: #fff; padding: 1px 6px; border-radius: 6px; font-weight: 800;">Q</span>
+                                <span>${escapeHtml(q)}</span>
+                            </div>
+                        `).join('')}
                     </div>
-                    <div style="font-size: 13px; color: #15803d; background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #22c55e;">
-                        <b>A (Bot phản hồi):</b> ${answer ? escapeHtml(answer) : '<i style="color:#94a3b8">Chưa có câu trả lời</i>'}
+                    <div style="font-size: 13px; color: #15803d; background: #f0fdf4; padding: 8px 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
+                        <div style="font-size: 11px; font-weight: 800; color: #16a34a; margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
+                            <span>🤖</span> <span>Bot trả lời khi người dùng bấm các câu hỏi trên:</span>
+                        </div>
+                        <div>${answer ? escapeHtml(answer) : '<i style="color:#94a3b8">Chưa có câu trả lời (A:)</i>'}</div>
                     </div>
                 </div>
             `;
@@ -229,15 +389,15 @@ function initScriptPreview() {
 
         if (scriptPreviewStats) {
             scriptPreviewStats.innerHTML = `
-                <span>📄 <b>${fileName}</b> (${formatBytes(fileSize)})</span>
-                <span>• <b>${rawBlocks.length}</b> khối hội thoại</span>
+                <span>📝 <b>${sourceName}</b> (${formatBytes(fileSize)})</span>
+                <span>• <b>${rawBlocks.length}</b> bước</span>
                 <span>• <b>${totalQuestions}</b> câu hỏi</span>
-                <span>• <b>${totalAnswers}</b> câu phản hồi</span>
+                <span>• <b>${totalAnswers}</b> phản hồi</span>
             `;
         }
 
         if (scriptPreviewContent) {
-            scriptPreviewContent.innerHTML = formattedBlocksHtml || '<p style="color: #64748b; font-size: 13px;">Không phát hiện thấy câu hỏi (Q:) hoặc câu trả lời (A:) nào hợp lệ trong file kịch bản.</p>';
+            scriptPreviewContent.innerHTML = formattedBlocksHtml || '<p style="color: #64748b; font-size: 13px;">Gõ câu hỏi (Q:) và câu trả lời (A:) để xem trước trực quan tại đây.</p>';
         }
 
         if (scriptRawContent) {
@@ -260,6 +420,25 @@ function initScriptPreview() {
             }
         });
     }
+
+    // Kiểm tra hợp lệ kịch bản khi submit form
+    const forms = document.querySelectorAll('form[action="/admin/character/add-full"], form[action^="/admin/character/update/"]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const hasDirectText = directEditor && directEditor.value.trim().length > 0;
+            const hasFile = scriptInput && scriptInput.files && scriptInput.files.length > 0;
+            const isUpdateForm = form.action.includes('/update/');
+
+            // Với form thêm mới: bắt buộc phải có kịch bản (soạn trực tiếp hoặc file)
+            if (!isUpdateForm && !hasDirectText && !hasFile) {
+                e.preventDefault();
+                alert('⚠️ Vui lòng soạn kịch bản hội thoại hoặc tải lên file kịch bản (.txt) cho nhân vật!');
+                if (window.switchScriptMode) window.switchScriptMode('direct');
+                if (directEditor) directEditor.focus();
+                return false;
+            }
+        });
+    });
 }
 
 // --- 3. XEM TRƯỚC & NGHE THỬ ÂM THANH (AUDIO PREVIEW) ---
@@ -273,20 +452,31 @@ function setupSingleAudioPreview(inputId, playerId, wrapperId, nameId, removeBtn
     const wrapper = document.getElementById(wrapperId);
     const nameLabel = document.getElementById(nameId);
     const removeBtn = document.getElementById(removeBtnId);
+    const pickerLabel = document.getElementById('audio-picker-label');
+    const pickerBtn = document.getElementById('audio-picker-btn');
 
     if (!input || !player) return;
 
     input.addEventListener('change', function() {
         const file = this.files && this.files[0];
         if (file) {
-            if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) {
+            if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|wav|ogg|m4a|aac|opus)$/i)) {
                 alert('Vui lòng chọn file âm thanh hợp lệ (MP3, WAV, OGG, M4A)!');
                 this.value = '';
+                if (pickerLabel) pickerLabel.innerText = 'Chạm để chọn file âm thanh từ điện thoại / máy tính (.mp3, .wav, .m4a)';
                 return;
             }
             const objectUrl = URL.createObjectURL(file);
             player.src = objectUrl;
             if (nameLabel) nameLabel.innerText = file.name + ' (' + formatBytes(file.size) + ')';
+            if (pickerLabel) {
+                pickerLabel.innerText = '✓ Đã chọn: ' + file.name + ' (' + formatBytes(file.size) + ')';
+            }
+            if (pickerBtn) {
+                pickerBtn.style.borderColor = '#22c55e';
+                pickerBtn.style.background = '#f0fdf4';
+                pickerBtn.style.color = '#15803d';
+            }
             if (wrapper) wrapper.style.display = 'block';
         }
     });
@@ -295,6 +485,14 @@ function setupSingleAudioPreview(inputId, playerId, wrapperId, nameId, removeBtn
         removeBtn.addEventListener('click', function() {
             input.value = '';
             player.src = '';
+            if (pickerLabel) {
+                pickerLabel.innerText = 'Chạm để chọn file âm thanh từ điện thoại / máy tính (.mp3, .wav, .m4a)';
+            }
+            if (pickerBtn) {
+                pickerBtn.style.borderColor = '#f472b6';
+                pickerBtn.style.background = '#fff5f8';
+                pickerBtn.style.color = '#db2777';
+            }
             if (wrapper) wrapper.style.display = 'none';
         });
     }

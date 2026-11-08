@@ -148,6 +148,89 @@ router.get('/', async function(req, res) {
     }
 });
 
+// Hàm trợ giúp: Phân tích nội dung kịch bản văn bản và lưu Question, Answer, Media vào CSDL
+async function saveScriptToDatabase(fileContent, charId, files) {
+    if (!fileContent || !fileContent.trim()) return;
+
+    var blocks = fileContent.split('---').map(b => b.trim()).filter(b => b.length > 0);
+    var answersToInsert = [];
+    var imagesToInsert = [];
+    var audiosToInsert = [];
+    var blockDataList = [];
+
+    // Bước 1: Parse từng khối
+    for (var i = 0; i < blocks.length; i++) {
+        var lines = blocks[i].split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        var qTexts = [];
+        var aText = "";
+
+        lines.forEach(line => {
+            if (line.startsWith('Q:')) {
+                qTexts.push(line.replace(/^Q:\s*/, '').trim());
+            } else if (line.startsWith('A:')) {
+                aText = line.replace(/^A:\s*/, '').trim();
+            }
+        });
+
+        if (qTexts.length > 0) {
+            var imgFile = files ? files.find(f => f.fieldname === `nodeImage_${i}`) : null;
+            var audioFile = files ? files.find(f => f.fieldname === `nodeAudio_${i}`) : null;
+
+            var ansIndex = aText ? answersToInsert.push({ answerText: aText }) - 1 : -1;
+            var imgIndex = imgFile ? imagesToInsert.push({ imageUrl: '/uploads/images/' + imgFile.filename }) - 1 : -1;
+            var audIndex = audioFile ? audiosToInsert.push({ audioUrl: '/uploads/audios/' + audioFile.filename }) - 1 : -1;
+
+            blockDataList.push({
+                qTexts: qTexts,
+                ansIndex: ansIndex,
+                imgIndex: imgIndex,
+                audIndex: audIndex
+            });
+        }
+    }
+
+    // Bước 2: Ghi hàng loạt Answer, Image, Audio vào DB
+    var createdAnswers = answersToInsert.length > 0 ? await Answer.insertMany(answersToInsert) : [];
+    var createdImages = imagesToInsert.length > 0 ? await Image.insertMany(imagesToInsert) : [];
+    var createdAudios = audiosToInsert.length > 0 ? await Audio.insertMany(audiosToInsert) : [];
+
+    // Bước 3: Tạo danh sách tất cả các Question
+    var allQuestionsData = [];
+    blockDataList.forEach((block, blockIdx) => {
+        block.qTexts.forEach(qText => {
+            allQuestionsData.push({
+                questionText: qText,
+                answerId: block.ansIndex !== -1 ? createdAnswers[block.ansIndex]._id : null,
+                imageId: block.imgIndex !== -1 ? createdImages[block.imgIndex]._id : null,
+                audioId: block.audIndex !== -1 ? createdAudios[block.audIndex]._id : null,
+                characterId: charId,
+                blockIndex: blockIdx,
+                isRoot: blockIdx === 0
+            });
+        });
+    });
+
+    var createdQuestions = await Question.insertMany(allQuestionsData);
+
+    // Bước 4: Liên kết mạng lưới nextQuestions giữa các block liên tiếp
+    var updateOps = [];
+    for (var k = 0; k < blockDataList.length - 1; k++) {
+        var currentBlockQuestions = createdQuestions.filter(q => q.blockIndex === k);
+        var nextBlockQuestions = createdQuestions.filter(q => q.blockIndex === k + 1);
+        var nextIds = nextBlockQuestions.map(q => q._id);
+
+        currentBlockQuestions.forEach(currQ => {
+            updateOps.push(
+                Question.findByIdAndUpdate(currQ._id, { nextQuestions: nextIds })
+            );
+        });
+    }
+
+    if (updateOps.length > 0) {
+        await Promise.all(updateOps);
+    }
+}
+
 // Route POST: Thêm nhân vật + Đọc kịch bản .txt + Upload Media (Tối ưu tốc độ CSDL)
 router.post('/character/add-full', upload.any(), async function(req, res) {
     try {
@@ -167,6 +250,20 @@ router.post('/character/add-full', upload.any(), async function(req, res) {
         
         var scriptFile = req.files ? req.files.find(f => f.fieldname === 'scriptFile') : null;
         var scriptFilename = scriptFile ? scriptFile.filename : '';
+        var seedsDir = path.join(__dirname, '../public/uploads/seeds/');
+        if (!fs.existsSync(seedsDir)) fs.mkdirSync(seedsDir, { recursive: true });
+
+        var fileContent = '';
+        if (scriptFile) {
+            var filePath = path.join(seedsDir, scriptFile.filename);
+            if (fs.existsSync(filePath)) {
+                fileContent = fs.readFileSync(filePath, 'utf8');
+            }
+        } else if (req.body.scriptText && req.body.scriptText.trim()) {
+            fileContent = req.body.scriptText.trim();
+            scriptFilename = 'script-mobile-' + Date.now() + '-' + Math.round(Math.random() * 1E6) + '.txt';
+            fs.writeFileSync(path.join(seedsDir, scriptFilename), fileContent, 'utf8');
+        }
 
         // 2. Tạo Nhân vật
         var newChar = await Character.create({
@@ -179,97 +276,9 @@ router.post('/character/add-full', upload.any(), async function(req, res) {
             scriptFilename: scriptFilename
         });
 
-        // 3. Đọc file .txt kịch bản
-
-        if (scriptFile) {
-            var filePath = path.join(__dirname, '../public/uploads/seeds/', scriptFile.filename);
-            var fileContent = fs.readFileSync(filePath, 'utf8');
-
-            // // Xóa file tạm ngay sau khi đọc xong
-            // fs.unlink(filePath, function(err) {
-            //     if (err) console.error("Lỗi xóa file tạm:", err);
-            // });
-
-            // Phân tách các khối hội thoại dựa vào dấu ngăn cách "---"
-            var blocks = fileContent.split('---').map(b => b.trim()).filter(b => b.length > 0);
-
-            var answersToInsert = [];
-            var imagesToInsert = [];
-            var audiosToInsert = [];
-            var blockDataList = [];
-
-            // Bước 1: Parse từng khối
-            for (var i = 0; i < blocks.length; i++) {
-                var lines = blocks[i].split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                var qTexts = [];
-                var aText = "";
-
-                lines.forEach(line => {
-                    if (line.startsWith('Q:')) {
-                        qTexts.push(line.replace('Q:', '').trim());
-                    } else if (line.startsWith('A:')) {
-                        aText = line.replace('A:', '').trim();
-                    }
-                });
-
-                if (qTexts.length > 0) {
-                    var imgFile = req.files.find(f => f.fieldname === `nodeImage_${i}`);
-                    var audioFile = req.files.find(f => f.fieldname === `nodeAudio_${i}`);
-
-                    var ansIndex = aText ? answersToInsert.push({ answerText: aText }) - 1 : -1;
-                    var imgIndex = imgFile ? imagesToInsert.push({ imageUrl: '/uploads/images/' + imgFile.filename }) - 1 : -1;
-                    var audIndex = audioFile ? audiosToInsert.push({ audioUrl: '/uploads/audios/' + audioFile.filename }) - 1 : -1;
-
-                    blockDataList.push({
-                        qTexts: qTexts,
-                        ansIndex: ansIndex,
-                        imgIndex: imgIndex,
-                        audIndex: audIndex
-                    });
-                }
-            }
-
-            // Bước 2: Ghi hàng loạt Answer, Image, Audio vào DB
-            var createdAnswers = answersToInsert.length > 0 ? await Answer.insertMany(answersToInsert) : [];
-            var createdImages = imagesToInsert.length > 0 ? await Image.insertMany(imagesToInsert) : [];
-            var createdAudios = audiosToInsert.length > 0 ? await Audio.insertMany(audiosToInsert) : [];
-
-            // Bước 3: Tạo danh sách tất cả các Question
-            var allQuestionsData = [];
-            blockDataList.forEach((block, blockIdx) => {
-                block.qTexts.forEach(qText => {
-                    allQuestionsData.push({
-                        questionText: qText,
-                        answerId: block.ansIndex !== -1 ? createdAnswers[block.ansIndex]._id : null,
-                        imageId: block.imgIndex !== -1 ? createdImages[block.imgIndex]._id : null,
-                        audioId: block.audIndex !== -1 ? createdAudios[block.audIndex]._id : null,
-                        characterId: newChar._id, // hoặc newChar._id nếu ở hàm add
-                        blockIndex: blockIdx,
-                        isRoot: blockIdx === 0 // Đánh dấu đây là các câu hỏi khởi đầu ở block đầu tiên
-                    });
-                });
-            });
-
-            var createdQuestions = await Question.insertMany(allQuestionsData);
-
-            // Bước 4: Liên kết mạng lưới nextQuestions giữa các block liên tiếp
-            var updateOps = [];
-            for (var k = 0; k < blockDataList.length - 1; k++) {
-                var currentBlockQuestions = createdQuestions.filter(q => q.blockIndex === k);
-                var nextBlockQuestions = createdQuestions.filter(q => q.blockIndex === k + 1);
-                
-                var nextIds = nextBlockQuestions.map(q => q._id);
-
-                currentBlockQuestions.forEach(currQ => {
-                    updateOps.push(
-                        Question.findByIdAndUpdate(currQ._id, { nextQuestions: nextIds })
-                    );
-                });
-            }
-
-            if (updateOps.length > 0) {
-                await Promise.all(updateOps);
-            }
+        // 3. Đọc kịch bản & phân tích vào CSDL (hỗ trợ cả tải file .txt và soạn trực tiếp trên web cho điện thoại)
+        if (fileContent && fileContent.trim()) {
+            await saveScriptToDatabase(fileContent, newChar._id, req.files || []);
         }
 
         res.redirect('/admin');
@@ -345,10 +354,19 @@ router.get('/character/edit/:id', async (req, res) => {
         var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
         var adminIcons = (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons;
 
+        var existingScriptContent = '';
+        if (character && character.scriptFilename) {
+            var scriptP = path.join(__dirname, '../public/uploads/seeds/', character.scriptFilename);
+            if (fs.existsSync(scriptP)) {
+                try { existingScriptContent = fs.readFileSync(scriptP, 'utf8'); } catch (e) {}
+            }
+        }
+
         res.render('admin/EditCharacter', { 
             title: `Chỉnh sửa: ${character ? character.name : 'Nhân vật'}`,
             character,
-            adminIcons: adminIcons
+            adminIcons: adminIcons,
+            existingScriptContent: existingScriptContent
         });
     } catch (err) {
         res.redirect('/admin');
@@ -362,8 +380,8 @@ router.post('/character/update/:id', upload.any([
 ]), async (req, res) => {
     try {
         const charId = req.params.id;
-        const { name, description, icon } = req.body;
-        const updateData = { name, description, icon: icon || '😀', };
+        const { name, description, icon, scriptText } = req.body;
+        const updateData = { name, description, icon: icon || '🍄', };
 
         // 1. Cập nhật Avatar va Backgroud
         var avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
@@ -385,104 +403,32 @@ router.post('/character/update/:id', upload.any([
             updateData.audioUrl = req.body.audioUrl.trim();
         }
 
+        // 2. Cập nhật Kịch bản (Hỗ trợ tải file .txt HOẶC soạn trực tiếp trên web cho điện thoại)
+        var scriptFile = req.files ? req.files.find(f => f.fieldname === 'scriptFile') : null;
+        var seedsDir = path.join(__dirname, '../public/uploads/seeds/');
+        if (!fs.existsSync(seedsDir)) fs.mkdirSync(seedsDir, { recursive: true });
+
+        var newFileContent = '';
+        if (scriptFile) {
+            var filePath = path.join(seedsDir, scriptFile.filename);
+            if (fs.existsSync(filePath)) {
+                newFileContent = fs.readFileSync(filePath, 'utf8');
+                updateData.scriptFilename = scriptFile.filename;
+            }
+        } else if (scriptText && scriptText.trim()) {
+            newFileContent = scriptText.trim();
+            var genFilename = 'script-mobile-' + Date.now() + '-' + Math.round(Math.random() * 1E6) + '.txt';
+            fs.writeFileSync(path.join(seedsDir, genFilename), newFileContent, 'utf8');
+            updateData.scriptFilename = genFilename;
+        }
+
         // Cập nhật thông tin cơ bản nhân vật
         await Character.findByIdAndUpdate(charId, updateData);
 
-        // 2. Cập nhật Kịch bản .txt (nếu người dùng tải file mới)
-        var scriptFile = req.files ? req.files.find(f => f.fieldname === 'scriptFile') : null;
-        if (scriptFile) {
-            var filePath = path.join(__dirname, '../public/uploads/seeds/', scriptFile.filename);
-
-            if (fs.existsSync(filePath)) {
-                var fileContent = fs.readFileSync(filePath, 'utf8');
-
-                // fs.unlink(filePath, function(err) {
-                //     if (err) console.error("Lỗi xóa file tạm:", err);
-                // });
-
-                // Xóa sạch toàn bộ kịch bản/câu hỏi cũ của nhân vật này trong CSDL
-                await Question.deleteMany({ characterId: charId });
-
-                // Phân tách các khối kịch bản theo dấu "---"
-                var blocks = fileContent.split('---').map(b => b.trim()).filter(b => b.length > 0);
-
-                var answersToInsert = [];
-                var blockDataList = [];
-                var imagesToInsert = [];
-                var audiosToInsert = [];
-
-                // Parse từng khối trong file .txt
-                for (var i = 0; i < blocks.length; i++) {
-                    var lines = blocks[i].split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    var qTexts = [];
-                    var aText = "";
-
-                    lines.forEach(line => {
-                        if (line.startsWith('Q:')) {
-                            qTexts.push(line.replace('Q:', '').trim());
-                        } else if (line.startsWith('A:')) {
-                            aText = line.replace('A:', '').trim();
-                        }
-                    });
-
-                    if (qTexts.length > 0) {
-                        var imgFile = req.files.find(f => f.fieldname === `nodeImage_${i}`);
-                        var audioFile = req.files.find(f => f.fieldname === `nodeAudio_${i}`);
-
-                        var ansIndex = aText ? answersToInsert.push({ answerText: aText }) - 1 : -1;
-                        var imgIndex = imgFile ? imagesToInsert.push({ imageUrl: '/uploads/images/' + imgFile.filename }) - 1 : -1;
-                        var audIndex = audioFile ? audiosToInsert.push({ audioUrl: '/uploads/audios/' + audioFile.filename }) - 1 : -1;
-                        blockDataList.push({
-                            qTexts: qTexts,
-                            ansIndex: ansIndex,
-                            imgIndex: imgIndex,
-                            audIndex: audIndex
-                        });
-                    }
-                }
-
-                // Lưu các câu trả lời (Answer) mới vào MongoDB
-                var createdAnswers = answersToInsert.length > 0 ? await Answer.insertMany(answersToInsert) : [];
-                var createdImages = imagesToInsert.length > 0 ? await Image.insertMany(imagesToInsert) : [];
-                var createdAudios = audiosToInsert.length > 0 ? await Audio.insertMany(audiosToInsert) : [];
-
-                // Tạo danh sách câu hỏi (Question) mới
-                var allQuestionsData = [];
-                blockDataList.forEach((block, blockIdx) => {
-                    block.qTexts.forEach(qText => {
-                        allQuestionsData.push({
-                            questionText: qText,
-                            answerId: block.ansIndex !== -1 ? createdAnswers[block.ansIndex]._id : null,
-                            imageId: block.imgIndex !== -1 ? createdImages[block.imgIndex]._id : null,
-                            audioId: block.audIndex !== -1 ? createdAudios[block.audIndex]._id : null,
-                            characterId: charId,
-                            blockIndex: blockIdx,
-                            isRoot: blockIdx === 0
-                        });
-                    });
-                });
-
-                var createdQuestions = await Question.insertMany(allQuestionsData);
-
-                // Liên kết mạng lưới phân nhánh nextQuestions giữa các khối
-                var updateOps = [];
-                for (var k = 0; k < blockDataList.length - 1; k++) {
-                    var currentBlockQuestions = createdQuestions.filter(q => q.blockIndex === k);
-                    var nextBlockQuestions = createdQuestions.filter(q => q.blockIndex === k + 1);
-                    
-                    var nextIds = nextBlockQuestions.map(q => q._id);
-
-                    currentBlockQuestions.forEach(currQ => {
-                        updateOps.push(
-                            Question.findByIdAndUpdate(currQ._id, { nextQuestions: nextIds })
-                        );
-                    });
-                }
-
-                if (updateOps.length > 0) {
-                    await Promise.all(updateOps);
-                }
-            }
+        if (newFileContent && newFileContent.trim()) {
+            // Xóa sạch toàn bộ kịch bản/câu hỏi cũ của nhân vật này trong CSDL
+            await Question.deleteMany({ characterId: charId });
+            await saveScriptToDatabase(newFileContent, charId, req.files || []);
         }
 
         res.redirect('/admin');
