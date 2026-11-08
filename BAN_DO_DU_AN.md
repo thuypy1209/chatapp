@@ -344,7 +344,7 @@ A: [Câu trả lời tiếp theo]
 - Script: `money-rain.js`, `music-player.js`, `minecraft-skeleton.js`
 
 ### `views/page/home.ejs`
-- Tên app: **"Phổi bạn không phải tôi"**
+- Tên app: **"Graduation"** (Thiệp Mời Lễ Tốt Nghiệp)
 - Nút **Trò chuyện** → `/chat/:defaultCharacter._id`
 - Nút **Chơi Super Mario & Chat** → `/mario`
 

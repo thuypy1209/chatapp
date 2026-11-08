@@ -14,8 +14,9 @@ router.get('/', async function(req, res, next) {
         }
 
         // Render giao diện trang chủ / chào mừng (ví dụ file views/*/*.ejs)
+        var brand = (res.locals.siteBrand && res.locals.siteBrand.brandTitle) ? res.locals.siteBrand.brandTitle : 'Graduation';
         res.render('page/home', { 
-            title: 'Phổi bạn không phải tôi',
+            title: brand,
             defaultCharacter: defaultCharacter,
             allCharacters: allCharacters
         });

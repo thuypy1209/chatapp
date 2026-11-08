@@ -23,7 +23,7 @@
 
             <!-- Tiêu đề thiệp -->
             <h3 id="game-card-title" class="game-card-title">
-                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.title) ? gameOverCard.title : 'Tấm Thiệp Động Viên 💌' %>
+                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.title && !/Tấm Thiệp Động Viên/i.test(gameOverCard.title)) ? gameOverCard.title : 'Thiệp Mời Tốt Nghiệp 💌' %>
             </h3>
 
             <!-- Dải ruy băng mờ trang trí -->
@@ -33,7 +33,7 @@
 
             <!-- Nội dung bức thiệp (Text thiệp) -->
             <div id="game-card-message" class="game-card-message">
-                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.message) ? gameOverCard.message : 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖' %>
+                <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.message && !/Đừng buồn vì một lần/i.test(gameOverCard.message)) ? gameOverCard.message : 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨' %>
             </div>
 
             <!-- Huy hiệu điểm số đã đạt được trong lần chơi -->
@@ -45,7 +45,7 @@
 
             <!-- Ký tên người gửi thiệp -->
             <div id="game-card-sender" class="game-card-sender">
-                — <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.sender) ? gameOverCard.sender : 'Từ Vương Quốc Nấm 🍄' %> —
+                — <%= (typeof gameOverCard !== 'undefined' && gameOverCard && gameOverCard.sender && !/Vương Quốc Nấm/i.test(gameOverCard.sender)) ? gameOverCard.sender : 'Từ Hoàng Yến' %> —
             </div>
 
             <!-- Các nút hành động dưới đáy thiệp -->
@@ -72,11 +72,11 @@
 
     // Bộ nhớ đệm dữ liệu thiệp trên client
     window.__currentCardData = {
-        title: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.title) ? gameOverCard.title.replace(/'/g, "\\'") : "Tấm Thiệp Động Viên 💌" %>',
-        message: `<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message) ? gameOverCard.message.replace(/`/g, "\\`").replace(/\\/g, "\\\\") : "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖" %>`,
-        messages: <%- JSON.stringify((typeof gameOverCard !== "undefined" && gameOverCard && Array.isArray(gameOverCard.messages) && gameOverCard.messages.length > 0) ? gameOverCard.messages : [(typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message) ? gameOverCard.message : "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖"]) %>,
+        title: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.title && !/Tấm Thiệp Động Viên/i.test(gameOverCard.title)) ? gameOverCard.title.replace(/'/g, "\\'") : "Thiệp Mời Tốt Nghiệp 💌" %>',
+        message: `<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.message && !/Đừng buồn vì một lần/i.test(gameOverCard.message)) ? gameOverCard.message.replace(/`/g, "\\`").replace(/\\/g, "\\\\") : "Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨" %>`,
+        messages: <%- JSON.stringify((typeof gameOverCard !== "undefined" && gameOverCard && Array.isArray(gameOverCard.messages)) ? gameOverCard.messages.filter(m => typeof m === 'string' && m.trim() && !/Vương quốc Nấm|Mario|công chúa/i.test(m)) : []) %>,
         isRandom: <%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.isRandom !== undefined) ? !!gameOverCard.isRandom : true %>,
-        sender: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.sender) ? gameOverCard.sender.replace(/'/g, "\\'") : "Từ Vương Quốc Nấm 🍄" %>',
+        sender: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.sender && !/Vương Quốc Nấm/i.test(gameOverCard.sender)) ? gameOverCard.sender.replace(/'/g, "\\'") : "Từ Hoàng Yến" %>',
         buttonText: '<%= (typeof gameOverCard !== "undefined" && gameOverCard && gameOverCard.buttonText) ? gameOverCard.buttonText.replace(/'/g, "\\'") : "🔄 Chơi lại ngay" %>'
     };
 
@@ -97,24 +97,28 @@
     }
     syncCardSettingFromServer();
 
-    // Hàm chọn 1 câu ngẫu nhiên trong kho thiệp
+    // Hàm chọn 1 câu ngẫu nhiên trong kho thiệp (CHỈ RANDOM CÁC CÂU NGƯỜI DÙNG THÊM)
     window.pickRandomGameCard = function() {
         const data = window.__currentCardData || {};
-        const list = (Array.isArray(data.messages) && data.messages.length > 0)
-            ? data.messages
-            : [data.message || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖'];
+        const userMessages = (Array.isArray(data.messages) && data.messages.length > 0)
+            ? data.messages.filter(m => typeof m === 'string' && m.trim() && !/Vương quốc Nấm|Mario|công chúa/i.test(m))
+            : [];
 
-        if (data.isRandom !== false && list.length > 1) {
+        // Nếu bật ngẫu nhiên VÀ có từ 2 câu người dùng thêm trở lên
+        if (data.isRandom !== false && userMessages.length > 1) {
             let nextIndex;
             let tries = 0;
             do {
-                nextIndex = Math.floor(Math.random() * list.length);
+                nextIndex = Math.floor(Math.random() * userMessages.length);
                 tries++;
             } while (nextIndex === window.__lastPickedCardIndex && tries < 10);
             window.__lastPickedCardIndex = nextIndex;
-            window.__activeCardMessage = list[nextIndex];
+            window.__activeCardMessage = userMessages[nextIndex];
+        } else if (data.isRandom !== false && userMessages.length === 1) {
+            window.__activeCardMessage = userMessages[0];
         } else {
-            window.__activeCardMessage = data.message || list[0];
+            // Dùng câu cố định do người dùng nhập
+            window.__activeCardMessage = data.message || 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨';
         }
 
         updateCardDOM();
@@ -127,7 +131,7 @@
         const senderEl = document.getElementById('game-card-sender');
         const btnRestartEl = document.getElementById('game-card-restart-btn');
 
-        const curMsg = window.__activeCardMessage || window.__currentCardData.message;
+        const curMsg = window.__activeCardMessage || window.__currentCardData.message || 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨';
 
         if (titleEl && window.__currentCardData.title) titleEl.innerText = window.__currentCardData.title;
         if (msgEl && curMsg) msgEl.innerText = curMsg;
@@ -139,7 +143,7 @@
     window.getCurrentGameCardText = function() {
         if (window.__activeCardMessage) return window.__activeCardMessage;
         if (window.__currentCardData && window.__currentCardData.message) return window.__currentCardData.message;
-        return 'Đừng buồn vì một lần Game Over nha! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖';
+        return 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨';
     };
 
     window.showGameOverCard = function(score, coins, onRestart) {

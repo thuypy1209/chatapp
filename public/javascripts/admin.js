@@ -829,29 +829,16 @@ function escapeHtml(string) {
 
 
 // --- 6. QUẢN LÝ TEXT THIỆP & KHO LỜI NHẮN NGẪU NHIÊN (RANDOM MESSAGES) ---
-const DEFAULT_CARD_MESSAGES_LIST = [
-    "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖",
-    "Thất bại chỉ là một trạm dừng chân nhỏ trên hành trình chinh phục đỉnh cao thôi! Công chúa và Vương quốc Nấm vẫn luôn tin tưởng vào bạn. Cố lên nhé anh hùng! 🍄👑✨",
-    "Game Over không phải là kết thúc, mà là cơ hội để bạn bắt đầu lại với nhiều kinh nghiệm hơn! Uống một ngụm nước ấm rồi bấm nút thử lại nào! ☕💪🌈",
-    "Mỗi lần vấp ngã là một lần bạn nhảy cao hơn! Ngay cả Mario cũng phải rơi xuống hố hàng chục lần mới giải cứu được thế giới cơ mà. Bạn đỉnh nhất! 🌟🎮🔥",
-    "Trời hôm nay có thể mưa, nhưng ngày mai nắng sẽ lại lên rực rỡ! Điểm số chỉ là tạm thời, phong độ của bạn mới là mãi mãi. Thử lại ngay thôi nào! ☀️🌻🎈",
-    "Bạn đã né được bao nhiêu chướng ngại vật rồi đấy, siêu lắm luôn! Thêm một hiệp nữa để phá kỷ lục của chính mình nào người bạn dũng cảm! 🚀🎯🐾",
-    "Hôm nay bạn đã làm rất tốt rồi! Hãy dành tặng cho bản thân một tràng pháo tay thật lớn nhé. Nhấn Chơi lại để tiếp tục tỏa sáng nha! 👏🧸💖",
-    "Không có gì phải tiếc nuối cả, bạn đã có những pha xử lý đỉnh cao! Hít một hơi thật sâu, thả lỏng đôi bàn tay và cùng bứt phá kỷ lục mới nào! 🍀💫🍄",
-    "Dù màn hình hiện Game Over, nhưng trong mắt mọi người bạn luôn là nhà vô địch! Hãy mỉm cười thật tươi rồi vào trận mới nha! 🏆😊✨",
-    "Đừng để một thử thách nhỏ làm bạn chùn bước chứ! Lần này hãy nhảy thật chuẩn và chinh phục kỷ lục mới nào! 🐢💨💥"
-];
+const DEFAULT_CARD_MESSAGES_LIST = [];
 
 let adminCardMessages = [];
 
 function initAdminCardMessages() {
     const data = window.__ADMIN_GAME_CARD_DATA || {};
-    if (Array.isArray(data.messages) && data.messages.length > 0) {
-        adminCardMessages = data.messages.slice();
-    } else if (data.message) {
-        adminCardMessages = [data.message, ...DEFAULT_CARD_MESSAGES_LIST.slice(1)];
+    if (Array.isArray(data.messages)) {
+        adminCardMessages = data.messages.filter(m => typeof m === 'string' && m.trim() && !/Vương quốc Nấm|Mario|công chúa/i.test(m));
     } else {
-        adminCardMessages = DEFAULT_CARD_MESSAGES_LIST.slice();
+        adminCardMessages = [];
     }
     renderAdminCardMessagesList();
 }
@@ -998,10 +985,6 @@ function submitEditCardMessage(e) {
 }
 
 function deleteCardMessage(idx) {
-    if (adminCardMessages.length <= 1) {
-        alert('Cần giữ lại ít nhất 1 câu thiệp trong danh sách!');
-        return;
-    }
     openDeleteCardMessageModal(idx);
 }
 
@@ -1048,12 +1031,7 @@ function onCardRandomToggleChange(checked) {
     }
 }
 
-function resetDefaultRandomCardMessages() {
-    if (confirm('Khôi phục kho lời nhắn về 10 câu mẫu mặc định ấm áp ban đầu?')) {
-        adminCardMessages = DEFAULT_CARD_MESSAGES_LIST.slice();
-        renderAdminCardMessagesList();
-    }
-}
+// Đã gỡ bỏ khôi phục câu mẫu theo yêu cầu
 
 function testRollAdminCardMessage() {
     if (adminCardMessages.length === 0) {
@@ -1062,9 +1040,9 @@ function testRollAdminCardMessage() {
     }
     const rand = adminCardMessages[Math.floor(Math.random() * adminCardMessages.length)];
     if (window.__currentCardData) {
-        window.__currentCardData.title = document.getElementById('admin-card-title-input').value.trim() || 'Tấm Thiệp Động Viên 💌';
+        window.__currentCardData.title = document.getElementById('admin-card-title-input').value.trim() || 'Thiệp Mời Tốt Nghiệp 💌';
         window.__currentCardData.message = rand;
-        window.__currentCardData.sender = document.getElementById('admin-card-sender-input').value.trim() || 'Từ Vương Quốc Nấm 🍄';
+        window.__currentCardData.sender = document.getElementById('admin-card-sender-input').value.trim() || 'Từ Hoàng Yến';
         window.__activeCardMessage = rand;
     }
     if (typeof window.showGameOverCard === 'function') {
@@ -1082,7 +1060,7 @@ function handleSaveGameCardSetting(event) {
     const isRandomToggle = document.getElementById('admin-card-is-random');
     const isRandom = isRandomToggle ? isRandomToggle.checked : true;
     const singleMsgInput = document.getElementById('admin-card-message-input');
-    const message = (singleMsgInput && singleMsgInput.value.trim()) ? singleMsgInput.value.trim() : (adminCardMessages[0] || 'Đừng buồn vì một lần dừng bước nhé!');
+    const message = (singleMsgInput && singleMsgInput.value.trim()) ? singleMsgInput.value.trim() : (adminCardMessages[0] || 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨');
     const statusEl = document.getElementById('game-card-save-status');
 
     if (adminCardMessages.length === 0 && !message) {
@@ -1126,7 +1104,7 @@ function handleSaveGameCardSetting(event) {
 }
 
 function previewGameCardFromAdmin() {
-    const title = document.getElementById('admin-card-title-input').value.trim() || 'Tấm Thiệp Động Viên 💌';
+    const title = document.getElementById('admin-card-title-input').value.trim() || 'Thiệp Mời Tốt Nghiệp 💌';
     const isRandom = document.getElementById('admin-card-is-random') ? document.getElementById('admin-card-is-random').checked : true;
     
     let message = '';
@@ -1135,10 +1113,10 @@ function previewGameCardFromAdmin() {
     } else {
         message = (document.getElementById('admin-card-message-input') && document.getElementById('admin-card-message-input').value.trim()) 
             ? document.getElementById('admin-card-message-input').value.trim() 
-            : (adminCardMessages[0] || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖');
+            : (adminCardMessages[0] || 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨');
     }
 
-    const sender = document.getElementById('admin-card-sender-input').value.trim() || 'Từ Vương Quốc Nấm 🍄';
+    const sender = document.getElementById('admin-card-sender-input').value.trim() || 'Từ Hoàng Yến';
 
     if (window.__currentCardData) {
         window.__currentCardData.title = title;
@@ -1156,21 +1134,7 @@ function previewGameCardFromAdmin() {
     }
 }
 
-function resetDefaultGameCardText() {
-    if (confirm('Khôi phục nội dung bức thiệp và kho ngẫu nhiên về mặc định ấm áp ban đầu?')) {
-        document.getElementById('admin-card-title-input').value = 'Tấm Thiệp Động Viên 💌';
-        document.getElementById('admin-card-sender-input').value = 'Từ Vương Quốc Nấm 🍄';
-        const single = document.getElementById('admin-card-message-input');
-        if (single) single.value = DEFAULT_CARD_MESSAGES_LIST[0];
-        const toggle = document.getElementById('admin-card-is-random');
-        if (toggle) {
-            toggle.checked = true;
-            onCardRandomToggleChange(true);
-        }
-        adminCardMessages = DEFAULT_CARD_MESSAGES_LIST.slice();
-        renderAdminCardMessagesList();
-    }
-}
+// Đã gỡ bỏ khôi phục thiệp mặc định theo yêu cầu
 
 // Tự động khởi tạo kho lời nhắn thiệp khi tải trang
 document.addEventListener('DOMContentLoaded', function() {

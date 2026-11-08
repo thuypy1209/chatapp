@@ -839,14 +839,14 @@ router.post('/api/game-card', async function(req, res) {
         
         var primaryMessage = (message && message.trim()) 
             ? message.trim() 
-            : (validMessages[0] || 'Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi! 🌸✨💖');
+            : (validMessages[0] || 'Thiệp mời tham dự Lễ Tốt Nghiệp 🎓✨');
 
         var updatedCard = await settingsUtils.updateGameCardSetting({
-            title: title ? title.trim() : 'Tấm Thiệp Động Viên 💌',
+            title: title ? title.trim() : 'Thiệp Mời Tốt Nghiệp 💌',
             message: primaryMessage,
-            messages: (validMessages.length > 0) ? validMessages : settingsUtils.DEFAULT_CARD_MESSAGES,
+            messages: validMessages, // Lưu chính xác các câu người dùng tự thêm, không chèn câu mẫu Mario cũ
             isRandom: (isRandom !== undefined) ? (isRandom === true || isRandom === 'true' || isRandom === 1) : true,
-            sender: sender ? sender.trim() : 'Từ Vương Quốc Nấm 🍄',
+            sender: sender ? sender.trim() : 'Từ Hoàng Yến',
             buttonText: buttonText ? buttonText.trim() : '🔄 Chơi lại ngay'
         });
         res.json({ success: true, message: 'Đã lưu cài đặt text thiệp thành công!', card: updatedCard });
@@ -869,9 +869,9 @@ router.get('/api/brand-setting', async function(req, res) {
 router.post('/api/brand-setting', async function(req, res) {
     try {
         var settingsUtils = require('../utils/settings');
-        var brandTitle = req.body.brandTitle ? String(req.body.brandTitle).trim() : 'Phổi bạn không phải tôi';
+        var brandTitle = req.body.brandTitle ? String(req.body.brandTitle).trim() : 'Graduation';
         var brandIcon = (req.body.brandIcon !== undefined) ? String(req.body.brandIcon).trim() : '';
-        var welcomeText = req.body.welcomeText ? String(req.body.welcomeText).trim() : ('Chào mừng bạn đến ' + brandTitle + '!');
+        var welcomeText = req.body.welcomeText ? String(req.body.welcomeText).trim() : 'Cảm ơn bạn đã nhấn vào web để mình có cơ hội gửi bạn tấm thiệp nhằm mời bạn đến với lễ tốt nghiệp của mình';
 
         var updated = await settingsUtils.updateBrandSetting({
             brandTitle: brandTitle,

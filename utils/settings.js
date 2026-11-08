@@ -17,27 +17,16 @@ let cachedMusicSetting = {
     updatedAt: Date.now()
 };
 
-// Kho các câu Text Thiệp ngẫu nhiên động viên khi Game Over
-const DEFAULT_CARD_MESSAGES = [
-    "Đừng buồn vì một lần dừng bước nhé! Bạn đã chơi rất xuất sắc rồi. Nụ cười của bạn quý giá hơn bất kỳ điểm số nào trong game. Hãy hít một hơi thật sâu, mỉm cười và thử lại nào! 🌸✨💖",
-    "Thất bại chỉ là một trạm dừng chân nhỏ trên hành trình chinh phục đỉnh cao thôi! Công chúa và Vương quốc Nấm vẫn luôn tin tưởng vào bạn. Cố lên nhé anh hùng! 🍄👑✨",
-    "Game Over không phải là kết thúc, mà là cơ hội để bạn bắt đầu lại với nhiều kinh nghiệm hơn! Uống một ngụm nước ấm rồi bấm nút thử lại nào! ☕💪🌈",
-    "Mỗi lần vấp ngã là một lần bạn nhảy cao hơn! Ngay cả Mario cũng phải rơi xuống hố hàng chục lần mới giải cứu được thế giới cơ mà. Bạn đỉnh nhất! 🌟🎮🔥",
-    "Trời hôm nay có thể mưa, nhưng ngày mai nắng sẽ lại lên rực rỡ! Điểm số chỉ là tạm thời, phong độ của bạn mới là mãi mãi. Thử lại ngay thôi nào! ☀️🌻🎈",
-    "Bạn đã né được bao nhiêu chướng ngại vật rồi đấy, siêu lắm luôn! Thêm một hiệp nữa để phá kỷ lục của chính mình nào người bạn dũng cảm! 🚀🎯🐾",
-    "Hôm nay bạn đã làm rất tốt rồi! Hãy dành tặng cho bản thân một tràng pháo tay thật lớn nhé. Nhấn Chơi lại để tiếp tục tỏa sáng nha! 👏🧸💖",
-    "Không có gì phải tiếc nuối cả, bạn đã có những pha xử lý đỉnh cao! Hít một hơi thật sâu, thả lỏng đôi bàn tay và cùng bứt phá kỷ lục mới nào! 🍀💫🍄",
-    "Dù màn hình hiện Game Over, nhưng trong mắt mọi người bạn luôn là nhà vô địch! Hãy mỉm cười thật tươi rồi vào trận mới nha! 🏆😊✨",
-    "Đừng để một thử thách nhỏ làm bạn chùn bước chứ! Lần này hãy nhảy thật chuẩn và chinh phục kỷ lục mới nào! 🐢💨💥"
-];
+// Kho các câu Text Thiệp ngẫu nhiên (chỉ chứa các câu do người dùng tự thêm)
+const DEFAULT_CARD_MESSAGES = [];
 
 // Cài đặt mặc định cho Bức Thiệp Động Viên khi Game Over
 const DEFAULT_GAME_CARD = {
-    title: 'Tấm Thiệp Động Viên 💌',
-    message: DEFAULT_CARD_MESSAGES[0],
-    messages: DEFAULT_CARD_MESSAGES,
+    title: 'Thiệp Mời Tốt Nghiệp 💌',
+    message: 'Thiệp mời tham dự\nLễ Tốt Nghiệp\nTrân trọng mời bạn yêu của tui đến tham dự cùng để lại kỷ niệm nhé\nVào ngày 16/11/2026 \nDự kiến thời gian: 11h-12h \nTại Nhà Hát Hoà Bình\n240 Đường 3/2 Phường Hoà Hưng TP Hồ Chí Minh \nSĐT: 0939923208 Yến',
+    messages: [],
     isRandom: true,
-    sender: 'Từ Vương Quốc Nấm 🍄',
+    sender: 'Từ Hoàng Yến',
     buttonText: '🔄 Chơi lại ngay'
 };
 
@@ -45,9 +34,9 @@ let cachedGameCardSetting = { ...DEFAULT_GAME_CARD };
 
 // Cài đặt mặc định Tiêu đề & Logo Thương hiệu website
 const DEFAULT_BRAND_SETTING = {
-    brandTitle: 'Phổi bạn không phải tôi',
-    brandIcon: '🍄',
-    welcomeText: 'Chào mừng bạn đến Phổi bạn không phải tôi!',
+    brandTitle: 'Graduation',
+    brandIcon: '',
+    welcomeText: 'Cảm ơn bạn đã nhấn vào web để mình có cơ hội gửi bạn tấm thiệp nhằm mời bạn đến với lễ tốt nghiệp của mình',
     updatedAt: Date.now()
 };
 
@@ -91,12 +80,17 @@ async function initSettings() {
         const cardItem = await Setting.findOne({ key: 'game_over_card' });
         if (cardItem && cardItem.value) {
             let cardVal = cardItem.value;
-            let msgs = (Array.isArray(cardVal.messages) && cardVal.messages.length > 0)
-                ? cardVal.messages
-                : (cardVal.message ? [cardVal.message, ...DEFAULT_CARD_MESSAGES.slice(1)] : DEFAULT_CARD_MESSAGES);
+            let msgs = Array.isArray(cardVal.messages) ? cardVal.messages : [];
+            // Lọc bỏ triệt để các câu mẫu Mario cũ nếu còn sót lại trong DB
+            msgs = msgs.filter(m => typeof m === 'string' && m.trim() && !/Vương quốc Nấm|Mario|công chúa/i.test(m));
+            let cardTitle = (cardVal.title && !/Tấm Thiệp Động Viên/i.test(cardVal.title)) ? cardVal.title : DEFAULT_GAME_CARD.title;
+            let cardSender = (cardVal.sender && !/Vương Quốc Nấm/i.test(cardVal.sender)) ? cardVal.sender : DEFAULT_GAME_CARD.sender;
+
             cachedGameCardSetting = {
                 ...DEFAULT_GAME_CARD,
                 ...cardVal,
+                title: cardTitle,
+                sender: cardSender,
                 messages: msgs,
                 isRandom: (cardVal.isRandom !== undefined) ? !!cardVal.isRandom : true
             };
@@ -106,9 +100,15 @@ async function initSettings() {
         // Nạp cài đặt Tiêu đề & Logo thương hiệu từ MongoDB
         const brandItem = await Setting.findOne({ key: 'site_brand_setting' });
         if (brandItem && brandItem.value) {
+            let bVal = brandItem.value;
+            let title = (bVal.brandTitle && !/Phổi bạn không phải tôi/i.test(bVal.brandTitle)) ? bVal.brandTitle : DEFAULT_BRAND_SETTING.brandTitle;
+            let icon = (bVal.brandIcon && bVal.brandIcon !== '🍄') ? bVal.brandIcon : '';
+            let welcome = (bVal.welcomeText && !/Phổi bạn không phải tôi/i.test(bVal.welcomeText)) ? bVal.welcomeText : DEFAULT_BRAND_SETTING.welcomeText;
+
             cachedBrandSetting = {
-                ...DEFAULT_BRAND_SETTING,
-                ...brandItem.value,
+                brandTitle: title,
+                brandIcon: icon,
+                welcomeText: welcome,
                 updatedAt: brandItem.updatedAt ? new Date(brandItem.updatedAt).getTime() : Date.now()
             };
             console.log('Đã nạp cài đặt thương hiệu từ MongoDB:', cachedBrandSetting.brandIcon, cachedBrandSetting.brandTitle);

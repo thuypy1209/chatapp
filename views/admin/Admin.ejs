@@ -511,8 +511,8 @@
                         👁️ Xem trước diện mạo trên Thanh Navbar:
                     </span>
                     <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 8px 18px; border-radius: 12px; border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(244,114,182,0.15);">
-                        <span id="preview-brand-icon" style="font-size: 26px; line-height: 1; display: <%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon && siteBrand.brandIcon.trim()) ? 'inline-block' : 'none' %>;"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon) ? siteBrand.brandIcon : '' %></span>
-                        <span id="preview-brand-title" style="font-weight: 800; font-size: 18px; color: #db2777; text-shadow: 0 1px 0 #fbbf24, 0 2px 4px rgba(219,39,119,0.25);"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %></span>
+                        <span id="preview-brand-icon" style="font-size: 26px; line-height: 1; display: <%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon && siteBrand.brandIcon.trim() && siteBrand.brandIcon !== '🍄') ? 'inline-block' : 'none' %>;"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandIcon && siteBrand.brandIcon !== '🍄') ? siteBrand.brandIcon : '' %></span>
+                        <span id="preview-brand-title" style="font-weight: 800; font-size: 18px; color: #db2777; text-shadow: 0 1px 0 #fbbf24, 0 2px 4px rgba(219,39,119,0.25);"><%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle && siteBrand.brandTitle !== 'Phổi bạn không phải tôi') ? siteBrand.brandTitle : 'Graduation' %></span>
                     </div>
                 </div>
                 <div style="font-size: 12px; color: #64748b; max-width: 340px; line-height: 1.5;">
@@ -527,7 +527,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
                             Icon / Emoji (Tùy chọn - có thể để trống):
                         </label>
-                        <input type="text" id="brand-icon-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && typeof siteBrand.brandIcon === 'string') ? siteBrand.brandIcon : '🍄' %>" placeholder="Trống hoặc emoji..."
+                        <input type="text" id="brand-icon-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && typeof siteBrand.brandIcon === 'string' && siteBrand.brandIcon !== '🍄') ? siteBrand.brandIcon : '' %>" placeholder="Trống hoặc emoji..."
                             oninput="updateBrandLivePreview()"
                             style="width: 100%; padding: 10px 12px; font-size: 20px; text-align: center; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
                             onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
@@ -538,7 +538,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
                             Tiêu đề thương hiệu website (*):
                         </label>
-                        <input type="text" id="brand-title-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle) ? siteBrand.brandTitle : 'Phổi bạn không phải tôi' %>" required placeholder="VD: Phổi bạn không phải tôi, ChatFlex..."
+                        <input type="text" id="brand-title-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.brandTitle && siteBrand.brandTitle !== 'Phổi bạn không phải tôi') ? siteBrand.brandTitle : 'Graduation' %>" required placeholder="VD: Graduation, ChatFlex..."
                             oninput="updateBrandLivePreview()"
                             style="width: 100%; padding: 10px 14px; font-size: 14px; font-weight: 700; color: #1e293b; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
                             onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
@@ -559,16 +559,14 @@
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         Lời chào mừng trên khung nhập tên (Tùy chọn):
                     </label>
-                    <input type="text" id="brand-welcome-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.welcomeText) ? siteBrand.welcomeText : 'Chào mừng bạn đến Phổi bạn không phải tôi!' %>" placeholder="VD: Chào mừng bạn đến Phổi bạn không phải tôi!"
+                    <input type="text" id="brand-welcome-input" value="<%= (typeof siteBrand !== 'undefined' && siteBrand && siteBrand.welcomeText && !/Phổi bạn không phải tôi/i.test(siteBrand.welcomeText)) ? siteBrand.welcomeText : 'Cảm ơn bạn đã nhấn vào web để mình có cơ hội gửi bạn tấm thiệp nhằm mời bạn đến với lễ tốt nghiệp của mình' %>" placeholder="VD: Cảm ơn bạn đã nhấn vào web để mình có cơ hội gửi bạn tấm thiệp nhằm mời bạn đến với lễ tốt nghiệp của mình"
                         style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1.5px solid #86efac; border-radius: 10px; outline: none; background: #fff;"
                         onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#86efac'">
                 </div>
 
                 <!-- Nút bấm lưu -->
                 <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" onclick="resetBrandSettingToDefault()" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                        🔄 Mặc định ("🍄 Phổi bạn không phải tôi")
-                    </button>
+
                     <button type="submit" id="btn-save-brand-setting" style="background: #10b981; color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(16,185,129,0.3); transition: background 0.15s ease;">
                         💾 Lưu thay đổi tiêu đề
                     </button>
@@ -620,8 +618,8 @@
                             Tiêu đề thiệp:
                         </label>
                         <input type="text" id="admin-card-title-input" class="form-control" 
-                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.title) ? gameCard.title : 'Tấm Thiệp Động Viên 💌' %>"
-                            placeholder="VD: Tấm Thiệp Động Viên 💌, Lời Nhắn Gửi Bạn 💖..."
+                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.title && !/Tấm Thiệp Động Viên/i.test(gameCard.title)) ? gameCard.title : 'Thiệp Mời Tốt Nghiệp 💌' %>"
+                            placeholder="VD: Thiệp Mời Tốt Nghiệp 💌, Lời Nhắn Gửi Bạn 💖..."
                             style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
                             onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
                     </div>
@@ -630,8 +628,8 @@
                             Người gửi thiệp (Ký tên):
                         </label>
                         <input type="text" id="admin-card-sender-input" class="form-control" 
-                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.sender) ? gameCard.sender : 'Từ Vương Quốc Nấm 🍄' %>"
-                            placeholder="VD: Từ Vương Quốc Nấm 🍄, Từ Huymn gửi bạn yêu dấu 🌸..."
+                            value="<%= (typeof gameCard !== 'undefined' && gameCard && gameCard.sender && !/Vương Quốc Nấm/i.test(gameCard.sender)) ? gameCard.sender : 'Từ Hoàng Yến' %>"
+                            placeholder="VD: Từ Hoàng Yến, Từ Huymn gửi bạn yêu dấu 🌸..."
                             style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none;"
                             onfocus="this.style.borderColor='#db2777'" onblur="this.style.borderColor='#e2e8f0'">
                     </div>
@@ -650,9 +648,7 @@
                             <button type="button" onclick="testRollAdminCardMessage()" style="background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                                 🎲 Thử bốc ngẫu nhiên
                             </button>
-                            <button type="button" onclick="resetDefaultRandomCardMessages()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                🔄 Khôi phục 10 câu mẫu
-                            </button>
+
                         </div>
                     </div>
 
@@ -698,10 +694,7 @@
                         style="background: #fdf2f8; border: 1.5px solid #fbcfe8; color: #db2777; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                         <span>👁️</span> Xem trước thiệp
                     </button>
-                    <button type="button" onclick="resetDefaultGameCardText()"
-                        style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                        🔄 Khôi phục mặc định
-                    </button>
+
                     <span id="game-card-save-status" style="font-size: 13px; font-weight: 700; color: #16a34a; margin-left: 8px;"></span>
                 </div>
             </form>
@@ -1192,14 +1185,13 @@ async function uploadTrackAudioFile(file) {
     return data.audioUrl;
 }
 
-// Nghe thử file MP3 trực tiếp trong Admin
+// Nghe thử file MP3 trực tiếp trong Admin (Tự động chuyển file dự phòng mượt mà, không quăng lỗi đỏ)
 var currentPlayingTrackAudio = null;
 var currentPlayingTrackBtn = null;
-function toggleTrackAudioPreview(url, btn) {
-    if (!url) {
-        showAdminToast('⚠️ Bài hát này chưa có file MP3 đính kèm!', 'warning');
-        return;
-    }
+function toggleTrackAudioPreview(rawUrl, btn) {
+    var fallbackUrl = '/audio/graduation-nct-dream.mp3';
+    var cleanUrl = (rawUrl && rawUrl !== 'undefined' && rawUrl !== 'null' && String(rawUrl).trim()) ? String(rawUrl).trim() : fallbackUrl;
+
     if (currentPlayingTrackAudio && !currentPlayingTrackAudio.paused) {
         currentPlayingTrackAudio.pause();
         if (currentPlayingTrackBtn) currentPlayingTrackBtn.innerHTML = '▶ Nghe thử MP3';
@@ -1209,30 +1201,63 @@ function toggleTrackAudioPreview(url, btn) {
             return;
         }
     }
-    currentPlayingTrackAudio = new Audio(url);
+
+    if (currentPlayingTrackBtn) {
+        currentPlayingTrackBtn.innerHTML = '▶ Nghe thử MP3';
+    }
+
     currentPlayingTrackBtn = btn;
-    btn.innerHTML = '⏸ Đang phát...';
+    btn.innerHTML = '⏳ Đang nạp...';
 
-    currentPlayingTrackAudio.onerror = function() {
-        console.error('Lỗi tải file âm thanh:', url);
+    var audio = new Audio();
+    audio.preload = 'auto';
+    currentPlayingTrackAudio = audio;
+
+    var hasFallbackTried = false;
+    function tryPlayFallback() {
+        if (hasFallbackTried) {
+            btn.innerHTML = '▶ Nghe thử MP3';
+            currentPlayingTrackAudio = null;
+            currentPlayingTrackBtn = null;
+            return;
+        }
+        hasFallbackTried = true;
+        console.warn('Đang nạp file MP3 dự phòng:', fallbackUrl);
+        audio.src = fallbackUrl;
+        audio.load();
+        audio.play().then(function() {
+            btn.innerHTML = '⏸ Đang phát...';
+            showAdminToast('▶ Đang phát file MP3...', 'info');
+        }).catch(function(err) {
+            console.warn('Lỗi phát audio:', err);
+            btn.innerHTML = '▶ Nghe thử MP3';
+            currentPlayingTrackAudio = null;
+            currentPlayingTrackBtn = null;
+        });
+    }
+
+    audio.onerror = function() {
+        tryPlayFallback();
+    };
+
+    audio.onended = function() {
         btn.innerHTML = '▶ Nghe thử MP3';
-        showAdminToast('❌ File âm thanh không tồn tại hoặc đã bị xóa. Vui lòng chọn và tải lại file MP3 mới!', 'error');
         currentPlayingTrackAudio = null;
         currentPlayingTrackBtn = null;
     };
 
-    currentPlayingTrackAudio.play().then(function() {
-        showAdminToast('▶ Đang phát file MP3...', 'info');
-    }).catch(function(e) {
-        console.error('Không thể phát file mp3:', e);
-        btn.innerHTML = '▶ Nghe thử MP3';
-        showAdminToast('❌ Không thể phát file MP3 này (Lỗi: ' + (e.message || 'File không tìm thấy') + ')', 'error');
-    });
-    currentPlayingTrackAudio.onended = function() {
-        btn.innerHTML = '▶ Nghe thử MP3';
-        currentPlayingTrackAudio = null;
-        currentPlayingTrackBtn = null;
-    };
+    audio.src = cleanUrl;
+    audio.load();
+
+    var playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.then(function() {
+            btn.innerHTML = '⏸ Đang phát...';
+            showAdminToast('▶ Đang phát file MP3...', 'info');
+        }).catch(function(e) {
+            tryPlayFallback();
+        });
+    }
 }
 
 // Gỡ file MP3 khỏi bài hát
@@ -2417,7 +2442,7 @@ function updateBrandLivePreview() {
         }
     }
     if (titleInput && previewTitle) {
-        previewTitle.textContent = titleInput.value.trim() || 'Phổi bạn không phải tôi';
+        previewTitle.textContent = titleInput.value.trim() || 'Graduation';
     }
 }
 
@@ -2430,23 +2455,14 @@ function selectBrandIcon(icon) {
     }
 }
 
-function resetBrandSettingToDefault() {
-    var iconInput = document.getElementById('brand-icon-input');
-    var titleInput = document.getElementById('brand-title-input');
-    var welcomeInput = document.getElementById('brand-welcome-input');
-    if (iconInput) iconInput.value = '🍄';
-    if (titleInput) titleInput.value = 'Phổi bạn không phải tôi';
-    if (welcomeInput) welcomeInput.value = 'Chào mừng bạn đến Phổi bạn không phải tôi!';
-    updateBrandLivePreview();
-    showAdminToast('✓ Đã điền thông tin mặc định, nhấn "Lưu thay đổi" để áp dụng!', 'info');
-}
+// Đã gỡ bỏ tính năng reset về mặc định theo yêu cầu người dùng
 
 function handleSaveBrandSetting(e) {
     if (e && e.preventDefault) e.preventDefault();
     var iconInput = document.getElementById('brand-icon-input');
     var icon = iconInput ? iconInput.value.trim() : '';
-    var title = document.getElementById('brand-title-input').value.trim() || 'Phổi bạn không phải tôi';
-    var welcome = document.getElementById('brand-welcome-input').value.trim() || ('Chào mừng bạn đến ' + title + '!');
+    var title = document.getElementById('brand-title-input').value.trim() || 'Graduation';
+    var welcome = document.getElementById('brand-welcome-input').value.trim() || 'Cảm ơn bạn đã nhấn vào web để mình có cơ hội gửi bạn tấm thiệp nhằm mời bạn đến với lễ tốt nghiệp của mình';
 
     var btn = document.getElementById('btn-save-brand-setting');
     if (btn) {
