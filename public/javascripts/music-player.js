@@ -73,6 +73,7 @@
     let currentSpeed = serverSetting.speed || 1.0;
     let activeCustomAudioUrl = serverSetting.customAudioUrl || null;
     let lastSettingTimestamp = serverSetting.updatedAt || Date.now();
+    let isAutoplayAll = (serverSetting.autoplayAll !== undefined) ? Boolean(serverSetting.autoplayAll) : true;
 
     let ytPlayer = null;
     let isPlaying = false;
@@ -97,10 +98,16 @@
         const audioSrc = src || (currentVer && currentVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
         if (!localAudio) {
             localAudio = new Audio(audioSrc);
-            localAudio.loop = true;
+            localAudio.loop = !isAutoplayAll;
             localAudio.preload = 'auto';
             localAudio.volume = volumeLevel / 100;
             localAudio.playbackRate = currentSpeed;
+            localAudio.onended = function() {
+                console.log('[MusicPlayer] File âm thanh kết thúc, isAutoplayAll =', isAutoplayAll);
+                if (isAutoplayAll) {
+                    playNextTrack(true);
+                }
+            };
             localAudio.onerror = function() {
                 console.warn('[MusicPlayer] File âm thanh gặp lỗi (404/nguồn không hỗ trợ):', localAudio.src);
                 if (!localAudio.src.endsWith(DEFAULT_NATIVE_BGM)) {
@@ -114,7 +121,10 @@
             };
         } else if (localAudio.src !== audioSrc && !localAudio.src.endsWith(audioSrc)) {
             localAudio.src = audioSrc;
+            localAudio.loop = !isAutoplayAll;
             localAudio.playbackRate = currentSpeed;
+        } else {
+            localAudio.loop = !isAutoplayAll;
         }
         return localAudio;
     }
@@ -856,6 +866,12 @@
         if (typeof setting.speed === 'number') {
             currentSpeed = setting.speed;
         }
+        if (typeof setting.autoplayAll === 'boolean') {
+            isAutoplayAll = setting.autoplayAll;
+            if (localAudio) {
+                localAudio.loop = !isAutoplayAll;
+            }
+        }
         activeCustomAudioUrl = setting.customAudioUrl || null;
 
         const trackTitle = document.getElementById('music-track-title');
@@ -937,6 +953,48 @@
         if (showToast) {
             const toast = document.getElementById('music-sync-toast');
             if (toast) {
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3500);
+            }
+        }
+    }
+
+    // --- 4b. Tự động chuyển bài tiếp theo khi hết bài (Autoplay Playlist) ---
+    function playNextTrack(autoStart = true) {
+        if (!MUSIC_VERSIONS || MUSIC_VERSIONS.length === 0) return;
+        const nextIndex = (currentVersionIndex + 1) % MUSIC_VERSIONS.length;
+        console.log(`[MusicPlayer] 🔁 Tự động chuyển từ bài #${currentVersionIndex + 1} sang bài #${nextIndex + 1}: ${MUSIC_VERSIONS[nextIndex].title}`);
+        currentVersionIndex = nextIndex;
+        const nextVer = MUSIC_VERSIONS[nextIndex];
+
+        applyMusicSetting({
+            versionIndex: nextIndex,
+            speed: (typeof nextVer.speed === 'number') ? nextVer.speed : 1.0,
+            customAudioUrl: null
+        }, false);
+
+        if (autoStart) {
+            isUserPaused = false;
+            isPlaying = true;
+            const hasTrackAudio = Boolean(nextVer && nextVer.audioUrl);
+            const targetSrc = (nextVer && nextVer.audioUrl) || activeCustomAudioUrl || DEFAULT_NATIVE_BGM;
+            if (hasTrackAudio || isNativeAudioActive || activeCustomAudioUrl) {
+                const audio = initNativeAudio(targetSrc);
+                audio.muted = false;
+                audio.volume = volumeLevel / 100;
+                audio.play().then(() => updateUIState(true)).catch((e) => console.warn('Lỗi autoplay audio:', e));
+            } else if (ytPlayer && isPlayerReady) {
+                try {
+                    if (typeof ytPlayer.loadVideoById === 'function') {
+                        ytPlayer.loadVideoById({ videoId: nextVer.id, startSeconds: 0 });
+                        ytPlayer.playVideo();
+                        updateUIState(true);
+                    }
+                } catch(_) {}
+            }
+            const toast = document.getElementById('music-sync-toast');
+            if (toast) {
+                toast.innerText = `🔁 Đang phát tiếp: ${nextVer.title}`;
                 toast.style.display = 'block';
                 setTimeout(() => { toast.style.display = 'none'; }, 3500);
             }
@@ -1095,8 +1153,15 @@
                             } else {
                                 updateUIState(true);
                             }
-                        } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+                        } else if (event.data === window.YT.PlayerState.PAUSED) {
                             updateUIState(false);
+                        } else if (event.data === window.YT.PlayerState.ENDED) {
+                            console.log('[MusicPlayer] Video YouTube kết thúc, isAutoplayAll =', isAutoplayAll);
+                            if (isAutoplayAll) {
+                                playNextTrack(true);
+                            } else {
+                                updateUIState(false);
+                            }
                         }
                     },
                     onError: (err) => {

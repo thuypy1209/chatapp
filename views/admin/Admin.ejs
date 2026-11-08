@@ -373,10 +373,41 @@
             </div>
         </div>
 
-        <!-- Danh sách các phiên bản nhạc -->
-        <h3 style="font-size: 14px; font-weight: 800; color: #1e293b; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
-            📋 Danh sách phiên bản nhạc YouTube
-        </h3>
+        <!-- Tùy chọn Tự động phát tất cả các bài (Autoplay Playlist) -->
+        <div style="background: #ffffff; border: 1.5px solid #fdba74; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(251,146,60,0.08);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 42px; height: 42px; border-radius: 12px; background: #fff7ed; border: 1px solid #fed7aa; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">
+                    🔀
+                </div>
+                <div>
+                    <div style="font-size: 13.5px; font-weight: 800; color: #c2410c; display: flex; align-items: center; gap: 8px;">
+                        <span>Tự động phát tất cả các bài (Autoplay)</span>
+                        <span id="autoplay-mode-badge" style="background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">Đang BẬT</span>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 3px;">
+                        Khi kết thúc 1 bài hát, hệ thống sẽ tự động chuyển sang bài tiếp theo trong danh sách (phát lần lượt toàn bộ danh sách liên tục).
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btn-toggle-autoplay-setting" onclick="toggleMusicAutoplayAll()"
+                    style="background: #22c55e; color: #fff; border: none; padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 3px 10px rgba(34,197,94,0.3); transition: all 0.2s ease;">
+                    <span id="btn-autoplay-icon">🔁</span>
+                    <span id="btn-autoplay-text">Autoplay: ĐANG BẬT</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Danh sách các bài hát -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 12px 0; flex-wrap: wrap; gap: 8px;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 6px;">
+                📋 Danh sách bài hát & phiên bản nhạc
+            </h3>
+            <button type="button" id="btn-admin-preview-all" onclick="toggleAdminPreviewAllTracks()"
+                style="background: #8b5cf6; color: #ffffff; border: 1px solid #7c3aed; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(139,92,246,0.25); transition: all 0.15s ease;">
+                ▶ Nghe thử lần lượt tất cả bài
+            </button>
+        </div>
         <div id="music-versions-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
             <!-- Render bằng JS -->
         </div>
@@ -1248,6 +1279,148 @@ function syncMusicVersionsToServer(callback) {
 }
 
 // Lấy cài đặt hiện tại từ server
+// Cập nhật trạng thái hiển thị của nút Autoplay trong Admin
+function updateAutoplayUI(isAutoplay) {
+    var btn = document.getElementById('btn-toggle-autoplay-setting');
+    var badge = document.getElementById('autoplay-mode-badge');
+    var icon = document.getElementById('btn-autoplay-icon');
+    var text = document.getElementById('btn-autoplay-text');
+    if (!btn) return;
+
+    var active = (isAutoplay !== false);
+    if (active) {
+        btn.style.background = '#22c55e';
+        btn.style.color = '#ffffff';
+        btn.style.boxShadow = '0 3px 10px rgba(34,197,94,0.3)';
+        if (icon) icon.textContent = '🔁';
+        if (text) text.textContent = 'Autoplay: ĐANG BẬT';
+        if (badge) {
+            badge.textContent = 'Đang BẬT';
+            badge.style.background = '#dcfce7';
+            badge.style.color = '#15803d';
+            badge.style.borderColor = '#86efac';
+        }
+    } else {
+        btn.style.background = '#f1f5f9';
+        btn.style.color = '#475569';
+        btn.style.boxShadow = 'none';
+        if (icon) icon.textContent = '⏸️';
+        if (text) text.textContent = 'Autoplay: ĐANG TẮT (Lặp 1 bài)';
+        if (badge) {
+            badge.textContent = 'Đang TẮT';
+            badge.style.background = '#f1f5f9';
+            badge.style.color = '#64748b';
+            badge.style.borderColor = '#cbd5e1';
+        }
+    }
+}
+
+// Bật / Tắt chế độ tự động phát tất cả các bài cho toàn hệ thống
+function toggleMusicAutoplayAll() {
+    var newStatus = !(currentMusicSetting.autoplayAll !== false);
+    currentMusicSetting.autoplayAll = newStatus;
+    updateAutoplayUI(newStatus);
+
+    fetch('/admin/music-autoplay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoplayAll: newStatus })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            currentMusicSetting = data.setting;
+            updateAutoplayUI(currentMusicSetting.autoplayAll);
+            if (newStatus) {
+                showAdminToast('🔁 Đã BẬT tự động phát tất cả các bài! Khi hết 1 bài sẽ tự phát tiếp.', 'success');
+            } else {
+                showAdminToast('⏸️ Đã TẮT tự động phát tất cả (Chỉ phát lặp lại 1 bài hiện tại).', 'info');
+            }
+        } else {
+            showAdminToast('❌ Lỗi: ' + (data.error || 'Không thể lưu cài đặt!'), 'error');
+        }
+    })
+    .catch(err => {
+        showAdminToast('❌ Lỗi kết nối khi cập nhật autoplay!', 'error');
+    });
+}
+
+// Nghe thử lần lượt tất cả các bài trong danh sách ngay trên trang Admin
+var isAdminPreviewAutoplayActive = false;
+var adminPreviewAutoplayIndex = 0;
+
+function toggleAdminPreviewAllTracks() {
+    var btn = document.getElementById('btn-admin-preview-all');
+    if (isAdminPreviewAutoplayActive) {
+        stopAdminPreviewAllTracks();
+        showAdminToast('⏸️ Đã dừng nghe thử lần lượt!', 'info');
+        return;
+    }
+    isAdminPreviewAutoplayActive = true;
+    if (btn) {
+        btn.innerHTML = '⏸️ Đang nghe thử tất cả... (Bấm để dừng)';
+        btn.style.background = '#f43f5e';
+    }
+    playAdminPreviewTrackAt(0);
+}
+
+function playAdminPreviewTrackAt(idx) {
+    if (!isAdminPreviewAutoplayActive) return;
+    if (!ADMIN_MUSIC_VERSIONS || ADMIN_MUSIC_VERSIONS.length === 0) return;
+    if (idx >= ADMIN_MUSIC_VERSIONS.length) {
+        idx = 0;
+    }
+    adminPreviewAutoplayIndex = idx;
+    var track = ADMIN_MUSIC_VERSIONS[idx];
+    var url = track.audioUrl || '/audio/graduation-nct-dream.mp3';
+
+    if (currentPlayingTrackAudio) {
+        currentPlayingTrackAudio.pause();
+        currentPlayingTrackAudio = null;
+    }
+    if (currentPlayingTrackBtn) {
+        currentPlayingTrackBtn.innerHTML = '▶ Nghe thử MP3';
+        currentPlayingTrackBtn = null;
+    }
+
+    currentPlayingTrackAudio = new Audio(url);
+    showAdminToast('▶ [' + (idx + 1) + '/' + ADMIN_MUSIC_VERSIONS.length + '] Đang nghe thử: ' + track.title, 'info');
+
+    currentPlayingTrackAudio.onended = function() {
+        if (isAdminPreviewAutoplayActive) {
+            playAdminPreviewTrackAt(idx + 1);
+        }
+    };
+
+    currentPlayingTrackAudio.onerror = function() {
+        if (isAdminPreviewAutoplayActive) {
+            playAdminPreviewTrackAt(idx + 1);
+        }
+    };
+
+    currentPlayingTrackAudio.play().catch(function(e) {
+        console.warn('Lỗi preview track:', e);
+        if (isAdminPreviewAutoplayActive) {
+            playAdminPreviewTrackAt(idx + 1);
+        }
+    });
+}
+
+function stopAdminPreviewAllTracks() {
+    isAdminPreviewAutoplayActive = false;
+    adminPreviewAutoplayIndex = 0;
+    if (currentPlayingTrackAudio) {
+        currentPlayingTrackAudio.pause();
+        currentPlayingTrackAudio = null;
+    }
+    var btn = document.getElementById('btn-admin-preview-all');
+    if (btn) {
+        btn.innerHTML = '▶ Nghe thử lần lượt tất cả bài';
+        btn.style.background = '#8b5cf6';
+    }
+}
+
+// Lấy cài đặt hiện tại từ server
 function loadCurrentMusicSetting() {
     fetch('/api/music-setting')
         .then(r => r.json())
@@ -1259,6 +1432,7 @@ function loadCurrentMusicSetting() {
             }
             renderMusicVersionsList();
             updateNowPlayingLabel();
+            updateAutoplayUI(currentMusicSetting.autoplayAll);
             if (data.customAudioUrl) {
                 var revertBtn = document.getElementById('btn-revert-youtube');
                 if (revertBtn) revertBtn.style.display = 'inline-flex';

@@ -12,6 +12,7 @@ let cachedMusicSetting = {
     versionIndex: 0,
     speed: 1.0,
     customAudioUrl: null,
+    autoplayAll: true,
     versions: DEFAULT_VERSIONS,
     updatedAt: Date.now()
 };
@@ -79,6 +80,7 @@ async function initSettings() {
             cachedMusicSetting = { 
                 ...cachedMusicSetting, 
                 ...item.value, 
+                autoplayAll: (item.value && item.value.autoplayAll !== undefined) ? Boolean(item.value.autoplayAll) : true,
                 versions: loadedVersions,
                 updatedAt: item.updatedAt ? new Date(item.updatedAt).getTime() : Date.now() 
             };

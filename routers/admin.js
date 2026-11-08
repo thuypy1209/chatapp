@@ -513,6 +513,9 @@ router.post('/music-setting', async function(req, res) {
         } else {
             updateData.customAudioUrl = null;
         }
+        if (req.body.autoplayAll !== undefined) {
+            updateData.autoplayAll = Boolean(req.body.autoplayAll);
+        }
 
         var updated = await settingsUtils.updateMusicSetting(updateData);
 
@@ -520,6 +523,20 @@ router.post('/music-setting', async function(req, res) {
     } catch (err) {
         console.error('Lỗi cập nhật music-setting:', err);
         res.json({ success: false, error: 'Không thể cập nhật cài đặt nhạc!' });
+    }
+});
+
+// POST /admin/music-autoplay: Admin bật / tắt tự động phát tất cả các bài cho toàn hệ thống
+router.post('/music-autoplay', async function(req, res) {
+    try {
+        var autoplayAll = Boolean(req.body.autoplayAll);
+        var updated = await settingsUtils.updateMusicSetting({
+            autoplayAll: autoplayAll
+        });
+        res.json({ success: true, autoplayAll: updated.autoplayAll, setting: updated });
+    } catch (err) {
+        console.error('Lỗi cập nhật music-autoplay:', err);
+        res.json({ success: false, error: 'Không thể cập nhật cài đặt autoplay!' });
     }
 });
 
