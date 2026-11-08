@@ -1178,7 +1178,7 @@
                                     </td>
                                     <td style="padding: 10px 14px; text-align: right;">
                                         <% if (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) { %>
-                                            <button type="button" onclick="openDeleteChatUserModal('<%= u._id %>', '<%= (u.username || '').replace(/'/g, "\\'") %>')" 
+                                            <button type="button" class="btn-del-chat-user" data-id="<%= u._id %>" data-username="<%= encodeURIComponent(u.username || '') %>"
                                                 style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;"
                                                 title="Xóa người dùng này để giải phóng tên">
                                                 🗑️ Xóa
@@ -1202,24 +1202,27 @@
                 </table>
             </div>
 
-            <!-- THANH PHÂN TRANG (PAGINATION: 10 NGƯỜI DÙNG / TRANG, NÚT TIẾP & QUAY LẠI) -->
-            <div id="chat-users-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 16px; background: #fdfbf7; border: 1.5px solid #fbcfe8; border-radius: 12px; flex-wrap: wrap; gap: 10px;">
-                <div id="chat-users-page-info" style="font-size: 13px; font-weight: 700; color: #64748b;">
-                    Đang hiển thị <span id="pagination-from" style="color: #db2777; font-weight: 800;">1</span> - <span id="pagination-to" style="color: #db2777; font-weight: 800;">10</span> trên tổng số <span id="pagination-total" style="color: #1e293b; font-weight: 800;"><%= (typeof chatUsers !== 'undefined' && chatUsers) ? chatUsers.length : 0 %></span> người dùng
+            <!-- THANH PHÂN TRANG (CĂN GIỮA TOÀN BỘ: DÒNG THÔNG TIN VÀ CÁC NÚT ĐIỀU HƯỚNG Ở CHÍNH GIỮA) -->
+            <div id="chat-users-pagination" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 16px; padding: 14px 20px; background: #fdfbf7; border: 1.5px solid #fbcfe8; border-radius: 14px; text-align: center; gap: 10px;">
+                <!-- Dòng hiển thị số lượng người dùng nằm ở chính giữa -->
+                <div id="chat-users-page-info" style="font-size: 13px; font-weight: 700; color: #64748b; text-align: center;">
+                    Đang hiển thị <span id="pagination-from" style="color: #db2777; font-weight: 800;">1</span> - <span id="pagination-to" style="color: #db2777; font-weight: 800;"><%= (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 0) ? Math.min(10, chatUsers.length) : 0 %></span> trên tổng số <span id="pagination-total" style="color: #1e293b; font-weight: 800;"><%= (typeof chatUsers !== 'undefined' && chatUsers) ? chatUsers.length : 0 %></span> người dùng
                 </div>
 
-                <div style="display: flex; gap: 6px; align-items: center;">
+                <!-- Cụm nút: Quay lại, các số trang, Tiếp trang nằm ở chính giữa -->
+                <div style="display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;">
                     <button type="button" id="btn-page-prev" onclick="goToChatUsersPage(currentChatUserPage - 1)"
-                        style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        style="padding: 7px 16px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: not-allowed; opacity: 0.45; pointer-events: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
                         ◀ Quay lại
                     </button>
 
-                    <div id="chat-users-page-numbers" style="display: flex; gap: 4px; align-items: center;">
+                    <div id="chat-users-page-numbers" style="display: inline-flex; gap: 4px; align-items: center;">
+                        <button type="button" onclick="goToChatUsersPage(1)" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; background: #db2777; color: #ffffff; border: 1.5px solid #db2777; box-shadow: 0 2px 6px rgba(219,39,119,0.3);">1</button>
                     </div>
 
                     <button type="button" id="btn-page-next" onclick="goToChatUsersPage(currentChatUserPage + 1)"
-                        style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                        <span id="btn-page-next-text">Tiếp trang ▶</span>
+                        style="padding: 7px 16px; border-radius: 8px; border: 1.5px solid #fbcfe8; background: #ffffff; color: #db2777; font-size: 12px; font-weight: 800; cursor: <%= (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 10) ? 'pointer' : 'not-allowed' %>; opacity: <%= (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 10) ? '1' : '0.45' %>; pointer-events: <%= (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 10) ? 'auto' : 'none' %>; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                        <span id="btn-page-next-text"><%= (typeof chatUsers !== 'undefined' && chatUsers && chatUsers.length > 10) ? 'Tiếp trang 2 ▶' : 'Tiếp trang ▶' %></span>
                     </button>
                 </div>
             </div>
@@ -2353,7 +2356,7 @@ initCollapsibleSections();
 <script src="/javascripts/admin.js"></script>
 <script>
 
-// ===== QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT USERS: LỌC & PHÂN TRANG 10) =====
+// ===== QUẢN LÝ NGƯỜI DÙNG ĐÃ VÀO NHẮN TIN TRÒ CHUYỆN (CHAT USERS: LỌC & PHÂN TRANG 10 CĂN GIỮA) =====
 var ALL_CHAT_USERS = <%- JSON.stringify(typeof chatUsers !== 'undefined' && chatUsers ? chatUsers : []) %>;
 var currentChatUserPage = 1;
 var CHAT_USERS_PAGE_SIZE = 10;
@@ -2374,11 +2377,11 @@ function formatVN(d) {
 function updatePageFilterOptions() {
     var select = document.getElementById('filter-chat-users-page');
     if (!select || !ALL_CHAT_USERS || !Array.isArray(ALL_CHAT_USERS)) return;
-    var currentVal = select.value;
+    var currentVal = select.value || 'all';
     var pages = [];
     ALL_CHAT_USERS.forEach(function(u) {
         var p = (u.lastPage || 'Phòng Chat').trim();
-        if (p && !pages.includes(p)) pages.push(p);
+        if (p && pages.indexOf(p) === -1) pages.push(p);
     });
 
     var html = '<option value="all">🌐 Tất cả trang truy cập</option>';
@@ -2404,6 +2407,19 @@ function renderChatUsersTable() {
 
     if (!tbody || !ALL_CHAT_USERS) return;
 
+    // Lắng nghe sự kiện click nút xóa người dùng qua Event Delegation
+    if (!tbody._hasChatDelHandler) {
+        tbody._hasChatDelHandler = true;
+        tbody.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-del-chat-user');
+            if (btn) {
+                var uid = btn.getAttribute('data-id');
+                var uname = decodeURIComponent(btn.getAttribute('data-username') || '');
+                openDeleteChatUserModal(uid, uname);
+            }
+        });
+    }
+
     var searchInput = document.getElementById('search-chat-users-input');
     var kw = (searchInput ? searchInput.value : '').toLowerCase().trim();
     var pageSelect = document.getElementById('filter-chat-users-page');
@@ -2416,10 +2432,10 @@ function renderChatUsersTable() {
         var username = (u.username || '').toLowerCase();
         var userPage = (u.lastPage || 'Phòng Chat').trim();
 
-        if (kw && !username.includes(kw)) return false;
+        if (kw && username.indexOf(kw) === -1) return false;
 
         if (pageFilter !== 'all') {
-            if (userPage !== pageFilter && !userPage.toLowerCase().includes(pageFilter.toLowerCase())) {
+            if (userPage.toLowerCase() !== pageFilter.toLowerCase() && userPage.toLowerCase().indexOf(pageFilter.toLowerCase()) === -1) {
                 return false;
             }
         }
@@ -2439,7 +2455,7 @@ function renderChatUsersTable() {
         if (sortFilter === 'created_desc') return bCreated - aCreated;
         if (sortFilter === 'created_asc') return aCreated - bCreated;
         if (sortFilter === 'visits_desc') return bVisits - aVisits;
-        if (sortFilter === 'name_asc') return (a.username || '').localeCompare(b.username || '');
+        if (sortFilter === 'name_asc') return (a.username || '').localeCompare(b.username || '', 'vi');
         return bActive - aActive;
     });
 
@@ -2458,7 +2474,7 @@ function renderChatUsersTable() {
         badge.innerText = totalUsers + ' người dùng';
     }
 
-    // 4. Render danh sách dòng
+    // 4. Render danh sách các dòng người dùng
     if (totalUsers === 0) {
         tbody.innerHTML = '<tr id="chat-users-empty-row"><td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">Không tìm thấy người dùng nào phù hợp với bộ lọc.</td></tr>';
     } else {
@@ -2469,14 +2485,13 @@ function renderChatUsersTable() {
             var active = u.lastActive ? formatVN(u.lastActive) : (u.createdAt ? formatVN(u.createdAt) : 'Mới tham gia');
             var page = u.lastPage || 'Phòng Chat';
             var visits = u.visitCount || 1;
-            var cleanName = (u.username || '').replace(/'/g, "\\'");
             var avatarEmoji = window.getEmojiForName ? window.getEmojiForName(u.username) : '🐱';
 
             html += '<tr style="border-bottom: 1px solid #f1f5f9;" id="chat-user-row-' + u._id + '" class="chat-user-row" data-username="' + (u.username || '').toLowerCase() + '">' +
                 '<td style="padding: 10px 14px; color: #94a3b8; font-weight: 700; width: 45px;">#' + stt + '</td>' +
                 '<td style="padding: 10px 14px; font-weight: 700; color: #1e293b;">' +
                     '<div style="display: flex; align-items: center; gap: 8px;">' +
-                        '<span class="chat-user-avatar" data-name="' + cleanName + '" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 4px rgba(219,39,119,0.1);">' + avatarEmoji + '</span>' +
+                        '<span class="chat-user-avatar" data-name="' + escapeHtml(u.username) + '" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border: 1.5px solid #fbcfe8; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 1px 4px rgba(219,39,119,0.1);">' + avatarEmoji + '</span>' +
                         '<span style="font-size: 14px;">' + escapeHtml(u.username) + '</span>' +
                     '</div>' +
                 '</td>' +
@@ -2486,7 +2501,7 @@ function renderChatUsersTable() {
                 '<td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #db2777;">' + visits + '</td>' +
                 '<td style="padding: 10px 14px; text-align: right;">' +
                     (currentIsSuperAdmin ? 
-                        '<button type="button" onclick="openDeleteChatUserModal('' + u._id + '', '' + cleanName + '')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' :
+                        '<button type="button" class="btn-del-chat-user" data-id="' + u._id + '" data-username="' + encodeURIComponent(u.username || '') + '" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s ease;" title="Xóa người dùng này để giải phóng tên">🗑️ Xóa</button>' :
                         '<span class="admin-badge-viewonly" title="Chỉ Super Admin mới có quyền xóa người dùng">👁️ Chỉ xem</span>'
                     ) +
                 '</td>' +
@@ -2495,7 +2510,7 @@ function renderChatUsersTable() {
         tbody.innerHTML = html;
     }
 
-    // 5. Cập nhật thông tin phân trang (From - To / Total)
+    // 5. Cập nhật dòng thông tin phân trang (Căn giữa)
     if (fromEl) fromEl.innerText = totalUsers > 0 ? (startIndex + 1) : 0;
     if (toEl) toEl.innerText = endIndex;
     if (totalEl) totalEl.innerText = totalUsers;
@@ -2571,7 +2586,6 @@ function handleFilterChatUsers() {
 }
 
 function refreshChatUsersList() {
-    var badge = document.getElementById('chat-users-badge-count');
     fetch('/admin/api/chat-users')
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -2596,8 +2610,6 @@ if (document.readyState === 'loading') {
     updatePageFilterOptions();
     renderChatUsersTable();
 }
-
-var currentIsSuperAdmin = <%= (typeof isSuperAdmin !== 'undefined' && isSuperAdmin) ? 'true' : 'false' %>;
 
 function openDeleteChatUserModal(userId, username) {
     if (!currentIsSuperAdmin) {
