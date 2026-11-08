@@ -67,6 +67,7 @@ app.use(function(req, res, next) {
     res.locals.gameOverCard = settingsUtils.getGameCardSetting();
     res.locals.siteBrand = settingsUtils.getBrandSetting();
     res.locals.getEmojiForName = emojiUtils.getEmojiForName;
+    res.locals.currentPath = req.originalUrl || req.path || '';
     next();
 });
 

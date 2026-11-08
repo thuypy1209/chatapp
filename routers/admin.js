@@ -134,7 +134,17 @@ router.get('/', async function(req, res) {
     } catch (err) {
         console.log("Lỗi lấy danh sách nhân vật cho admin:", err);
         var settingsUtils = require('../utils/settings');
-        res.render('admin/Admin', { characters: [], admins: [], chatUsers: [], formatDateVN: formatDateVN, isSuperAdmin: false, currentAdmin: req.adminUser, adminIcons: [], gameCard: settingsUtils.getGameCardSetting() });
+        res.render('admin/Admin', { 
+            title: 'Quản trị Admin',
+            characters: [], 
+            admins: [], 
+            chatUsers: [], 
+            formatDateVN: formatDateVN, 
+            isSuperAdmin: false, 
+            currentAdmin: req.adminUser, 
+            adminIcons: [], 
+            gameCard: settingsUtils.getGameCardSetting() 
+        });
     }
 });
 

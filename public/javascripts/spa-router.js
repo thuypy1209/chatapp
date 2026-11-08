@@ -114,9 +114,9 @@
     function initializeNewPage(pathname) {
         const path = pathname.toLowerCase();
 
-        // 1. Đồng bộ active pill trên Navbar
+        // 1. Đồng bộ active pill trên Navbar chính xác theo đường dẫn mới
         if (typeof window.highlightActivePage === 'function') {
-            window.highlightActivePage();
+            window.highlightActivePage(path);
         }
 
         // 2. Trang Game Flappy Bangboo
@@ -239,13 +239,13 @@
             // Thực thi scripts trong nội dung mới
             await executePageScripts(container);
 
-            // Kích hoạt logic trang mới
-            initializeNewPage(targetUrl.pathname);
-
-            // Cập nhật thanh địa chỉ URL
+            // Cập nhật thanh địa chỉ URL trước khi kích hoạt logic trang mới
             if (pushToHistory) {
                 window.history.pushState({ spa: true, url: targetUrl.href }, '', targetUrl.href);
             }
+
+            // Kích hoạt logic trang mới và cập nhật trạng thái menu
+            initializeNewPage(targetUrl.pathname);
 
             // Cuộn lên đầu trang
             window.scrollTo({ top: 0, behavior: 'instant' });

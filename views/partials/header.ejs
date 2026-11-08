@@ -11,11 +11,13 @@
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <%
-    // Nhận diện nếu trang hiện tại là Phòng Chat hoặc Game (Flappy / Mario)
+    // Nhận diện chính xác trang hiện tại dựa trên cả đường dẫn URL và Tiêu đề
+    var reqPath = (typeof currentPath !== 'undefined' && currentPath ? currentPath : '').toLowerCase();
     var currentTitle = typeof title !== 'undefined' ? title : '';
-    var isAdminActive = /Quản trị/i.test(currentTitle);
-    var isChatActive = !isAdminActive && /Phòng Chat|Trò chuyện/i.test(currentTitle);
-    var isGameActive = !isAdminActive && !isChatActive && /Flappy|Cuộc Phiêu Lưu|Chơi game|Bangboo/i.test(currentTitle);
+
+    var isAdminActive = reqPath.indexOf('/admin') === 0 || /Quản trị/i.test(currentTitle);
+    var isChatActive = !isAdminActive && (reqPath.indexOf('/chat') === 0 || /Phòng Chat|Trò chuyện/i.test(currentTitle));
+    var isGameActive = !isAdminActive && !isChatActive && (reqPath.indexOf('/flappy') === 0 || reqPath.indexOf('/mario') === 0 || /Flappy|Cuộc Phiêu Lưu|Chơi game|Bangboo/i.test(currentTitle));
     var isHomeActive = !isAdminActive && !isChatActive && !isGameActive;
     var isAutoCollapsedPage = isGameActive || isChatActive;
     var isGamePage = isGameActive;
@@ -97,6 +99,9 @@
                 navbar.classList.remove('menu-open');
                 if (hamburgerBtn) hamburgerBtn.classList.remove('is-active');
             } else {
+                if (typeof window.highlightActivePage === 'function') {
+                    window.highlightActivePage();
+                }
                 navbar.classList.add('menu-open');
                 if (hamburgerBtn) hamburgerBtn.classList.add('is-active');
             }
@@ -106,6 +111,9 @@
         window.toggleMainNavbar = function(forceOpen) {
             if (!navbar) return;
             if (forceOpen === true) {
+                if (typeof window.highlightActivePage === 'function') {
+                    window.highlightActivePage();
+                }
                 navbar.classList.add('menu-open');
                 if (hamburgerBtn) hamburgerBtn.classList.add('is-active');
             } else if (forceOpen === false) {
@@ -135,16 +143,23 @@
         }
 
         // Tự động đánh dấu trang hiện tại trên Menu (Client-side sync & SPA Router)
-        window.highlightActivePage = function() {
-            var path = window.location.pathname.toLowerCase();
+        window.highlightActivePage = function(customPath) {
+            var rawPath = (customPath || window.location.pathname || '').toLowerCase();
             var navItems = document.querySelectorAll('#navbar-nav-list a.nav-item');
             navItems.forEach(function(item) {
                 var route = (item.getAttribute('data-route') || '').toLowerCase();
                 var isCurrent = false;
-                if (route === '/' && (path === '/' || path === '')) isCurrent = true;
-                else if (route === '/chat' && path.indexOf('/chat') === 0) isCurrent = true;
-                else if ((route === '/flappy' || route === '/mario') && (path.indexOf('/flappy') === 0 || path.indexOf('/mario') === 0)) isCurrent = true;
-                else if (route === '/admin' && path.indexOf('/admin') === 0) isCurrent = true;
+
+                // Kiểm tra theo thứ tự ưu tiên tuyệt đối: Admin -> Chat -> Flappy -> Trang chủ
+                if (route === '/admin') {
+                    isCurrent = (rawPath.indexOf('/admin') === 0);
+                } else if (route === '/chat') {
+                    isCurrent = (rawPath.indexOf('/chat') === 0) && (rawPath.indexOf('/admin') !== 0);
+                } else if (route === '/flappy' || route === '/mario') {
+                    isCurrent = ((rawPath.indexOf('/flappy') === 0 || rawPath.indexOf('/mario') === 0) && (rawPath.indexOf('/admin') !== 0));
+                } else if (route === '/') {
+                    isCurrent = (rawPath === '/' || rawPath === '') && (rawPath.indexOf('/admin') !== 0) && (rawPath.indexOf('/chat') !== 0) && (rawPath.indexOf('/flappy') !== 0) && (rawPath.indexOf('/mario') !== 0);
+                }
 
                 if (isCurrent) {
                     item.classList.add('active');
