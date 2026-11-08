@@ -2150,19 +2150,27 @@ body.in-mario-fullscreen-mode .btn-toggle-nav-mobile {
 
 /* --- 5. MarioChat Page Components --- */
 .mario-play-chat-wrapper {
-    max-width: 1400px;
-    margin: 10px auto 30px auto;
-    padding: 0 14px;
+    width: 100%;
+    max-width: 1080px;
+    margin: 14px auto 30px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
     z-index: 10;
+    box-sizing: border-box;
 }
 .mario-header-bar {
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 8px 18px;
+    padding: 10px 20px;
     border-radius: 14px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -2428,11 +2436,15 @@ body.is-playing .game-hud-toolbar:hover {
     z-index: 105;
 }
 .game-column {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
     position: relative;
     z-index: 105;
+    box-sizing: border-box;
 }
 .game-card {
     background: #0f172a;
@@ -4613,4 +4625,63 @@ body.game-page-active .game-card {
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 120px);
+}
+
+
+/* ========================================================
+   FLAPPY BANGBOO - BỐ CỤC TO RÕ ĐÃ MẮT TRÊN MÁY TÍNH (PC)
+   Giữ nguyên 100% bố cục di động dưới 768px, chỉ mở rộng trên PC
+   ======================================================== */
+@media (min-width: 769px) {
+    .mario-play-chat-wrapper {
+        width: 100% !important;
+        max-width: 1080px !important;
+        margin: 14px auto 32px auto !important;
+        padding: 0 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+
+    .mario-header-bar {
+        width: 100% !important;
+        max-width: min(1000px, calc((100vh - 175px) * 16 / 9)) !important;
+        margin-bottom: 12px !important;
+        padding: 10px 20px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mario-header-h1 {
+        font-size: 17px !important;
+    }
+
+    .mario-header-icon {
+        font-size: 24px !important;
+    }
+
+    .game-column {
+        width: 100% !important;
+        max-width: min(1000px, calc((100vh - 175px) * 16 / 9)) !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    .game-card {
+        width: 100% !important;
+        border-radius: 20px !important;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .game-card:not(:fullscreen) .game-canvas,
+    .game-card:not(:fullscreen) .game-dom-viewport {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16 / 9 !important;
+        min-height: 480px !important;
+        max-height: calc(100vh - 175px) !important;
+    }
 }
