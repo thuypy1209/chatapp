@@ -345,6 +345,86 @@ router.get('/character/delete/:id', async function(req, res) {
         res.redirect('/admin');
     }
 });
+// Hàm trợ giúp: Lấy kịch bản từ file vật lý hoặc tự động tái tạo chuẩn xác từ cơ sở dữ liệu MongoDB
+async function getOrReconstructCharacterScript(character) {
+    if (!character) return '';
+
+    // 1. Kiểm tra file vật lý trên đĩa nếu có
+    if (character.scriptFilename) {
+        var seedsDir = path.join(__dirname, '../public/uploads/seeds/');
+        var scriptPath = path.join(seedsDir, character.scriptFilename);
+        if (fs.existsSync(scriptPath)) {
+            try {
+                var content = fs.readFileSync(scriptPath, 'utf8');
+                if (content && content.trim()) {
+                    return content.trim();
+                }
+            } catch (e) {}
+        }
+    }
+
+    // 2. Nếu file không tồn tại hoặc rỗng, tự động tái tạo từ Question & Answer trong MongoDB
+    try {
+        var questions = await Question.find({ characterId: character._id })
+            .populate('answerId')
+            .sort({ blockIndex: 1, createdAt: 1, _id: 1 });
+
+        if (!questions || questions.length === 0) return '';
+
+        var blockMap = {};
+        questions.forEach(q => {
+            var bIdx = (typeof q.blockIndex === 'number') ? q.blockIndex : 0;
+            if (!blockMap[bIdx]) {
+                blockMap[bIdx] = {
+                    questions: [],
+                    answerText: (q.answerId && q.answerId.answerText) ? q.answerId.answerText.trim() : ''
+                };
+            }
+            if (q.questionText && q.questionText.trim()) {
+                blockMap[bIdx].questions.push(q.questionText.trim());
+            }
+            if (!blockMap[bIdx].answerText && q.answerId && q.answerId.answerText) {
+                blockMap[bIdx].answerText = q.answerId.answerText.trim();
+            }
+        });
+
+        var blockIndices = Object.keys(blockMap).map(Number).sort((a, b) => a - b);
+        var blockStrings = [];
+        blockIndices.forEach(idx => {
+            var block = blockMap[idx];
+            var lines = [];
+            block.questions.forEach(qText => {
+                lines.push('Q: ' + qText);
+            });
+            if (block.answerText) {
+                lines.push('A: ' + block.answerText);
+            }
+            if (lines.length > 0) {
+                blockStrings.push(lines.join('\n'));
+            }
+        });
+
+        var reconstructed = blockStrings.join('\n---\n');
+
+        // Lưu lại file vật lý vào public/uploads/seeds để đảm bảo các lần sau luôn có sẵn
+        if (reconstructed && reconstructed.trim()) {
+            var seedsDir = path.join(__dirname, '../public/uploads/seeds/');
+            if (!fs.existsSync(seedsDir)) fs.mkdirSync(seedsDir, { recursive: true });
+            var genFilename = character.scriptFilename || ('script-char-' + character._id + '.txt');
+            fs.writeFileSync(path.join(seedsDir, genFilename), reconstructed, 'utf8');
+            if (!character.scriptFilename) {
+                character.scriptFilename = genFilename;
+                await character.save();
+            }
+        }
+
+        return reconstructed;
+    } catch (err) {
+        console.error('Lỗi tái tạo kịch bản nhân vật từ CSDL:', err);
+        return '';
+    }
+}
+
 // GET: Lấy thông tin nhân vật để đưa lên form sửa
 router.get('/character/edit/:id', async (req, res) => {
     try {
@@ -354,13 +434,7 @@ router.get('/character/edit/:id', async (req, res) => {
         var defaultIcons = ['🎮', '🍄', '⭐', '💻', '🧳', '🌿', '🍳', '⚔️', '⛏️', '🧙‍♂️', '🐱', '🌸', '💎', '📜', '🤖', '👑', '🔮', '🧸', '⚡', '🔥'];
         var adminIcons = (setting && Array.isArray(setting.value)) ? setting.value : defaultIcons;
 
-        var existingScriptContent = '';
-        if (character && character.scriptFilename) {
-            var scriptP = path.join(__dirname, '../public/uploads/seeds/', character.scriptFilename);
-            if (fs.existsSync(scriptP)) {
-                try { existingScriptContent = fs.readFileSync(scriptP, 'utf8'); } catch (e) {}
-            }
-        }
+        var existingScriptContent = await getOrReconstructCharacterScript(character);
 
         res.render('admin/EditCharacter', { 
             title: `Chỉnh sửa: ${character ? character.name : 'Nhân vật'}`,

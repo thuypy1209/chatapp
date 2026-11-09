@@ -285,7 +285,10 @@ A: Mình luôn lắng nghe bạn tâm sự, cùng chơi game Flappy Bangboo và 
         });
 
         // Nếu đã có sẵn nội dung (VD trang chỉnh sửa EditCharacter)
-        if (directEditor.value.trim()) {
+        if (directEditor.value && directEditor.value.trim()) {
+            if (charCountEl) {
+                charCountEl.innerText = directEditor.value.length + ' ký tự';
+            }
             renderScriptPreview(directEditor.value, 'Kịch bản hiện tại', new Blob([directEditor.value]).size);
         }
     }
