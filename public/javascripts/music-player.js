@@ -102,7 +102,7 @@
         if (document.getElementById('chatflex-music-widget')) return;
 
         const currentVer = MUSIC_VERSIONS[currentVersionIndex] || DEFAULT_MUSIC_VERSIONS[0];
-        const cardWidth = isAdmin ? '375px' : '360px';
+        const cardWidth = isAdmin ? '375px' : '320px';
 
         const widget = document.createElement('div');
         widget.id = 'chatflex-music-widget';
@@ -253,11 +253,12 @@
                 </div>
                 ` : ''}
 
-                <!-- Hàng điều khiển Playback: Prev, Play/Pause, Next, Autoplay, Âm lượng -->
+                <!-- Hàng điều khiển Playback: Prev, Play/Pause, Next, Autoplay, Âm lượng (Cụm chuyển bài & Autoplay chỉ dành cho Admin) -->
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #fdf2f8; padding: 6px 10px; border-radius: 12px; border: 1px solid #fce7f3;">
                     <!-- Cụm nút Playback -->
                     <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                        <!-- Nút Bài trước -->
+                        ${isAdmin ? `
+                        <!-- Nút Bài trước (Chỉ Admin) -->
                         <button id="btn-prev-music" type="button" title="Bài trước đó (⏮)" style="
                             background: #ffffff;
                             color: #db2777;
@@ -276,13 +277,14 @@
                         ">
                             ⏮
                         </button>
+                        ` : ''}
 
-                        <!-- Nút Play/Pause lớn -->
+                        <!-- Nút Play/Pause lớn (Dành cho tất cả mọi người) -->
                         <button id="btn-play-pause-music" type="button" style="
                             background: #db2777;
                             color: #ffffff;
                             border: none;
-                            padding: 5px 12px;
+                            padding: ${isAdmin ? '5px 12px' : '6px 16px'};
                             border-radius: 8px;
                             font-size: 12px;
                             font-weight: 800;
@@ -297,7 +299,8 @@
                             <span id="play-pause-icon" style="font-size: 11px; letter-spacing: -0.5px;">▶</span> <span id="play-pause-text">Phát</span>
                         </button>
 
-                        <!-- Nút Bài tiếp theo -->
+                        ${isAdmin ? `
+                        <!-- Nút Bài tiếp theo (Chỉ Admin) -->
                         <button id="btn-next-music" type="button" title="Bài tiếp theo (⏭)" style="
                             background: #ffffff;
                             color: #db2777;
@@ -317,7 +320,7 @@
                             ⏭
                         </button>
 
-                        <!-- Nút Bật/Tắt chế độ tự động phát tiếp (Autoplay Playlist) -->
+                        <!-- Nút Bật/Tắt chế độ tự động phát tiếp (Autoplay Playlist - Chỉ Admin) -->
                         <button id="btn-toggle-autoplay-widget" type="button" title="Tự động phát tiếp toàn bộ danh sách khi hết bài" style="
                             background: ${isAutoplayAll ? '#ecfdf5' : '#f8fafc'};
                             color: ${isAutoplayAll ? '#047857' : '#94a3b8'};
@@ -336,6 +339,7 @@
                             <span id="widget-autoplay-icon">${isAutoplayAll ? '🔁' : '🔂'}</span>
                             <span id="widget-autoplay-text" style="font-size: 10.5px;">${isAutoplayAll ? 'Auto' : '1 bài'}</span>
                         </button>
+                        ` : ''}
                     </div>
 
                     <!-- Âm lượng: Thiết kế chạm vuốt mượt mà trên điện thoại -->
@@ -345,7 +349,7 @@
                         </button>
                         <div id="music-slider-touch-wrapper" style="position: relative; display: flex; align-items: center; height: 28px; padding: 0 2px; cursor: pointer; touch-action: none;">
                             <input type="range" id="music-volume-slider" min="0" max="100" value="75" style="
-                                width: 68px;
+                                width: ${isAdmin ? '68px' : '100px'};
                                 height: 24px;
                                 cursor: pointer;
                                 touch-action: none;
