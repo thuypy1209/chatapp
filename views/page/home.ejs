@@ -11,7 +11,7 @@
     <!-- Chỉ hiển thị 2 nút: Trò chuyện & Chơi -->
     <div class="home-actions">
         <!-- Nút Trò chuyện với nhân vật mặc định do Admin chọn -->
-        <% if (defaultCharacter) { %>
+        <!-- <% if (defaultCharacter) { %>
             <a href="/chat/<%= defaultCharacter._id %>" class="btn btn-home-chat">
                 <span class="btn-home-icon"><%= defaultCharacter.icon || '💬' %></span> Trò chuyện với <%= defaultCharacter.name %>
             </a>
@@ -19,7 +19,7 @@
             <a href="/chat" class="btn btn-home-chat">
                 <span class="btn-home-icon">💬</span> Vào phòng Chat
             </a>
-        <% } %>
+        <% } %> -->
 
         <!-- Nút Chơi Flappy Bird  -->
         <a href="/flappy" class="btn btn-home-mario">
