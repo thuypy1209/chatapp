@@ -70,7 +70,10 @@ app.use(function(req, res, next) {
     res.locals.currentPath = req.originalUrl || req.path || '';
     next();
 });
-
+// Thêm vào app.js (trước các router khác)
+app.get('/ping', function(req, res) {
+    res.status(200).send('pong');
+});
 // API công khai để client đồng bộ cài đặt nhạc theo thời gian thực
 app.get('/api/music-setting', function(req, res) {
     res.json(settingsUtils.getMusicSetting());
@@ -85,6 +88,7 @@ app.get('/api/game-card', function(req, res) {
 app.get('/api/brand-setting', function(req, res) {
     res.json({ success: true, brand: settingsUtils.getBrandSetting() });
 });
+
 
 // API stream file âm thanh lưu vĩnh viễn trên MongoDB Atlas (hỗ trợ HTTP Range requests cho iOS/Messenger)
 var TrackAudio = require('./schemas/TrackAudio');
